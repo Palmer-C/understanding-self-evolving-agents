@@ -1,0 +1,698 @@
+{
+  "config": {
+    "experiment": "E01",
+    "run_id": "E01-20260923T152230Z-90acda",
+    "protocol": "experiments/protocols/E01.md",
+    "public_protocol": "spec/outline-v0.4.md §6.3",
+    "started_at": "2026-09-23T15:22:30.560222+00:00",
+    "git_head": "346742dc8bf0a19bb67ffa1b5dde46140c4ba1e8",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.7,
+    "episode_budget": {
+      "max_calls": 8,
+      "max_steps": 12,
+      "max_prompt_tokens": 200000,
+      "max_completion_tokens": 20000,
+      "max_wall_seconds": 600.0
+    },
+    "E_train_episodes": 8,
+    "R_repeats": 5,
+    "base_seed": 20260923,
+    "n_train_tasks": 16,
+    "n_sealed_tasks": 16,
+    "mde": 0.03,
+    "unit": "task",
+    "trial": false
+  },
+  "finished_at": "2026-09-23T15:55:59.272606+00:00",
+  "wall_seconds_total": 2008.71,
+  "verdicts": {
+    "grid1": {
+      "classstate-07": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "classstate-08": [
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "dictmiss-07": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "errorcontract-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "mutabledefault-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "mutabledefault-08": [
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "strindex-07": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "grid2": {
+      "classstate-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "classstate-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "dictmiss-07": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "errorcontract-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-08": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "mutabledefault-07": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "mutabledefault-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "strindex-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "grid3": {
+      "classstate-07": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "classstate-08": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "dictmiss-07": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "mutabledefault-08": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-07": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        true,
+        false,
+        false,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "strindex-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "grid4": {
+      "classstate-07": [
+        false,
+        true,
+        false,
+        true,
+        false
+      ],
+      "classstate-08": [
+        false,
+        true,
+        false,
+        true,
+        false
+      ],
+      "dictmiss-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "errorcontract-07": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "errorcontract-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "sortkey-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "sortkey-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "strindex-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "pass_rate_by_grid": {
+    "grid1": 0.7375,
+    "grid2": 0.725,
+    "grid3": 0.7625,
+    "grid4": 0.7875
+  },
+  "grid_labels": {
+    "grid1": "独立重跑，取最好的一次",
+    "grid2": "持久物在 t=0 外部构建，此后只读不写",
+    "grid3": "每任务单独适配，用完即弃",
+    "grid4": "跨任务持久更新，记忆在生长"
+  },
+  "ledger": {
+    "grid1": {
+      "episodes": 88,
+      "calls": 469,
+      "prompt_tokens": 190402,
+      "completion_tokens": 21117,
+      "wall_seconds": 369.58341890003067,
+      "side_calls": 0,
+      "side_prompt_tokens": 0,
+      "side_completion_tokens": 0
+    },
+    "grid2": {
+      "episodes": 88,
+      "calls": 466,
+      "prompt_tokens": 286174,
+      "completion_tokens": 44409,
+      "wall_seconds": 417.7206462001195,
+      "side_calls": 0,
+      "side_prompt_tokens": 0,
+      "side_completion_tokens": 0
+    },
+    "grid3": {
+      "episodes": 88,
+      "calls": 550,
+      "prompt_tokens": 229340,
+      "completion_tokens": 94626,
+      "wall_seconds": 411.2952161998255,
+      "side_calls": 88,
+      "side_prompt_tokens": 11277,
+      "side_completion_tokens": 64179
+    },
+    "grid4": {
+      "episodes": 88,
+      "calls": 485,
+      "prompt_tokens": 226368,
+      "completion_tokens": 26856,
+      "wall_seconds": 407.07735160004813,
+      "side_calls": 8,
+      "side_prompt_tokens": 3054,
+      "side_completion_tokens": 2709
+    }
+  },
+  "judgement": {
+    "P1_d41": {
+      "label": "grid4-grid1",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.049999999999999996,
+      "ci95_low": -0.09999999999999999,
+      "ci95_high": 0.17500000000000002,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1000 ≤ 0"
+    },
+    "P1b_d42": {
+      "label": "grid4-grid2",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.0625,
+      "ci95_low": -0.1375,
+      "ci95_high": 0.275,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1375 ≤ 0"
+    },
+    "d43": {
+      "label": "grid4-grid3",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.025,
+      "ci95_low": -0.125,
+      "ci95_high": 0.175,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1250 ≤ 0；点估计 +0.0250 小于预注册 MDE 0.03"
+    }
+  },
+  "by_family_41": {
+    "classstate": {
+      "n_pairs": 2,
+      "point": -0.09999999999999998
+    },
+    "dictmiss": {
+      "n_pairs": 2,
+      "point": 0.09999999999999998
+    },
+    "errorcontract": {
+      "n_pairs": 2,
+      "point": -5.551115123125783e-17
+    },
+    "mutabledefault": {
+      "n_pairs": 2,
+      "point": 0.4
+    },
+    "offbyone": {
+      "n_pairs": 2,
+      "point": -0.10000000000000003
+    },
+    "recursionbase": {
+      "n_pairs": 2,
+      "point": -0.3
+    },
+    "sortkey": {
+      "n_pairs": 2,
+      "point": 0.30000000000000004
+    },
+    "strindex": {
+      "n_pairs": 2,
+      "point": 0.09999999999999998
+    }
+  },
+  "sample_sizing": {
+    "sd_paired_diff_41": 0.28751811537130434,
+    "sd_paired_diff_42": 0.4425306015783918,
+    "n_required_41": 353,
+    "n_required_42": 836,
+    "n_available_tasks": 16,
+    "formula": "n >= (1.96 * sd(paired per-task diff) / MDE)^2, MDE=0.03",
+    "flips_by_grid": {
+      "grid1": 12,
+      "grid2": 11,
+      "grid3": 10,
+      "grid4": 9
+    }
+  },
+  "memory": {
+    "grid2_external": [
+      "classstate：对象状态累积：实例属性与类属性混淆、状态未更新、副作用与返回值不一致",
+      "dictmiss：缺失键与计数初始化：默认值语义、累加被覆盖、缺失路径的返回",
+      "errorcontract：输入契约：非法或越界输入应当返回什么，而不是抛什么",
+      "mutabledefault：共享可变状态：可变默认参数与模块级容器的累积与别名",
+      "offbyone：边界与差一：区间端点含/不含、循环上界",
+      "recursionbase：递归基例与终止：基线取值、递归参数不收敛、嵌套未展开",
+      "sortkey：排序键与稳定性：键取错字段、缺次级键、反向用错位置",
+      "strindex：字符串索引与切片：索引方向、切分方式、大小写、端点字符"
+    ],
+    "grid4_lessons": [
+      {
+        "index": 0,
+        "text": "有状态类应在实例内初始化状态，方法修改后返回最新值，并用连续调用测试累加逻辑。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": true
+      },
+      {
+        "index": 1,
+        "text": "pop() 必须移除并返回栈顶，不能只返回，否则 items 不会更新。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false
+      },
+      {
+        "index": 2,
+        "text": "做词频统计时，遇到重复词要累加计数，而不是每次都赋值为 1。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": false
+      },
+      {
+        "index": 3,
+        "text": "分组时用字典累计列表，遍历原序列即可保持组内顺序，空输入自然得到空字典。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": true
+      },
+      {
+        "index": 4,
+        "text": "实现除法前先确认除零与返回类型，零除返回 None，普通结果保持浮点，并用边界用例自测。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": true
+      },
+      {
+        "index": 5,
+        "text": "转换失败要捕获 TypeError/ValueError 并返回 default，不能让异常泄漏。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": true
+      },
+      {
+        "index": 6,
+        "text": "可变默认参数用 None 占位，并先复制输入再修改，确保无副作用、调用互不影响。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": true
+      },
+      {
+        "index": 7,
+        "text": "默认参数勿用可变集合；缺省时用 None，进入函数再新建并复制输入，避免跨调用共享状态。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": true
+      }
+    ]
+  }
+}

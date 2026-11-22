@@ -1,0 +1,9 @@
+% figures/ch14-rail.tex —— 第 14 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch14.tex 中 \input{figures/ch14-rail}
+% 图主体在 ch14-rail-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch14-rail-body}
+\caption{来源、可变状态、开发反馈与独立评价的职责分工。保留原始记录支持追溯，历史快照支持指定状态恢复；测试可读与规则可改是两种不同权限。图示是本书的工程设计建议，不声称旧实验已实现全部隔离。}
+\label{fig:ch14-rail}
+\end{figure}

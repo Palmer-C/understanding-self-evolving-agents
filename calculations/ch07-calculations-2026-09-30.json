@@ -1,0 +1,36 @@
+{
+  "kind": "exact_calculation_not_E04",
+  "model_calls": 0,
+  "assumptions": "Teaching selection model: independent Bernoulli(1/2) on 4 development tasks for all equal-ability candidates.",
+  "selection_rows": [
+    {
+      "candidates": 1,
+      "exact": "1/2",
+      "decimal": 0.5
+    },
+    {
+      "candidates": 2,
+      "exact": "163/256",
+      "decimal": 0.63671875
+    },
+    {
+      "candidates": 4,
+      "exact": "49063/65536",
+      "decimal": 0.7486419677734375
+    },
+    {
+      "candidates": 8,
+      "exact": "3600557263/4294967296",
+      "decimal": 0.8383200650569052
+    }
+  ],
+  "ace_source": "ace-agentic-context-engineering__2510.04618.pdf Table 2",
+  "ace_differences_pp": {
+    "finer": "-17/5",
+    "formula": "11",
+    "mean": "19/5"
+  },
+  "collapse_fraction": "9080/9141",
+  "limitations": "No uncertainty inference for ACE; no optimization or API execution.",
+  "script_sha256": "211c8da50921770ef471b3d9c4e46087ef27b4e09615b00bf251bafbcf2a8b31"
+}

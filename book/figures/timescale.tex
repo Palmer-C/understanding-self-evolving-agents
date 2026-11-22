@@ -1,0 +1,9 @@
+% figures/timescale.tex —— 第 1 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch01.tex 中 \input{figures/timescale}
+% 图主体在 timescale-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/timescale-body}
+\caption{三层时间尺度上的状态保留范围。临时执行状态按任务协议复位，轨迹可独立归档；虚线表示按更新规则提炼并接入持久组件的可能路径，不表示每份归档都会被采用。只有进入version层并被后续任务继承、使$A_{k+1}\neq A_k$的变化，才属于本书的自进化研究对象。}
+\label{fig:timescale}
+\end{figure}

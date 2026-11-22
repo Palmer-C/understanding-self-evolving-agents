@@ -1,0 +1,14 @@
+\begin{tikzpicture}[
+ cell/.style={draw,rounded corners=2pt,minimum height=18mm,text width=50mm,align=center,font=\small},
+ head/.style={font=\small\bfseries,align=center},
+ arrow/.style={draw,dashed,gray!60,thick}
+]
+\node[head] at (0,2) {同读取者};\node[head] at (6.5,2) {换读取者};
+\node[font=\small,rotate=90] at (-3.3,0.7) {拟合到求解器};
+\node[font=\small,rotate=90] at (-3.3,-1.7) {拟合到问题域};
+\node[cell,fill=blue!8] (a) at (0,0.7) {通过率 \measured{0.7000}\\相对同读基线 \measured{+0.0125}};
+\node[cell,fill=orange!10] (b) at (6.5,0.7) {通过率 \measured{0.3625}\\相对换读基线 \measured{+0.1000}};
+\node[cell,fill=gray!8] (c) at (0,-1.7) {通过率 \measured{0.7000}\\相对同读基线 \measured{+0.0125}};
+\node[cell,fill=green!8] (d) at (6.5,-1.7) {通过率 \measured{0.4250}\\相对换读基线 \measured{+0.1625}};
+\draw[arrow] (a.east)--(b.west);\draw[arrow] (c.east)--(d.west);
+\end{tikzpicture}

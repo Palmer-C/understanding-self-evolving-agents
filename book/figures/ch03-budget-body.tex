@@ -1,0 +1,55 @@
+% figures/ch03-budget-body.tex —— 第 3 章核心图主体：历史四格的状态保留范围
+% 图主体仅供 figures/ch03-budget.tex 引用；数字不进图，因此不受身份纪律约束。
+% 全书引用入口：figures/ch03-budget.tex（含 figure 环境与编号）
+% 图内不含任何数字，因此不受 \cited{} / \calcnum{} / \measured{} 身份纪律约束。
+% 画的是第 3 章的收益归属判据：分类状态保留范围；收益需要独立对照。
+\begin{tikzpicture}[
+  blk/.style={draw, rounded corners=2pt, minimum height=9mm, text width=25mm, align=center, font=\footnotesize},
+  bud/.style={blk, fill=gray!14},
+  epi/.style={blk, fill=orange!12},
+  task/.style={blk, fill=yellow!12},
+  ver/.style={blk, fill=blue!12},
+  keep/.style={blk, fill=green!12},
+  drop/.style={blk, fill=red!8},
+  lbl/.style={font=\footnotesize, align=left, text width=52mm},
+  arrow/.style={-{Stealth[length=1.6mm]}, thick}
+]
+  % ---- 预算 ----
+  \node[bud] (b) at (0,0) {比较协议\\预算单位、准备范围与信息来源};
+
+  % ---- 四种花法 ----
+  \node[epi]  (g1) at (3.4, 3.2) {历史格 1\\重复运行，报告平均};
+  \node[epi]  (g2) at (3.4, 1.1) {历史格 2\\预先给定，此后只读};
+  \node[task] (g3) at (3.4,-1.1) {历史格 3\\任务内适配，用完即弃};
+  \node[ver]  (g4) at (3.4,-3.2) {历史格 4\\跨任务持久记忆};
+
+  \draw[arrow] (b) -- (g1);
+  \draw[arrow] (b) -- (g2);
+  \draw[arrow] (b) -- (g3);
+  \draw[arrow] (b) -- (g4);
+
+  % ---- 收益留到哪 ----
+  \node[drop] (d1) at (6.8, 3.2) {不新增跨题状态};
+  \node[drop] (d2) at (6.8, 1.1) {保留固定记忆};
+  \node[drop] (d3) at (6.8,-1.1) {当前任务状态};
+  \node[keep] (d4) at (6.8,-3.2) {保留到后续版本};
+
+  \draw[arrow] (g1) -- (d1);
+  \draw[arrow] (g2) -- (d2);
+  \draw[arrow] (g3) -- (d3);
+  \draw[arrow] (g4) -- (d4);
+
+  % ---- 判据 ----
+  \node[lbl, text width=37mm] at (10.5, 3.2) {提供静态参照；\\尚无重试候选选择};
+  \node[lbl, text width=37mm] at (10.5, 1.1) {检查固定信息作用；\\需核对是否同源};
+  \node[lbl, text width=37mm] at (10.5,-1.1) {检查任务内适配；\\不能据此声称跨题收益};
+  \node[lbl, text width=37mm] at (10.5,-3.2) {检查持久方案；\\是否有收益仍需比较};
+
+  % ---- 底部 ----
+  \draw[gray!45] (-1.5,-4.6) -- (12.5,-4.6);
+  \node[lbl, text width=140mm] at (5.5,-5.3) {
+    设计要求：\textbf{（一）}预算单位与全流程成本范围明确；
+    \textbf{（二）}各臂依赖的准备成本均入账；
+    \textbf{（三）}任务内状态与跨题持久物分开；
+    \textbf{（四）}开发改善不替代独立最终评价。分类图本身不证明预算对齐或收益。};
+\end{tikzpicture}

@@ -1,0 +1,2058 @@
+{
+  "config": {
+    "experiment": "E03+E03c",
+    "run_id": "E03-20260925T152453Z-254845",
+    "protocol": "experiments/protocols/E03.md",
+    "public_protocol": "spec/outline-v0.4.md §6.3",
+    "started_at": "2026-09-25T15:24:53.839282+00:00",
+    "git_head": "6bbefbd90fe43aecaad3a7cdbf65bca16236eee9",
+    "model_same": "deepseek-flash",
+    "model_cross": "deepseek-v4-pro",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.7,
+    "episode_budget": {
+      "max_calls": 8,
+      "max_steps": 12,
+      "max_prompt_tokens": 200000,
+      "max_completion_tokens": 20000,
+      "max_wall_seconds": 600.0
+    },
+    "E_train_episodes": 8,
+    "R_repeats": 5,
+    "base_seed": 20260925,
+    "mde": 0.03,
+    "unit": "task",
+    "in_episode_verification": false,
+    "retrieve_k": 2,
+    "raw_item_chars": 600,
+    "held_out_families": [
+      "sortkey",
+      "strindex"
+    ],
+    "split_A_train_tasks": 12,
+    "split_A_test_tasks": 16,
+    "split_B_train_tasks": 16,
+    "split_B_test_tasks": 16,
+    "split_A_arms": [
+      "base_same",
+      "form_raw",
+      "form_summary",
+      "form_structured"
+    ],
+    "split_B_arms": [
+      "base_same",
+      "base_cross",
+      "fit_solver_same",
+      "fit_solver_cross",
+      "fit_domain_same",
+      "fit_domain_cross"
+    ],
+    "trial": false,
+    "backend_retries_same": 0,
+    "backend_retries_cross": 0
+  },
+  "finished_at": "2026-09-28T15:42:46.959082+00:00",
+  "wall_seconds_total": 1557.94,
+  "arm_labels": {
+    "base_same": "无记忆基线（同模型）：不写、不检索任何持久物",
+    "base_cross": "无记忆基线（换模型）：换模型臂的静态基线，缺它无法分离模型强弱",
+    "form_raw": "原始轨迹条目：工具序列 + 最后代码 + 验收输出，不经模型加工",
+    "form_summary": "摘要条目：≤60 字自然语言，不带任何结构字段",
+    "form_structured": "结构化条目：事实 / 适用 / 不适用 三字段",
+    "fit_solver_same": "拟合到求解器，同模型读：写成针对当前模型的补丁",
+    "fit_solver_cross": "拟合到求解器，换模型读",
+    "fit_domain_same": "拟合到问题域，同模型读：写成与读取者无关的任务域事实",
+    "fit_domain_cross": "拟合到问题域，换模型读"
+  },
+  "verdicts": {
+    "A": {
+      "base_same": {
+        "sortkey-01": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-02": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-03": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-04": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-05": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-06": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-08": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "strindex-01": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "strindex-02": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-03": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-04": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-05": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-06": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-07": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "strindex-08": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "form_raw": {
+        "sortkey-01": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-02": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-03": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "sortkey-04": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-05": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-06": [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "sortkey-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-08": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-01": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-02": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-03": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-04": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-05": [
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "strindex-06": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "strindex-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-08": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "form_summary": {
+        "sortkey-01": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-02": [
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "sortkey-03": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "sortkey-04": [
+          true,
+          false,
+          true,
+          false,
+          true
+        ],
+        "sortkey-05": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-06": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "sortkey-07": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "sortkey-08": [
+          false,
+          false,
+          true,
+          true,
+          false
+        ],
+        "strindex-01": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-02": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-03": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-04": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-05": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-06": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-07": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-08": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      "form_structured": {
+        "sortkey-01": [
+          false,
+          true,
+          false,
+          true,
+          true
+        ],
+        "sortkey-02": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-03": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "sortkey-04": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "sortkey-05": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "sortkey-06": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "sortkey-07": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "sortkey-08": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "strindex-01": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-02": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-03": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-04": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "strindex-05": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "strindex-06": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "strindex-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "strindex-08": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      }
+    },
+    "B": {
+      "base_same": {
+        "classstate-07": [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "classstate-08": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "dictmiss-07": [
+          false,
+          false,
+          true,
+          false,
+          true
+        ],
+        "dictmiss-08": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "errorcontract-07": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "errorcontract-08": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "mutabledefault-07": [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "mutabledefault-08": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "offbyone-07": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "offbyone-08": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "recursionbase-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "recursionbase-08": [
+          true,
+          false,
+          true,
+          false,
+          false
+        ],
+        "sortkey-07": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "sortkey-08": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "strindex-07": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "strindex-08": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      "base_cross": {
+        "classstate-07": [
+          true,
+          false,
+          false,
+          true,
+          false
+        ],
+        "classstate-08": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "dictmiss-07": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "dictmiss-08": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "errorcontract-07": [
+          false,
+          true,
+          true,
+          false,
+          false
+        ],
+        "errorcontract-08": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "mutabledefault-07": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "mutabledefault-08": [
+          false,
+          true,
+          false,
+          false,
+          true
+        ],
+        "offbyone-07": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "offbyone-08": [
+          true,
+          false,
+          true,
+          false,
+          true
+        ],
+        "recursionbase-07": [
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "recursionbase-08": [
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "sortkey-07": [
+          true,
+          false,
+          true,
+          false,
+          false
+        ],
+        "sortkey-08": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "strindex-07": [
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "strindex-08": [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      },
+      "fit_solver_same": {
+        "classstate-07": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "classstate-08": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "dictmiss-07": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "dictmiss-08": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "errorcontract-07": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "errorcontract-08": [
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "mutabledefault-07": [
+          true,
+          false,
+          true,
+          false,
+          true
+        ],
+        "mutabledefault-08": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "offbyone-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "offbyone-08": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "recursionbase-07": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "recursionbase-08": [
+          true,
+          false,
+          true,
+          false,
+          true
+        ],
+        "sortkey-07": [
+          true,
+          false,
+          false,
+          true,
+          false
+        ],
+        "sortkey-08": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "strindex-07": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-08": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "fit_solver_cross": {
+        "classstate-07": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "classstate-08": [
+          false,
+          true,
+          false,
+          false,
+          false
+        ],
+        "dictmiss-07": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "dictmiss-08": [
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "errorcontract-07": [
+          true,
+          false,
+          true,
+          false,
+          false
+        ],
+        "errorcontract-08": [
+          false,
+          true,
+          false,
+          false,
+          true
+        ],
+        "mutabledefault-07": [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "mutabledefault-08": [
+          false,
+          false,
+          false,
+          true,
+          false
+        ],
+        "offbyone-07": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "offbyone-08": [
+          false,
+          false,
+          true,
+          false,
+          true
+        ],
+        "recursionbase-07": [
+          false,
+          false,
+          true,
+          true,
+          false
+        ],
+        "recursionbase-08": [
+          true,
+          false,
+          false,
+          false,
+          true
+        ],
+        "sortkey-07": [
+          false,
+          false,
+          false,
+          true,
+          false
+        ],
+        "sortkey-08": [
+          true,
+          false,
+          false,
+          false,
+          true
+        ],
+        "strindex-07": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "strindex-08": [
+          false,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      "fit_domain_same": {
+        "classstate-07": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "classstate-08": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "dictmiss-07": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "dictmiss-08": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "errorcontract-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "errorcontract-08": [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "mutabledefault-07": [
+          false,
+          true,
+          false,
+          true,
+          true
+        ],
+        "mutabledefault-08": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "offbyone-07": [
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "offbyone-08": [
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "recursionbase-07": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "recursionbase-08": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-07": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "sortkey-08": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "strindex-07": [
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "strindex-08": [
+          true,
+          false,
+          true,
+          false,
+          true
+        ]
+      },
+      "fit_domain_cross": {
+        "classstate-07": [
+          true,
+          true,
+          false,
+          false,
+          true
+        ],
+        "classstate-08": [
+          false,
+          false,
+          false,
+          true,
+          true
+        ],
+        "dictmiss-07": [
+          false,
+          true,
+          false,
+          false,
+          true
+        ],
+        "dictmiss-08": [
+          false,
+          true,
+          false,
+          true,
+          true
+        ],
+        "errorcontract-07": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "errorcontract-08": [
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        "mutabledefault-07": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "mutabledefault-08": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "offbyone-07": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "offbyone-08": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "recursionbase-07": [
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "recursionbase-08": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "sortkey-07": [
+          false,
+          false,
+          false,
+          true,
+          false
+        ],
+        "sortkey-08": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "strindex-07": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "strindex-08": [
+          true,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    }
+  },
+  "pass_rate": {
+    "A": {
+      "base_same": 0.9,
+      "form_raw": 0.8875,
+      "form_summary": 0.775,
+      "form_structured": 0.7625
+    },
+    "B": {
+      "base_same": 0.6875,
+      "base_cross": 0.2625,
+      "fit_solver_same": 0.7,
+      "fit_solver_cross": 0.3625,
+      "fit_domain_same": 0.7,
+      "fit_domain_cross": 0.425
+    }
+  },
+  "ledger": {
+    "A": {
+      "base_same": {
+        "episodes": 80,
+        "calls": 399,
+        "prompt_tokens": 146154,
+        "completion_tokens": 23808,
+        "wall_seconds": 560.3939779997454,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "form_raw": {
+        "episodes": 80,
+        "calls": 384,
+        "prompt_tokens": 299511,
+        "completion_tokens": 27034,
+        "wall_seconds": 439.9046720000915,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "form_summary": {
+        "episodes": 80,
+        "calls": 376,
+        "prompt_tokens": 155673,
+        "completion_tokens": 34108,
+        "wall_seconds": 463.65250510006445,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "form_structured": {
+        "episodes": 80,
+        "calls": 367,
+        "prompt_tokens": 175584,
+        "completion_tokens": 22253,
+        "wall_seconds": 404.30967099999543,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      }
+    },
+    "B": {
+      "base_same": {
+        "episodes": 80,
+        "calls": 365,
+        "prompt_tokens": 138358,
+        "completion_tokens": 27698,
+        "wall_seconds": 427.8195863996516,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "base_cross": {
+        "episodes": 80,
+        "calls": 276,
+        "prompt_tokens": 121395,
+        "completion_tokens": 61652,
+        "wall_seconds": 903.1623097000411,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "fit_solver_same": {
+        "episodes": 80,
+        "calls": 358,
+        "prompt_tokens": 153464,
+        "completion_tokens": 32774,
+        "wall_seconds": 374.2314798993757,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "fit_solver_cross": {
+        "episodes": 80,
+        "calls": 301,
+        "prompt_tokens": 249265,
+        "completion_tokens": 172180,
+        "wall_seconds": 2084.9186977002537,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "fit_domain_same": {
+        "episodes": 80,
+        "calls": 356,
+        "prompt_tokens": 178277,
+        "completion_tokens": 27297,
+        "wall_seconds": 331.5079514000099,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "fit_domain_cross": {
+        "episodes": 80,
+        "calls": 306,
+        "prompt_tokens": 207725,
+        "completion_tokens": 132228,
+        "wall_seconds": 1514.7015778991627,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      }
+    }
+  },
+  "side_ledger": {
+    "episodes": 0,
+    "calls": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "wall_seconds": 0.0,
+    "side_calls": 0,
+    "side_prompt_tokens": 0,
+    "side_completion_tokens": 0
+  },
+  "memory_chars": {
+    "A": {
+      "form_raw": 600.0,
+      "form_summary": 44.0,
+      "form_structured": 102.75
+    },
+    "B": {
+      "form_summary": 42.5,
+      "form_structured": 108.875,
+      "fit_solver": 60.75,
+      "fit_domain": 104.375,
+      "form_raw": 600.0
+    }
+  },
+  "gains_A": {
+    "form_raw": {
+      "label": "A:form_raw-base_same",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.012500000000000011,
+      "ci95_low": -0.12500000000000003,
+      "ci95_high": 0.1,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1250 ≤ 0；点估计 -0.0125 小于预注册 MDE 0.03"
+    },
+    "form_summary": {
+      "label": "A:form_summary-base_same",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.125,
+      "ci95_low": -0.2375,
+      "ci95_high": -2.7755575615628914e-17,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.2375 ≤ 0"
+    },
+    "form_structured": {
+      "label": "A:form_structured-base_same",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.1375,
+      "ci95_low": -0.2375,
+      "ci95_high": -0.0375,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.2375 ≤ 0"
+    }
+  },
+  "gains_B": {
+    "fit_solver_same": {
+      "label": "B:fit_solver_same-base_same",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.012500000000000008,
+      "ci95_low": -0.11249999999999998,
+      "ci95_high": 0.125,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1125 ≤ 0；点估计 +0.0125 小于预注册 MDE 0.03"
+    },
+    "fit_solver_cross": {
+      "label": "B:fit_solver_cross-base_cross",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.1,
+      "ci95_low": -0.012499999999999994,
+      "ci95_high": 0.21250000000000002,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.0125 ≤ 0"
+    },
+    "fit_domain_same": {
+      "label": "B:fit_domain_same-base_same",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.012499999999999997,
+      "ci95_low": -0.15000000000000002,
+      "ci95_high": 0.1625,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1500 ≤ 0；点估计 +0.0125 小于预注册 MDE 0.03"
+    },
+    "fit_domain_cross": {
+      "label": "B:fit_domain_cross-base_cross",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.16249999999999998,
+      "ci95_low": 3.469446951953614e-18,
+      "ci95_high": 0.32499999999999996,
+      "mde": 0.03,
+      "degraded": false,
+      "reason": "区间下界 > 0 且点估计达到 MDE"
+    }
+  },
+  "P3_structured_vs_summary_splitA": {
+    "label": "A:form_structured-form_summary",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": -0.01249999999999999,
+    "ci95_low": -0.15,
+    "ci95_high": 0.11250000000000004,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.1500 ≤ 0；点估计 -0.0125 小于预注册 MDE 0.03"
+  },
+  "P3_raw_vs_summary_splitA": {
+    "label": "A:form_raw-form_summary",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": 0.11249999999999999,
+    "ci95_low": -0.012500000000000018,
+    "ci95_high": 0.2375,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.0125 ≤ 0"
+  },
+  "P3b_domain_vs_solver_cross": {
+    "label": "B:fit_domain_cross-fit_solver_cross",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": 0.062499999999999986,
+    "ci95_low": -0.0625,
+    "ci95_high": 0.175,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.0625 ≤ 0"
+  },
+  "P3b_domain_vs_solver_same": {
+    "label": "B:fit_domain_same-fit_solver_same",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": -6.938893903907228e-18,
+    "ci95_low": -0.13750000000000004,
+    "ci95_high": 0.15,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.1375 ≤ 0；点估计 -0.0000 小于预注册 MDE 0.03"
+  },
+  "sign_flips": {
+    "fit_solver": {
+      "n_sign_flips": 1,
+      "n_tasks_compared": 16
+    },
+    "fit_domain": {
+      "n_sign_flips": 2,
+      "n_tasks_compared": 16
+    }
+  },
+  "sample_sizing": {
+    "sd_p3_structured_vs_summary": 0.27778888866667556,
+    "sd_p3b_domain_vs_solver_cross": 0.25,
+    "n_required_p3": 330,
+    "n_required_p3b": 267,
+    "n_available_A": 16,
+    "n_available_B": 16,
+    "formula": "n >= (1.96 * sd(paired per-task diff) / MDE)^2, MDE=0.03"
+  },
+  "by_family_A_structured_vs_summary": {
+    "sortkey": {
+      "n_pairs": 8,
+      "point": 0.05
+    },
+    "strindex": {
+      "n_pairs": 8,
+      "point": -0.07499999999999998
+    }
+  },
+  "memory": {
+    "A": {
+      "form_raw": [
+        {
+          "index": 0,
+          "text": "来源任务 classstate-01（族 classstate）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\nclass Counter:\n    def __init__(self):\n        self.total = 0\n\n    def add(self, n):\n        self.total += n\n        return self.total\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return ",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 1,
+          "text": "来源任务 classstate-02（族 classstate）：工具序列 list_files → read_file → read_file；验收未通过；验收输出 exit=1\n--- stdout ---\n\n--- stderr ---\n======================================================================\nFAIL: test_case_1 (test_main.TestBehaviour.test_case_1)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<TEMP>/test_main.py\", line 32, in test_case_1\n    self.assertEqual(s.i\n最后写下的代码：\n# main.py\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        sel",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": false,
+          "chars": 600
+        },
+        {
+          "index": 2,
+          "text": "来源任务 dictmiss-01（族 dictmiss）：工具序列 list_files → read_file → read_file → write_file → read_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef word_count(words):\n    d = {}\n    for w in words:\n        d[w] = d.get(w, 0) + 1\n    return d\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\nclas",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 3,
+          "text": "来源任务 dictmiss-02（族 dictmiss）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef group_by_len(words):\n    d = {}\n    for w in words:\n        d.setdefault(len(w), []).append(w)\n    return d\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\ncl",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 4,
+          "text": "来源任务 errorcontract-01（族 errorcontract）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef safe_div(a, b):\n    if b == 0:\n        return None\n    return a / b\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\nclass TestBehaviour(unittest.Tes",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 5,
+          "text": "来源任务 errorcontract-02（族 errorcontract）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef parse_int(s, default=None):\n    try:\n        return int(s)\n    except (TypeError, ValueError):\n        return default\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importl",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 6,
+          "text": "来源任务 mutabledefault-01（族 mutabledefault）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef append_to(x, items=None):\n    if items is None:\n        items = []\n    return items + [x]\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\nclass Te",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 7,
+          "text": "来源任务 mutabledefault-02（族 mutabledefault）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef add_tag(tag, tags=None):\n    result = set() if tags is None else set(tags)\n    result.add(tag)\n    return sorted(result)\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return im",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 600
+        }
+      ],
+      "form_summary": [
+        {
+          "index": 0,
+          "text": "有状态类先明确初始化与修改规则，add 要累加后返回当前 total，并用连续调用测试验证。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 46
+        },
+        {
+          "index": 1,
+          "text": "实现 pop 时要同时返回并移除栈顶元素，直接用 self.items.pop()，不能只读取末元素。",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": false,
+          "chars": 51
+        },
+        {
+          "index": 2,
+          "text": "实现计数类任务先看验收用例，覆盖空输入和重复元素，再用字典累加即可。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 34
+        },
+        {
+          "index": 3,
+          "text": "分组时先确定键值结构并保持原顺序，用 setdefault 累加，空输入返回空字典。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 42
+        },
+        {
+          "index": 4,
+          "text": "先处理除零等边界并返回约定值，再写普通逻辑，返回类型要符合断言。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 32
+        },
+        {
+          "index": 5,
+          "text": "转换函数用 try/except 捕获 TypeError 和 ValueError，失败返回 default，避免抛异常。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 62
+        },
+        {
+          "index": 6,
+          "text": "默认参数别用可变对象；缺省设 None，函数内新建列表，返回新列表且不改原列表。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 40
+        },
+        {
+          "index": 7,
+          "text": "默认参数用 None，缺省时每次新建集合，传入 tags 时基于副本，避免跨调用共享状态。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 45
+        }
+      ],
+      "form_structured": [
+        {
+          "index": 0,
+          "text": "事实：实现 Counter 类，total 初始 0，add(n) 累加并返回，验收测试通过。\n适用：小型有状态累加类且测试仅覆盖基本行为时。\n不适用：需并发安全、输入校验或持久化等复杂需求时。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 97
+        },
+        {
+          "index": 1,
+          "text": "事实：任务要求 pop 弹出并返回栈顶，空栈返回 None；实现只返回未删除，测试失败。\n适用：实现栈的 pop 且需改变栈内容时。\n不适用：只需查看栈顶、不能修改栈内容时。",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": false,
+          "chars": 87
+        },
+        {
+          "index": 2,
+          "text": "事实：任务为实现 word_count(words)，返回各词出现次数；3个验收用例全部通过。\n适用：统计可哈希元素出现次数，且规则简单无需规范化时。\n不适用：元素不可哈希，或需处理大小写、标点、分词等复杂词频时。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 107
+        },
+        {
+          "index": 3,
+          "text": "事实：任务要求 group_by_len 按单词长度分组并保持组内原顺序，验收 3 个用例全部通过。\n适用：需要按单词长度分组且组内保留原顺序时。\n不适用：需要排序去重、改变组内顺序或键不可哈希时。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 99
+        },
+        {
+          "index": 4,
+          "text": "事实：任务要求 safe_div 在 b=0 时返回 None，否则返回 a 除以 b 的浮点结果。\n适用：需要零除不抛异常而返回 None 的简单除法。\n不适用：需要抛出异常、区分 0/0、或处理特殊数值边界时。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 107
+        },
+        {
+          "index": 5,
+          "text": "事实：parse_int 捕获 TypeError/ValueError，失败返回 default，验收通过。\n适用：需要安全转整数、失败返回默认值且不抛异常时。\n不适用：需保留失败原因、严格报错或接受浮点/其他格式时。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 110
+        },
+        {
+          "index": 6,
+          "text": "事实：append_to 需返回追加 x 的新列表，缺省空列表且每次调用互不影响，测试通过。\n适用：默认参数可能被修改，需返回新列表且调用独立时。\n不适用：需原地修改传入列表或跨调用共享默认可变对象时。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 101
+        },
+        {
+          "index": 7,
+          "text": "事实：add_tag 返回加入 tag 后的升序全部标签；tags 缺省从空集合开始，每次调用互不影响。\n适用：实现无状态、每次调用独立且不修改入参的标签添加函数。\n不适用：需要跨调用累积标签、沿用上次缺省状态或原地修改入参时。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 114
+        }
+      ]
+    },
+    "B": {
+      "form_summary": [
+        {
+          "index": 0,
+          "text": "有状态类把状态放实例属性，按调用顺序累加并返回当前值，测试各用例新建实例。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 37
+        },
+        {
+          "index": 1,
+          "text": "先读清返回值和内部表示要求，尤其空栈 pop 返回 None、items 栈底在前，写完立即跑验收测试。",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 52
+        },
+        {
+          "index": 2,
+          "text": "实现计数函数时优先用 get 累加，确认空输入等边界，保持代码最简，避免多余状态。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 41
+        },
+        {
+          "index": 3,
+          "text": "按序遍历并用 setdefault 聚合，保组内顺序；空输入自然返回空字典，测试重载模块隔离状态。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 49
+        },
+        {
+          "index": 4,
+          "text": "先处理特殊输入（如除数为0）并返回约定值，再按正常路径计算并统一类型。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 35
+        },
+        {
+          "index": 5,
+          "text": "解析函数除 ValueError 外还要捕获 TypeError，保证 None 等输入失败时也返回默认值、不外抛。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 58
+        },
+        {
+          "index": 6,
+          "text": "可变默认参数会跨调用共享，缺省应使用 None 并在函数内新建列表。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": false,
+          "chars": 34
+        },
+        {
+          "index": 7,
+          "text": "缺省参数不要用可变对象；每次调用都新建容器或复制入参，确保互不影响。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 34
+        }
+      ],
+      "form_structured": [
+        {
+          "index": 0,
+          "text": "事实：任务要求实现 Counter：total 初始 0；add(n) 累加并返回 total，验收通过。\n适用：实现简单、单线程、实例级累加计数器时。\n不适用：需要并发安全、持久化或复杂状态共享时。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 100
+        },
+        {
+          "index": 1,
+          "text": "事实：任务实现 Stack 类，push 压入，pop 弹出栈顶，空栈返回 None，items 栈底在前，验收通过。\n适用：实现简单 LIFO 栈且空 pop 需返回 None 时。\n不适用：需线程安全、容量限制、空栈抛异常或并发访问时。",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 120
+        },
+        {
+          "index": 2,
+          "text": "事实：实现 word_count(words)，遍历用 dict.get 累加计数并返回词频字典，验收通过。\n适用：需统计可哈希词或元素出现次数并返回计数字典时。\n不适用：输入含不可哈希元素，或需分词、排序、保留顺序等复杂处理时。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 115
+        },
+        {
+          "index": 3,
+          "text": "事实：任务为实现 group_by_len，按单词长度分组且组内保持原顺序；最终代码测试通过。\n适用：需要按键分组并保持组内输入顺序时。\n不适用：需要去重、排序，或元素无 len 且需自定义键时。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 98
+        },
+        {
+          "index": 4,
+          "text": "事实：任务要求 safe_div(a,b)，b=0 返回 None，否则返回浮点商；实现通过 3 个测试。\n适用：简单数值除法且要求除零返回 None、不抛异常时。\n不适用：需报告除零错误、保留整数/Decimal 或处理非数字输入时。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 118
+        },
+        {
+          "index": 5,
+          "text": "事实：实现 parse_int：int 转换失败时返回 default，不抛异常；验收通过。\n适用：需要安全解析整数且失败返回默认值、不抛异常的场景。\n不适用：需要暴露或区分转换错误、严格校验输入格式的场景。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 104
+        },
+        {
+          "index": 6,
+          "text": "事实：append_to 应返回新列表，items 缺省为空且每次调用互不影响；items=[] 会复用可变默认值。\n适用：Python 函数默认参数需要每次调用独立列表时。\n不适用：函数有意跨调用共享同一可变默认对象时。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": false,
+          "chars": 111
+        },
+        {
+          "index": 7,
+          "text": "事实：实现 add_tag 返回加入 tag 后的升序标签；tags 缺省为空，每次调用互不影响。\n适用：默认参数无状态、需去重排序且不修改传入标签时。\n不适用：需跨调用累积状态或应原地修改 tags 参数时。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 105
+        }
+      ],
+      "fit_solver": [
+        {
+          "index": 0,
+          "text": "你容易把简单实现题扩成完整 unittest，连 reload/fresh 样板都带上；只改 main.py 实现 Counter，别写验收测试。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 73
+        },
+        {
+          "index": 1,
+          "text": "你常直接 append/pop 实现栈，容易漏掉空栈分支；记住先判空返回 None，items 保持栈底在前。",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 55
+        },
+        {
+          "index": 2,
+          "text": "你写 word_count 时爱用 d.get(w,0)+1，简洁正确；但易过度扩展边界，按题意计数即可，别加校验或过滤。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 61
+        },
+        {
+          "index": 3,
+          "text": "你写分组题爱用 setdefault 按原序 append，这很好；但别顺手加 sorted/set，空输入仍要返回 {}。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 62
+        },
+        {
+          "index": 4,
+          "text": "你写 safe_div 时易直接 a/b，忘了 b==0 返回 None；先判零，再 float 相除，别抛异常。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 57
+        },
+        {
+          "index": 5,
+          "text": "你parse_int漏了OverflowError；int(float('inf'))会抛，应返回default。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 57
+        },
+        {
+          "index": 6,
+          "text": "你写默认参数时爱用可变的 items=[]，导致 append_to 跨调用累积；应改成 items=None，并在函数内每次新建列表。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": false,
+          "chars": 68
+        },
+        {
+          "index": 7,
+          "text": "你易把 tags=None 当成跨调用累积状态，用可变默认参数或模块级集合；应每次新建集合并返回升序列表。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 53
+        }
+      ],
+      "fit_domain": [
+        {
+          "index": 0,
+          "text": "事实：Counter 的 total 是实例属性，初值为 0；add(n) 累加 n 并返回当前 total。\n适用：正常顺序调用 add；n 为数值。\n不适用：外部改写 total、并发调用或 n 非数值。",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 104
+        },
+        {
+          "index": 1,
+          "text": "事实：栈后进先出；push 加尾，pop 删返尾；空栈 pop 返 None；items 栈底在前\n适用：实现 LIFO 栈且空栈 pop 返 None\n不适用：要求 FIFO、空栈抛异常或 items 顺序相反时",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 107
+        },
+        {
+          "index": 2,
+          "text": "事实：word_count 对可迭代 words 统计元素频次，返回元素到次数的字典；空输入返回空字典。\n适用：输入元素可哈希，按完全相等计数。\n不适用：元素不可哈希，或需大小写归一化、分词等语义处理。",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 101
+        },
+        {
+          "index": 3,
+          "text": "事实：按单词长度分组时，键为长度，值为该长度单词列表，组内保持原顺序，空输入返回空字典。\n适用：输入为字符串序列，需按长度分组并保留组内原始顺序。\n不适用：要求组间或组内排序、修改原词或键非整数长度时。",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 101
+        },
+        {
+          "index": 4,
+          "text": "事实：safe_div 在 b 为 0 时返回 None，否则返回 a 与 b 的浮点除法结果。\n适用：b 为 0，或 a、b 可转换为浮点数且 b 非零。\n不适用：b 非零且 a、b 无法转换为浮点数或浮点除法异常。",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 109
+        },
+        {
+          "index": 5,
+          "text": "事实：parse_int可转则返回整数，失败则返回default，默认None，不抛转换异常。\n适用：可被int转换或转换失败时。\n不适用：非TypeError/ValueError异常时。",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 95
+        },
+        {
+          "index": 6,
+          "text": "事实：append_to返回追加x的新列表；items缺省时从空列表开始，调用间不得共享列表状态。\n适用：实现append_to且要求调用间无共享状态。\n不适用：允许复用可变默认值或原地修改传入列表时。",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": false,
+          "chars": 101
+        },
+        {
+          "index": 7,
+          "text": "事实：add_tag 返回加入 tag 后全部标签的升序去重列表；缺省 tags 从空集开始，各次调用互不影响。\n适用：调用 add_tag 且 tags 为 None 或已有标签集合时。\n不适用：要求跨调用保留状态或修改传入集合时。",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 117
+        }
+      ],
+      "form_raw": [
+        {
+          "index": 0,
+          "text": "来源任务 classstate-01（族 classstate）：工具序列 list_files → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\nclass Counter:\n    def __init__(self):\n        self.total = 0\n\n    def add(self, n):\n        self.total += n\n        return self.total\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.re",
+          "source_task": "classstate-01",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 1,
+          "text": "来源任务 classstate-02（族 classstate）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, x):\n        self.items.append(x)\n\n    def pop(self):\n        if not self.items:\n            return None\n        return self.items.pop()\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport un",
+          "source_task": "classstate-02",
+          "source_family": "classstate",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 2,
+          "text": "来源任务 dictmiss-01（族 dictmiss）：工具序列 list_files → read_file → read_file → write_file → read_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef word_count(words):\n    d = {}\n    for w in words:\n        d[w] = d.get(w, 0) + 1\n    return d\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\nclas",
+          "source_task": "dictmiss-01",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 3,
+          "text": "来源任务 dictmiss-02（族 dictmiss）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef group_by_len(words):\n    d = {}\n    for w in words:\n        d.setdefault(len(w), []).append(w)\n    return d\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\ncl",
+          "source_task": "dictmiss-02",
+          "source_family": "dictmiss",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 4,
+          "text": "来源任务 errorcontract-01（族 errorcontract）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef safe_div(a, b):\n    if b == 0:\n        return None\n    return float(a) / float(b)\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importlib.reload(main)\n\n\nclass TestBehaviou",
+          "source_task": "errorcontract-01",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 5,
+          "text": "来源任务 errorcontract-02（族 errorcontract）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef parse_int(s, default=None):\n    try:\n        return int(s)\n    except (TypeError, ValueError):\n        return default\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return importl",
+          "source_task": "errorcontract-02",
+          "source_family": "errorcontract",
+          "source_verdict": true,
+          "chars": 600
+        },
+        {
+          "index": 6,
+          "text": "来源任务 mutabledefault-01（族 mutabledefault）：工具序列 list_files → read_file → read_file；验收未通过；验收输出 exit=1\n--- stdout ---\n\n--- stderr ---\n======================================================================\nFAIL: test_case_1 (test_main.TestBehaviour.test_case_1)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"<TEMP>/test_main.py\", line 26, in test_case_1\n    self.assertEqual\n最后写下的代码：\n# main.py\ndef append_to(x, items=[]):\n    items.append(x)\n    return items\n\n# test_main.py\n\"\"\"验收测试",
+          "source_task": "mutabledefault-01",
+          "source_family": "mutabledefault",
+          "source_verdict": false,
+          "chars": 600
+        },
+        {
+          "index": 7,
+          "text": "来源任务 mutabledefault-02（族 mutabledefault）：工具序列 list_files → read_file → read_file → write_file；验收通过；验收输出 exit=0\n--- stdout ---\n\n--- stderr ---\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nOK\n\n最后写下的代码：\n# main.py\ndef add_tag(tag, tags=None):\n    result = set() if tags is None else set(tags)\n    result.add(tag)\n    return sorted(result)\n\n# test_main.py\n\"\"\"验收测试（自动生成，期望值由正确实现在构建期算出）。\n\n断言是字面量，不含参考实现：沙箱内的文件对 Agent 可读，\n测试里若带一份正确实现，任务会退化成复制。\n\"\"\"\n\nimport importlib\nimport unittest\n\nimport main\n\n\ndef fresh():\n    \"\"\"每个用例都重载模块，避免模块级状态在用例之间串味。\"\"\"\n    return im",
+          "source_task": "mutabledefault-02",
+          "source_family": "mutabledefault",
+          "source_verdict": true,
+          "chars": 600
+        }
+      ]
+    }
+  }
+}

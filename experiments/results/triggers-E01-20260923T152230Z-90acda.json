@@ -1,0 +1,34 @@
+{
+  "run_id": "E01-20260923T152230Z-90acda",
+  "protocol": "spec/outline-v0.4.md §13.2（三个可计算触发信号）",
+  "signals": [
+    {
+      "arm": "grid4",
+      "n_episodes": 8,
+      "fail_rate": 0.25,
+      "error_run": {
+        "max": 2,
+        "mean": 0.375,
+        "p50": 0.0,
+        "n_ge2": 1
+      },
+      "drift": {
+        "max": 0.5,
+        "mean": 0.0625,
+        "n_ge_half": 1
+      },
+      "novelty": {
+        "min": 0.8209,
+        "mean": 0.9546,
+        "p50": 0.9844,
+        "n_below_half": 0
+      },
+      "gating": {
+        "rule": "error_run >= 2 或 novelty >= 0.5 才写入",
+        "n_writes_total": 8,
+        "n_writes_kept": 8,
+        "saved_fraction": 0.0
+      }
+    }
+  ]
+}

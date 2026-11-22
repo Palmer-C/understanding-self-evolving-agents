@@ -1,0 +1,18 @@
+% 功能分类，不构成必经阶梯或成本排名。
+\begin{tikzpicture}[
+ b/.style={draw,rounded corners=2pt,text width=3.1cm,minimum height=1cm,align=center,font=\small},
+ t/.style={text width=7cm,align=left,font=\small},
+ a/.style={-{Stealth[length=2mm]},thick}]
+ \node[b,fill=blue!10] (x) at (0,0) {修改任务产物};
+ \node[b,fill=orange!10] (y) at (0,-1.8) {修改任务执行器};
+ \node[b,fill=red!8] (z) at (0,-3.6) {修改候选生成过程};
+ \node[t] (tx) at (7,0) {当前要求与相关回归；\\结果只覆盖实际检查范围。};
+ \node[t] (ty) at (7,-1.8) {新任务表现、运行资源与权限；\\档案不是所有系统的必要条件。};
+ \node[t] (tz) at (7,-3.6) {相同起点与预算下产出候选的能力；\\迁移时核对携带对象与目标反馈。};
+ \draw[a] (x.east)--(tx.west);
+ \draw[a] (y.east)--(ty.west);
+ \draw[a] (z.east)--(tz.west);
+ \draw[dashed,gray] (-1.8,-4.65)--(10.6,-4.65);
+ \node[align=center,text width=12.4cm,font=\small] at (4.4,-5.4)
+ {共同评价边界：任务划分、评分版本、观测记录与预算。\\验证器需更新时，单列验收并记录跨版本可比性。};
+\end{tikzpicture}

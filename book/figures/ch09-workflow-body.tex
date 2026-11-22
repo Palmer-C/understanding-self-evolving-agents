@@ -1,0 +1,30 @@
+% Three full-size panels; no transform-shape reduction.
+\begin{tikzpicture}[
+ nd/.style={draw,rounded corners=2pt,text width=18mm,minimum height=8mm,align=center,font=\small},
+ io/.style={nd,fill=gray!10},
+ arrow/.style={-{Stealth[length=1.8mm]},thick},
+ note/.style={font=\small,align=left,text width=43mm}
+]
+\node[font=\bfseries\small] at (0,1) {顺序};
+\node[io] (s1) at (0,0) {生成};
+\node[nd] (s2) at (0,-1.2) {求解};
+\node[io] (s3) at (0,-2.4) {输出};
+\draw[arrow] (s1)--(s2);\draw[arrow] (s2)--(s3);
+\node[note,anchor=north] at (0,-3.2) {按实际调用与\\执行事件记账。\\等待时间沿串行路径累加。};
+\node[font=\bfseries\small] at (5,1) {带评审};
+\node[io] (r1) at (5,0) {生成与求解};
+\node[nd,fill=orange!12] (r2) at (5,-1.2) {评审};
+\node[nd] (r3) at (6.1,-2.4) {修正};
+\node[io] (r4) at (5,-3.6) {输出};
+\draw[arrow] (r1)--(r2);\draw[arrow] (r2)--(r3);
+\draw[arrow] (r3)--(r4);\draw[arrow] (r2.west)--++(-1.2,0)|-(r4.west);
+\node[note,anchor=north] at (5,-4.4) {评审与修正分别计费。\\时间取决于实际返回分支。};
+\node[font=\bfseries\small] at (10,1) {并行集成};
+\node[io] (p0) at (10,0) {输入};
+\node[nd,fill=blue!9] (p1) at (8.8,-1.5) {求解甲};
+\node[nd,fill=blue!9] (p2) at (11.2,-1.5) {求解乙};
+\node[io] (p3) at (10,-3) {聚合};
+\draw[arrow] (p0)--(p1);\draw[arrow] (p0)--(p2);
+\draw[arrow] (p1)--(p3);\draw[arrow] (p2)--(p3);
+\node[note,anchor=north] at (10,-3.8) {各路与聚合均计费。\\等待受并发和排队影响。\\质量取决于错误相关性。};
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+*.aux
+*.bcf
+*.blg
+*.bbl
+*.fls
+*.fdb_latexmk
+*.log
+*.synctex.gz
+*.run.xml
+book/build/
+book/main.pdf
+__pycache__/
+*.pyc
+.env
+references/files/

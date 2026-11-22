@@ -1,0 +1,11 @@
+{
+  "identity": "Short exact code excerpt independently read from original repository; not a runnable replacement or a frozen-package alias",
+  "original_path": "experiments/lab/run_e12.py",
+  "original_sha256": "2bc7b2125647f2a674113962b3af802d07001c33ce5197500c97a2700b9bdeb8",
+  "matches_historical_audit_source_sha256": true,
+  "read_date": "2026-10-21",
+  "original_full_source_in_frozen_package": false,
+  "start_line_1based": 292,
+  "code": "if \"control_no_update\" in per_arm:\n    floor = per_arm[\"control_no_update\"][\"noise_floor\"]\nelse:\n    floor = 0.0\n",
+  "scope": "The isolated conditional reproduces missing-field behavior with explicit constructed state; no runner, backend or historical task is executed"
+}

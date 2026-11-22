@@ -1,0 +1,41 @@
+% figures/timescale-body.tex —— 三层时间尺度图的纯 tikz 主体
+% 单独编译入口：figures/timescale-standalone.tex
+% 全书引用入口：figures/timescale.tex（含 figure 环境与编号）
+% 图内不含任何数字，因此不受 \cited{} / \calcnum{} / \measured{} 身份纪律约束。
+% version 行画出完整五类持久组件（$\theta,P,M,L,G$），与式 (1.1) 的 Updatable 集合一致。
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, minimum height=9mm, minimum width=18mm, font=\small},
+  lbl/.style={font=\small, anchor=east},
+  note/.style={font=\footnotesize, anchor=west, gray!60!black}
+]
+  % ---- step t ----
+  \node[lbl] at (1.4,2.4) {step $t$};
+  \node[box, fill=gray!10] (s1) at (3.0,2.4) {消息};
+  \node[box, fill=gray!10] (s2) at (6.0,2.4) {工具结果};
+  \node[box, fill=gray!10] (s3) at (9.0,2.4) {消息};
+
+  % ---- episode e ----
+  \node[lbl] at (1.4,1.2) {episode $e$};
+  \node[box, fill=blue!8] (e1) at (4.0,1.2) {临时工作状态};
+  \node[box, fill=blue!8] (e2) at (9.0,1.2) {轨迹可另存};
+
+  % ---- version k：五类持久组件 ----
+  \node[lbl] at (1.4,0.0) {version $k$};
+  \node[box, fill=orange!12] (k1) at (3.0,0.0) {$M$ 记忆};
+  \node[box, fill=orange!12] (k2) at (5.0,0.0) {$P$ 指令};
+  \node[box, fill=orange!12] (k3) at (7.0,0.0) {$L$ 技能};
+  \node[box, fill=orange!12] (k4) at (9.0,0.0) {$G$ 工作流};
+  \node[box, fill=orange!12] (k5) at (11.0,0.0) {$\theta$ 参数};
+
+  % ---- 层内与层间关系 ----
+  \draw[-{Stealth[length=2mm]}] (s1)--(s2);
+  \draw[-{Stealth[length=2mm]}] (s2)--(s3);
+  \draw[-{Stealth[length=2mm]}, dashed] (e2.south) -- (k3.north);
+
+  % ---- 保留范围的标注 ----
+  \draw[gray!60!black, line width=0.3pt] (1.8,1.75) -- (12.4,1.75);
+  % Reset and archive conditions are stated in the caption; keeping them here
+  % would collide with the step-row boxes at the final printed size.
+  \draw[gray!60!black, line width=0.3pt] (1.8,-0.55) -- (12.4,-0.55);
+  \node[note] at (1.8,-0.95) {跨任务保留：只有这里的变化满足 $A_{k+1}\neq A_k$};
+\end{tikzpicture}

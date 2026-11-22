@@ -1,0 +1,9 @@
+% figures/ch09-workflow.tex —— 第 9 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch09.tex 中 \input{figures/ch09-workflow}
+% 图主体在 ch09-workflow-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch09-workflow-body}
+\caption{顺序、带评审与并行集成的控制流示意。图中节点和分支不同，具体调用量、时延与质量需按实现测量；并行不保证等待时间不变，评审也不保证纠错。即使最终分数相同，执行过程与资源账仍可能不同。}
+\label{fig:ch09-workflow}
+\end{figure}

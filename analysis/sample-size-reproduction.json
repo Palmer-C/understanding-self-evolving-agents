@@ -1,0 +1,68 @@
+{
+  "identity": "calculated from hash-bound historical pilot SDs; not measured capability",
+  "input_manifest": "analysis/inputs.json",
+  "E03_scope": "P3 structured-minus-summary only; does not use the disputed A/base_same baseline",
+  "assumptions": {
+    "alpha_two_sided": 0.05,
+    "power_example": 0.8,
+    "half_width": 0.03,
+    "true_shift_vs_zero": 0.03
+  },
+  "limitations": [
+    "Task independence assumed; family dependence is not corrected.",
+    "Pilot SD uncertainty, multiple testing, and sequential looks are not included.",
+    "No confirmatory sample size has been preregistered by this script."
+  ],
+  "rows": [
+    {
+      "sd_from_pilot": 0.28751811537130434,
+      "legacy_precision_n": 353,
+      "precision_n_normal_quantile": 353,
+      "power_example_n": 721,
+      "comparison": "P1",
+      "run_id": "E01-20260923T152230Z-90acda",
+      "recorded_n": 353,
+      "available_tasks": 16
+    },
+    {
+      "sd_from_pilot": 0.4425306015783918,
+      "legacy_precision_n": 836,
+      "precision_n_normal_quantile": 836,
+      "power_example_n": 1708,
+      "comparison": "P1b",
+      "run_id": "E01-20260923T152230Z-90acda",
+      "recorded_n": 836,
+      "available_tasks": 16
+    },
+    {
+      "sd_from_pilot": 0.3721558813185679,
+      "legacy_precision_n": 592,
+      "precision_n_normal_quantile": 592,
+      "power_example_n": 1208,
+      "comparison": "P2b:self-exec",
+      "run_id": "E02-20260924T153511Z-421eac",
+      "recorded_n": 592,
+      "available_tasks": 16
+    },
+    {
+      "sd_from_pilot": 0.3183289703016886,
+      "legacy_precision_n": 433,
+      "precision_n_normal_quantile": 433,
+      "power_example_n": 884,
+      "comparison": "E02:formal-self",
+      "run_id": "E02-20260924T153511Z-421eac",
+      "recorded_n": 433,
+      "available_tasks": 16
+    },
+    {
+      "sd_from_pilot": 0.27778888866667556,
+      "legacy_precision_n": 330,
+      "precision_n_normal_quantile": 330,
+      "power_example_n": 673,
+      "comparison": "P3",
+      "run_id": "E03-20260925T152453Z-254845",
+      "recorded_n": 330,
+      "available_tasks": 16
+    }
+  ]
+}

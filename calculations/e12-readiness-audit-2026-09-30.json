@@ -1,0 +1,35 @@
+{
+  "identity": "offline code/analytic audit; no model calls; no E12 run",
+  "source_sha256": {
+    "experiments\\lab\\run_e12.py": "2bc7b2125647f2a674113962b3af802d07001c33ce5197500c97a2700b9bdeb8"
+  },
+  "default_order_block": {
+    "line": 292,
+    "exception": "KeyError 'noise_floor'",
+    "cause": "noise_floor read after control arm but populated only after all arms"
+  },
+  "constant_control_drop": {
+    "mean_D": 1,
+    "standard_deviation_used_as_floor": 0.0,
+    "consequence": "dispersion alone does not capture systematic loss or selection bias"
+  },
+  "selection_teaching_example": {
+    "assumed_independent_bernoulli_p": 0.5,
+    "selected_initial_score": 1,
+    "expected_no_update_retest_score": 0.5,
+    "expected_apparent_D": 0.5,
+    "identity": "analytic assumption, not observed data"
+  },
+  "readiness": "not runnable for evidence; preserve unknown untracked runner unchanged",
+  "further_findings": [
+    "fewer than two selected tasks silently expands regression set",
+    "small medium large generate different source trajectories/seeds; not only update amount",
+    "large rewrites content but byte delta is net size, not edit magnitude",
+    "per-arm ledgers copy shared preparation; summing duplicates shared work",
+    "control rerun costs appended to shared ledger after arm copies, absent from summary",
+    "summary omits actual snapshots and complete before/after/recovery outcome arrays",
+    "flipped label does not ensure generated lesson contradicts task facts",
+    "a confidence interval containing zero does not refute universal degradation",
+    "same-family update does not imply a proven lower bound on degradation"
+  ]
+}

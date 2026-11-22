@@ -1,0 +1,1426 @@
+{
+  "config": {
+    "experiment": "E02",
+    "run_id": "E02-20260924T153511Z-421eac",
+    "protocol": "experiments/protocols/E02.md",
+    "public_protocol": "spec/outline-v0.4.md §6.3",
+    "started_at": "2026-09-24T15:35:11.644740+00:00",
+    "git_head": "89cec63aa3cc8acfb68f66942bd626b0460448e9",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.7,
+    "episode_budget": {
+      "max_calls": 8,
+      "max_steps": 12,
+      "max_prompt_tokens": 200000,
+      "max_completion_tokens": 20000,
+      "max_wall_seconds": 600.0
+    },
+    "E_train_episodes": 8,
+    "R_repeats": 5,
+    "base_seed": 20260924,
+    "noise_rate": 0.3,
+    "n_train_tasks": 16,
+    "n_sealed_tasks": 16,
+    "mde": 0.03,
+    "unit": "task",
+    "in_episode_verification": false,
+    "trial": false
+  },
+  "finished_at": "2026-09-24T16:17:09.495527+00:00",
+  "wall_seconds_total": 2517.85,
+  "verdicts": {
+    "arm_base": {
+      "classstate-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "classstate-08": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "dictmiss-07": [
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "errorcontract-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    "arm_formal": {
+      "classstate-07": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "classstate-08": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "dictmiss-07": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "errorcontract-07": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "errorcontract-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-08": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "strindex-07": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "strindex-08": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    "arm_exec": {
+      "classstate-07": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "classstate-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "dictmiss-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-07": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "recursionbase-07": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "sortkey-08": [
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "strindex-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ]
+    },
+    "arm_review": {
+      "classstate-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "classstate-08": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "dictmiss-07": [
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "errorcontract-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "mutabledefault-08": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "offbyone-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "recursionbase-07": [
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "strindex-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    },
+    "arm_self": {
+      "classstate-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "classstate-08": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "dictmiss-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "dictmiss-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "errorcontract-08": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "mutabledefault-07": [
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "mutabledefault-08": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "recursionbase-07": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "recursionbase-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "sortkey-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "strindex-07": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "strindex-08": [
+        true,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    "arm_noise": {
+      "classstate-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "classstate-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "dictmiss-07": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "dictmiss-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "errorcontract-07": [
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "errorcontract-08": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "mutabledefault-07": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "mutabledefault-08": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "offbyone-07": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "offbyone-08": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "recursionbase-07": [
+        false,
+        true,
+        false,
+        true,
+        false
+      ],
+      "recursionbase-08": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sortkey-07": [
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "sortkey-08": [
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "strindex-07": [
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "strindex-08": [
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
+  "pass_rate_by_arm": {
+    "arm_base": 0.8125,
+    "arm_formal": 0.7125,
+    "arm_exec": 0.7,
+    "arm_review": 0.7125,
+    "arm_self": 0.6125,
+    "arm_noise": 0.6625
+  },
+  "arm_labels": {
+    "arm_base": "无反馈基线：不写、不检索任何持久物",
+    "arm_formal": "形式化 / 可执行验证：验收器判定 + 完整输出",
+    "arm_exec": "环境结果：原始执行输出，无对错标签",
+    "arm_review": "学习式评审：另一模型只读代码给评审与判定",
+    "arm_self": "内在自评：做题者自己回看代码给判断",
+    "arm_noise": "受控噪声对照：形式判定按固定翻转率翻转"
+  },
+  "ledger": {
+    "arm_base": {
+      "episodes": 88,
+      "calls": 431,
+      "prompt_tokens": 163270,
+      "completion_tokens": 27231,
+      "wall_seconds": 353.2588532998925,
+      "side_calls": 0,
+      "side_prompt_tokens": 0,
+      "side_completion_tokens": 0
+    },
+    "arm_formal": {
+      "episodes": 88,
+      "calls": 403,
+      "prompt_tokens": 169093,
+      "completion_tokens": 27439,
+      "wall_seconds": 332.2310774998041,
+      "side_calls": 8,
+      "side_prompt_tokens": 3803,
+      "side_completion_tokens": 2470
+    },
+    "arm_exec": {
+      "episodes": 88,
+      "calls": 406,
+      "prompt_tokens": 177496,
+      "completion_tokens": 41229,
+      "wall_seconds": 360.1796401999309,
+      "side_calls": 8,
+      "side_prompt_tokens": 4538,
+      "side_completion_tokens": 8774
+    },
+    "arm_review": {
+      "episodes": 88,
+      "calls": 408,
+      "prompt_tokens": 169110,
+      "completion_tokens": 38518,
+      "wall_seconds": 344.5677496996941,
+      "side_calls": 16,
+      "side_prompt_tokens": 6537,
+      "side_completion_tokens": 11138
+    },
+    "arm_self": {
+      "episodes": 88,
+      "calls": 409,
+      "prompt_tokens": 180120,
+      "completion_tokens": 43930,
+      "wall_seconds": 385.2031156999292,
+      "side_calls": 16,
+      "side_prompt_tokens": 6672,
+      "side_completion_tokens": 8179
+    },
+    "arm_noise": {
+      "episodes": 88,
+      "calls": 407,
+      "prompt_tokens": 179209,
+      "completion_tokens": 32012,
+      "wall_seconds": 337.6383300998132,
+      "side_calls": 8,
+      "side_prompt_tokens": 4191,
+      "side_completion_tokens": 3138
+    }
+  },
+  "feedback_quality": {
+    "arm_base": {
+      "n_feedback": 0,
+      "n_implied_available": 0,
+      "n_mismatch": 0,
+      "n_parse_fail": 0,
+      "n_noise_flips": 0,
+      "mismatch_rate": null
+    },
+    "arm_formal": {
+      "n_feedback": 8,
+      "n_implied_available": 8,
+      "n_mismatch": 0,
+      "n_parse_fail": 0,
+      "n_noise_flips": 0,
+      "mismatch_rate": 0.0
+    },
+    "arm_exec": {
+      "n_feedback": 8,
+      "n_implied_available": 8,
+      "n_mismatch": 0,
+      "n_parse_fail": 0,
+      "n_noise_flips": 0,
+      "mismatch_rate": 0.0
+    },
+    "arm_review": {
+      "n_feedback": 8,
+      "n_implied_available": 8,
+      "n_mismatch": 0,
+      "n_parse_fail": 0,
+      "n_noise_flips": 0,
+      "mismatch_rate": 0.0
+    },
+    "arm_self": {
+      "n_feedback": 8,
+      "n_implied_available": 8,
+      "n_mismatch": 0,
+      "n_parse_fail": 0,
+      "n_noise_flips": 0,
+      "mismatch_rate": 0.0
+    },
+    "arm_noise": {
+      "n_feedback": 8,
+      "n_implied_available": 8,
+      "n_mismatch": 2,
+      "n_parse_fail": 0,
+      "n_noise_flips": 2,
+      "mismatch_rate": 0.25
+    }
+  },
+  "gains_vs_base": {
+    "arm_formal": {
+      "label": "arm_formal-arm_base",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.1,
+      "ci95_low": -0.21250000000000002,
+      "ci95_high": 0.012499999999999983,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.2125 ≤ 0"
+    },
+    "arm_exec": {
+      "label": "arm_exec-arm_base",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.1125,
+      "ci95_low": -0.26249999999999996,
+      "ci95_high": 0.05000000000000001,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.2625 ≤ 0"
+    },
+    "arm_review": {
+      "label": "arm_review-arm_base",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.1,
+      "ci95_low": -0.2375,
+      "ci95_high": 0.024999999999999994,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.2375 ≤ 0"
+    },
+    "arm_self": {
+      "label": "arm_self-arm_base",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.2,
+      "ci95_low": -0.3875,
+      "ci95_high": -0.025,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.3875 ≤ 0"
+    },
+    "arm_noise": {
+      "label": "arm_noise-arm_base",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.15,
+      "ci95_low": -0.3125,
+      "ci95_high": 0.01249999999999999,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.3125 ≤ 0"
+    }
+  },
+  "ladder_diffs": {
+    "d_fe": {
+      "label": "arm_formal-arm_exec",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.012499999999999987,
+      "ci95_low": -0.11250000000000002,
+      "ci95_high": 0.13749999999999998,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1125 ≤ 0；点估计 +0.0125 小于预注册 MDE 0.03"
+    },
+    "d_er": {
+      "label": "arm_exec-arm_review",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": -0.01249999999999999,
+      "ci95_low": -0.13749999999999998,
+      "ci95_high": 0.1125,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.1375 ≤ 0；点估计 -0.0125 小于预注册 MDE 0.03"
+    },
+    "d_rs": {
+      "label": "arm_review-arm_self",
+      "unit": "task",
+      "n_pairs": 16,
+      "n_runs_min": 5,
+      "point": 0.1,
+      "ci95_low": -0.05000000000000002,
+      "ci95_high": 0.2625,
+      "mde": 0.03,
+      "degraded": true,
+      "reason": "95% 区间下界 -0.0500 ≤ 0"
+    }
+  },
+  "ladder_inversions": [
+    "d_er"
+  ],
+  "P2b_self_vs_exec": {
+    "label": "arm_self-arm_exec",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": -0.08750000000000001,
+    "ci95_low": -0.26250000000000007,
+    "ci95_high": 0.0875,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.2625 ≤ 0"
+  },
+  "E02_effect_span": {
+    "label": "arm_formal-arm_self",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": 0.09999999999999999,
+    "ci95_low": -0.037500000000000026,
+    "ci95_high": 0.2625,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.0375 ≤ 0"
+  },
+  "noise_control": {
+    "label": "arm_noise-arm_formal",
+    "unit": "task",
+    "n_pairs": 16,
+    "n_runs_min": 5,
+    "point": -0.04999999999999999,
+    "ci95_low": -0.2,
+    "ci95_high": 0.11250000000000002,
+    "mde": 0.03,
+    "degraded": true,
+    "reason": "95% 区间下界 -0.2000 ≤ 0"
+  },
+  "discordant_vs_base": {
+    "arm_formal": {
+      "worse_than_base": 9,
+      "better_than_base": 5,
+      "n_tasks": 16
+    },
+    "arm_exec": {
+      "worse_than_base": 11,
+      "better_than_base": 3,
+      "n_tasks": 16
+    },
+    "arm_review": {
+      "worse_than_base": 8,
+      "better_than_base": 4,
+      "n_tasks": 16
+    },
+    "arm_self": {
+      "worse_than_base": 9,
+      "better_than_base": 4,
+      "n_tasks": 16
+    },
+    "arm_noise": {
+      "worse_than_base": 8,
+      "better_than_base": 3,
+      "n_tasks": 16
+    }
+  },
+  "by_family_formal_vs_base": {
+    "classstate": {
+      "n_pairs": 2,
+      "point": -0.2
+    },
+    "dictmiss": {
+      "n_pairs": 2,
+      "point": 0.19999999999999996
+    },
+    "errorcontract": {
+      "n_pairs": 2,
+      "point": -0.10000000000000003
+    },
+    "mutabledefault": {
+      "n_pairs": 2,
+      "point": -0.4
+    },
+    "offbyone": {
+      "n_pairs": 2,
+      "point": -0.2
+    },
+    "recursionbase": {
+      "n_pairs": 2,
+      "point": 0.09999999999999998
+    },
+    "sortkey": {
+      "n_pairs": 2,
+      "point": -0.19999999999999996
+    },
+    "strindex": {
+      "n_pairs": 2,
+      "point": 0.0
+    }
+  },
+  "sample_sizing": {
+    "sd_paired_diff_self_exec": 0.3721558813185679,
+    "sd_paired_diff_formal_self": 0.3183289703016886,
+    "n_required_self_exec": 592,
+    "n_required_formal_self": 433,
+    "n_available_tasks": 16,
+    "formula": "n >= (1.96 * sd(paired per-task diff) / MDE)^2, MDE=0.03"
+  },
+  "memory": {
+    "arm_formal": [
+      {
+        "index": 0,
+        "text": "状态存实例属性，初始化齐全，方法更新后返回最新值，避免模块级状态。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 1,
+        "text": "pop 不仅要返回栈顶，还必须从栈中删除它，否则 items 不变。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 2,
+        "text": "做词频类函数时，用字典累加并覆盖空输入、重复项，先本地跑通验收测试再提交。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 3,
+        "text": "先读清分组键与顺序要求，再用哈希表按遍历顺序聚合，简单实现最稳。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 4,
+        "text": "除零边界必须严格按规格返回 None，不能自行改成 0.0；先对照需求再实现。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 5,
+        "text": "转换失败时应返回传入的 default，而不是写死 0；严格按接口语义实现。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 6,
+        "text": "可变默认参数勿直接改；None时新建，否则先复制，保证返回新列表且调用间互不影响。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 7,
+        "text": "缺省参数用 None，内部新建集合，不修改入参，返回排序后的新列表。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      }
+    ],
+    "arm_exec": [
+      {
+        "index": 0,
+        "text": "累加方法应写成 self.total += n，不能直接赋值，否则会覆盖之前累计值。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 1,
+        "text": "实现 pop 时既要返回栈顶，也要真正移除它，别只读取末项而忘记更新 items。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 2,
+        "text": "统计词频时，遇到已存在的词应累加计数，而不是重复覆盖为1。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 3,
+        "text": "分组时要向已有列表追加，不能覆盖；可用 setdefault(len(w), []).append(w)。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 4,
+        "text": "提交前本地跑完整测试并确认通过和完整输出，避免因日志截断而误判。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 5,
+        "text": "不抛异常接口应捕获 Exception 而非仅 TypeError/ValueError，int 的溢出也会抛错。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 6,
+        "text": "缺省参数避免用可变对象，改用 None 哨兵，每次调用新建列表，保证互不影响。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 7,
+        "text": "别用可变对象作默认参数；tags=None 时在函数内新建空集合，确保每次调用互不影响。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      }
+    ],
+    "arm_review": [
+      {
+        "index": 0,
+        "text": "实现有状态类时，初始化状态、原地累加并返回新值，再用连续调用用例验证。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 1,
+        "text": "pop 必须同时删除并返回栈顶，只读取会导致 items 不变而失败。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 2,
+        "text": "统计频次时用默认值累加，天然兼容重复项与空输入；提交前核对边界。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 3,
+        "text": "分组题用字典按键追加，组内保序；空输入返回空字典，无需特判。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 4,
+        "text": "先明确边界条件，尤其除零和类型转换，再写最小实现并跑测试验证。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 5,
+        "text": "解析可能失败的值时，先尝试转换，捕获 ValueError 和 TypeError，失败即返回默认值，绝不向外抛异常。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 6,
+        "text": "默认参数别用可变对象；缺省时用 None，函数内再新建列表，避免多次调用共享状态。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 7,
+        "text": "默认参数勿用可变对象，缺省值应在函数体内新建，保证每次调用互不影响。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      }
+    ],
+    "arm_self": [
+      {
+        "index": 0,
+        "text": "有状态对象的状态绑到实例，方法更新后返回新值；按测试逐一自查，避免改错接口。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 1,
+        "text": "实现 pop 时既要返回栈顶，也必须删除该元素，否则 items 不变；栈空才返回 None。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 2,
+        "text": "实现词频统计先处理空输入，并确认元素可哈希；用默认值累加避免键不存在错误。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 3,
+        "text": "按长度分组时用字典收集，缺键先建空列表再追加，保持原遍历顺序；空输入返回空字典。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 4,
+        "text": "边界条件按题意实现，未要求的类型校验别自作主张，但提交前标注潜在风险。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 5,
+        "text": "异常分支应返回传入的 default，不要硬编码默认值，并检查各分支是否尊重参数。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 6,
+        "text": "默认参数用 None，函数内新建可变对象；返回新列表而非原地修改，保证各次调用互不影响。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 7,
+        "text": "默认参数用 None 并新建集合，传入先复制；返回升序结果，留意混合类型排序报错。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      }
+    ],
+    "arm_noise": [
+      {
+        "index": 0,
+        "text": "实现有状态类时先初始化实例字段，修改后返回最新值，并按多次连续调用自测。",
+        "source_task": "classstate-01",
+        "source_family": "classstate",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 1,
+        "text": "pop 既要返回栈顶，也要从 items 中删除它；实现时别忘了先弹出再返回。",
+        "source_task": "classstate-02",
+        "source_family": "classstate",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 2,
+        "text": "统计词频时应在已有计数上累加，而非每次赋值为1；注意初始化和默认值。",
+        "source_task": "dictmiss-01",
+        "source_family": "dictmiss",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 3,
+        "text": "本地测试全绿仍可能验收失败，别改测试文件，严格按平台要求提交对应源文件。",
+        "source_task": "dictmiss-02",
+        "source_family": "dictmiss",
+        "source_verdict": true,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": false
+      },
+      {
+        "index": 4,
+        "text": "除数为 0 必须返回 None，不能返回 0.0 或抛异常；先严格按规格核对边界值。",
+        "source_task": "errorcontract-01",
+        "source_family": "errorcontract",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 5,
+        "text": "公开测试全过不代表验收通过；int 转换还可能抛 OverflowError，需一并捕获并返回默认值。",
+        "source_task": "errorcontract-02",
+        "source_family": "errorcontract",
+        "source_verdict": true,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": false
+      },
+      {
+        "index": 6,
+        "text": "别用可变默认参数；缺省用 None，函数内新建列表，避免状态跨调用残留。",
+        "source_task": "mutabledefault-01",
+        "source_family": "mutabledefault",
+        "source_verdict": false,
+        "feedback_implied_success": false,
+        "feedback_matched_truth": true
+      },
+      {
+        "index": 7,
+        "text": "默认参数用 None，内部新建集合，拷贝传入数据并排序返回，避免修改原数据与跨调用共享状态。",
+        "source_task": "mutabledefault-02",
+        "source_family": "mutabledefault",
+        "source_verdict": true,
+        "feedback_implied_success": true,
+        "feedback_matched_truth": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "identity": "Deterministic arithmetic on reported rounded tables and exact constructed selection example; not E04 or paper replication",
+  "api_calls": 0,
+  "selection_assumptions": "Independent candidates and independent Bernoulli(1/2) outcomes on four development tasks; m positive integer",
+  "selection": [
+    {
+      "candidates": 1,
+      "exact": "1/2",
+      "mean": 0.5
+    },
+    {
+      "candidates": 2,
+      "exact": "163/256",
+      "mean": 0.63671875
+    },
+    {
+      "candidates": 4,
+      "exact": "49063/65536",
+      "mean": 0.7486419677734375
+    },
+    {
+      "candidates": 8,
+      "exact": "3600557263/4294967296",
+      "mean": 0.8383200650569052
+    }
+  ],
+  "source_score_differences": {
+    "GEPA_Table1_aggregate_vs_GRPO": "297/50",
+    "GEPA_Table1_aggregate_vs_MIPROv2": "701/100",
+    "GEPA_Table1_HotpotQA_vs_GRPO": "19",
+    "GEPA_Table1_AIME_vs_MIPROv2": "12",
+    "GEPA_Table2_transfer_vs_baseline": "9",
+    "GEPA_Table2_target_optimized_vs_transfer": "319/100",
+    "ACE_Table2_FiNER_online_unlabeled": "-17/5",
+    "ACE_Table2_Formula_online_unlabeled": "11",
+    "ACE_Table2_average_online_unlabeled": "19/5"
+  },
+  "cost_arithmetic": {
+    "ACE_Table4_offline_latency_reduction_percent": 82.34257300827488,
+    "ACE_Table4_offline_rollout_reduction_percent": 75.10460251046025,
+    "ACE_Table4_online_latency_reduction_percent": 91.54737036126812,
+    "ACE_Table4_online_token_cost_reduction_percent": 83.61581920903954,
+    "ACE_Table12_rollout_increase_percent": 42.61168384879725,
+    "ACE_Table12_input_reduction_percent": 80.76652495351537,
+    "ACE_Table12_output_reduction_percent": 83.57769379335126,
+    "ACE_Figure2_context_reduction_percent": 99.33267695000546,
+    "GEPA_best_appearance_rollout_ratio": 35.39823008849557,
+    "GEPA_reported_total_budget_rollout_ratio": 6.6796548844976344
+  },
+  "scopes": {
+    "ACE_Table4": "Main-table latency/rollout and historical-dollar reports",
+    "ACE_Table12": "AppendixA.3 separate fine-grained setting:1 epoch/1 reflector round; all3 component totals",
+    "GEPA_best_vs_total": "678 is reported best-prompt appearance,3593 total optimization budget row GEPA(+Merge); not interchangeable"
+  },
+  "unmeasured": "No E04 run, no causal component attribution, no source-table uncertainty intervals"
+}

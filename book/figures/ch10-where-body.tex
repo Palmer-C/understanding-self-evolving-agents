@@ -1,0 +1,17 @@
+% Four update locations; no assumed monotonic cost or safety ranking.
+\begin{tikzpicture}[
+ box/.style={draw,rounded corners=2pt,text width=28mm,minimum height=14mm,align=center,font=\small},
+ note/.style={text width=28mm,align=left,font=\footnotesize}]
+ \node[box,fill=blue!8] at (0,0) {$M$\\经验记忆};
+ \node[box,fill=blue!8] at (3.4,0) {$P$\\指令策略};
+ \node[box,fill=orange!10] at (6.8,0) {$L$\\工具技能};
+ \node[box,fill=orange!10] at (10.2,0) {$\theta$\\模型参数};
+ \node[note,anchor=north] at (0,-1) {保存条目与来源\\核对派生摘要\\撤销后检查读取};
+ \node[note,anchor=north] at (3.4,-1) {保存提示版本\\核对工具权限\\回归实际行为};
+ \node[note,anchor=north] at (6.8,-1) {保存源码与依赖\\验收调用契约\\记录维护成本};
+ \node[note,anchor=north] at (10.2,-1) {保存基座与更新\\检查点或适配器\\核对训练及回归};
+ \draw[gray!50] (-1.4,-3) -- (11.6,-3);
+ \node[align=left,font=\footnotesize,text width=128mm,anchor=north] at (5.1,-3.2)
+ {共同问题：更新了什么、依据来自哪里、代价覆盖哪些阶段、恢复能撤销什么。\\
+ 外部对象通常更易定位；参数可保存版本。两者都需要行为与风险检查，费用不按位置预定排序。};
+\end{tikzpicture}

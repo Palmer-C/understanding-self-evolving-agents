@@ -1,0 +1,19 @@
+% Operational evaluation scopes; not a convergence theorem.
+\begin{tikzpicture}[
+ box/.style={draw,rounded corners=2pt,text width=3.6cm,minimum height=1.25cm,align=center,font=\small},
+ arr/.style={-{Stealth[length=1.8mm]},thick}]
+ \node[box,fill=blue!8] (a) at (0,0) {本书已观测范围\\有限任务、预算与更新对象};
+ \node[box,fill=green!8] (b) at (4.7,0) {扩大可修改范围\\保留或重建共同评价};
+ \node[box,fill=orange!10] (c) at (9.4,0) {长期与目标演化\\另定义范围、状态与资源};
+ \draw[arr] (a) -- (b);
+ \draw[arr] (b) -- (c);
+ \node[align=center,text width=3.8cm,font=\footnotesize] at (0,-1.65)
+ {固定规则有助比较\\仍须审查实现与覆盖};
+ \node[align=center,text width=3.8cm,font=\footnotesize] at (4.7,-1.65)
+ {修改器或评审器可变\\不等于无法外部评价};
+ \node[align=center,text width=3.8cm,font=\footnotesize] at (9.4,-1.65)
+ {有限阶段可以测量\\不能由此证明无界增长};
+ \draw[dashed,gray] (-1.9,-2.55) -- (11.3,-2.55);
+ \node[align=center,text width=13cm,font=\footnotesize] at (4.7,-3.15)
+ {每次扩展都需要新证据。固定评价、数值有界、历史最佳单调与系统收敛是不同条件。};
+\end{tikzpicture}

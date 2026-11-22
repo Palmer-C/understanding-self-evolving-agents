@@ -1,0 +1,18 @@
+% Mechanism map; no empirical ranking is encoded.
+\begin{tikzpicture}[
+ box/.style={draw,rounded corners=2pt,text width=31mm,minimum height=13mm,align=center,font=\small},
+ arrow/.style={-{Stealth[length=1.6mm]},thick}
+]
+\node[box,fill=gray!10] (o) at (0,0) {可见观测\\候选、状态与范围};
+\node[box,fill=blue!8] (p) at (4.3,0) {操作选择\\规则、拟合或训练};
+\node[box,fill=orange!10] (g) at (8.6,0) {环境校验\\权限、版本与预算};
+\node[box,fill=green!10] (m) at (8.6,-2.1) {状态变更\\提交并返回回执};
+\node[box,fill=gray!10] (r) at (4.3,-2.1) {后续任务反馈\\可能延迟或缺失};
+\draw[arrow] (o)--(p);
+\draw[arrow] (p)--(g);
+\draw[arrow] (g)--(m);
+\draw[arrow] (m)--(r);
+\draw[arrow,dashed] (r)--node[right,font=\footnotesize]{训练时可用}(p);
+\node[align=left,text width=132mm,font=\footnotesize] at (4.3,-3.5)
+{学习改变的是指定的决策对象；工具语义与权限仍由环境约束。虚线表示可能存在的训练反馈，不表示每次部署都会更新策略。JitRL 调整任务策略，不能据此认定其记忆操作也被学习。};
+\end{tikzpicture}

@@ -1,0 +1,464 @@
+"""E01 四格运行器（协议：`experiments/protocols/E01.md`，公共协议：`spec/outline-v0.4.md` §6.3）。
+
+用法：
+    python experiments/lab/run_e01.py --train-episodes 8 --repeats 3
+    python experiments/lab/run_e01.py --trial          # 只跑 2 题 × 1 次，验通路不花钱
+
+本文件是**测量工具**：它跑四格、记账、用 `eval.paired_diff` 出判决，
+自己不写任何结论，也不填任何数字（所有数字来自本次运行的原始记录）。
+
+预算口径（协议 §3 的落地）
+- 主预算 = episode 配额：四格在训练集上各花 $E$ 个 episode；判决时每格在每道封存题上
+  各跑 1 个 episode × $R$ 次独立运行。**四格的 episode 数完全相同。**
+- 副账 = 模型调用数 / token 数 / 墙钟时间：格 3 的任务内适配调用、格 4 的写入调用
+  都不占 episode 配额，全部记进副账，用于出"计入演化成本后的总预算曲线"。
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from experiments.lab.backends import build_backend  # noqa: E402
+from experiments.lab.budget import Budget  # noqa: E402
+from experiments.lab.e01_arms import (  # noqa: E402
+    GRIDS,
+    GRID_LABELS,
+    adapt_note,
+    build_agent,
+    build_external_memory,
+    extract_lesson,
+    retrieve,
+)
+from experiments.lab.eval import TaskRuns, by_family, paired_diff  # noqa: E402
+from experiments.lab.tasks import load_task_dir  # noqa: E402
+from experiments.lab.trace import new_run_id  # noqa: E402
+
+TASKS_ROOT = REPO_ROOT / "experiments" / "tasks" / "v1"
+RUNS_ROOT = REPO_ROOT / "experiments" / "runs"
+RESULTS_ROOT = REPO_ROOT / "experiments" / "results"
+
+EPISODE_BUDGET = Budget()  # max_calls=8 / max_steps=12，四格同值
+DEFAULT_MDE = 0.03
+
+
+# --------------------------------------------------------------------- 工具
+
+
+def git_head() -> str:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=str(REPO_ROOT),
+            capture_output=True, text=True, timeout=30,
+        )
+        return out.stdout.strip() or "unknown"
+    except Exception:  # 拿不到提交号也要把运行跑完，不能因此中断实验
+        return "unknown"
+
+
+def load_tasks(split: str) -> list:
+    """按 split 读任务集 v1，顺序固定（按 task_id 排序），保证四格跑同一批题。"""
+    tasks = []
+    for d in sorted(p for p in TASKS_ROOT.glob("*/*") if p.is_dir()):
+        meta = d / "test.json"
+        if not meta.is_file():
+            continue
+        task = load_task_dir(d)
+        if task.split == split:
+            tasks.append(task)
+    return tasks
+
+
+def _ledger() -> dict:
+    return {
+        "episodes": 0,
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0,
+        "side_calls": 0,          # 不占 episode 配额的额外调用（适配 / 写入）
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0,
+    }
+
+
+def _absorb(led: dict, usage: dict) -> None:
+    led["episodes"] += 1
+    led["calls"] += int(usage.get("calls", 0))
+    led["prompt_tokens"] += int(usage.get("prompt_tokens", 0))
+    led["completion_tokens"] += int(usage.get("completion_tokens", 0))
+    led["wall_seconds"] += float(usage.get("wall_seconds", 0.0))
+
+
+def _absorb_side(led: dict, cost: dict) -> None:
+    led["side_calls"] += int(cost.get("calls", 0))
+    led["side_prompt_tokens"] += int(cost.get("prompt_tokens", 0))
+    led["side_completion_tokens"] += int(cost.get("completion_tokens", 0))
+    led["calls"] += int(cost.get("calls", 0))
+    led["prompt_tokens"] += int(cost.get("prompt_tokens", 0))
+    led["completion_tokens"] += int(cost.get("completion_tokens", 0))
+
+
+# --------------------------------------------------------------------- 训练期
+
+
+def train_phase(
+    grid: str,
+    backend,
+    train_tasks: list,
+    n_episodes: int,
+    out_dir: Path,
+) -> tuple[list[dict], dict]:
+    """四格在训练集上各花 E 个 episode。只有格 4 在此写入持久物。
+
+    返回 (格 4 写出的记忆条目, 副账)。其余三格返回空记忆列表。
+    """
+    led = _ledger()
+    lessons: list[dict] = []
+    for i in range(n_episodes):
+        task = train_tasks[i % len(train_tasks)]
+        memory = [x["text"] for x in lessons] if grid == "grid4" else None
+        agent = build_agent(grid, backend, memory_items=memory, name=f"{grid}-train")
+        if grid == "grid3":
+            note, cost = adapt_note(backend, task)
+            _absorb_side(led, cost)
+            agent.system_prompt += f"\n\n本次任务的注意事项（只在本任务内有效）：\n- {note}\n"
+        trace_dir = out_dir / "traces" / grid / "train" / f"{task.task_id}-e{i}"
+        trace = agent.run_episode(task, budget=EPISODE_BUDGET, seed=1000 + i, out_dir=trace_dir)
+        _absorb(led, trace.usage)
+
+        if grid == "grid4":
+            # 写入：由 agent 自己的最终代码 + 验收结果生成，不读任务集的正确实现
+            final_code = _last_written_code(trace, dict(task.files))
+            text, cost = extract_lesson(backend, task, final_code, bool(trace.verdict))
+            _absorb_side(led, cost)
+            lessons.append({
+                "index": len(lessons),
+                "text": text,
+                "source_task": task.task_id,
+                "source_family": task.family,
+                "source_verdict": bool(trace.verdict),
+            })
+    return lessons, led
+
+
+def _last_written_code(trace, initial: dict[str, str]) -> dict[str, str]:
+    """从轨迹里取出 agent 最后真正写进沙箱的文件内容（不是任务初始文件）。"""
+    code = dict(initial)
+    for step in trace.steps:
+        if step.kind == "tool_result" and step.detail.get("tool") == "write_file":
+            args = step.detail.get("args") or {}
+            path, content = args.get("path"), args.get("content")
+            if isinstance(path, str) and isinstance(content, str):
+                code[path] = content
+    return code
+
+
+# --------------------------------------------------------------------- 判决期
+
+
+def sealed_phase(
+    grid: str,
+    backend,
+    sealed_tasks: list,
+    repeats: int,
+    memory: list[dict] | None,
+    out_dir: Path,
+    temperature: float | None,
+    base_seed: int,
+) -> tuple[list[TaskRuns], dict]:
+    """每格在封存集上每题跑 R 次独立运行，主指标 pass@1（单次 episode 验收与否）。"""
+    led = _ledger()
+    runs: list[TaskRuns] = []
+    for task in sealed_tasks:
+        verdicts = []
+        for r in range(repeats):
+            seed = base_seed + r * 7919
+            if grid == "grid4":
+                items = retrieve(memory or [], task.statement, k=2)
+            elif grid == "grid2":
+                items = build_external_memory()
+            else:
+                items = None
+            agent = build_agent(grid, backend, memory_items=items, name=f"{grid}-sealed")
+            if grid == "grid3":
+                note, cost = adapt_note(backend, task)
+                _absorb_side(led, cost)
+                agent.system_prompt += f"\n\n本次任务的注意事项（只在本任务内有效）：\n- {note}\n"
+            trace_dir = out_dir / "traces" / grid / "sealed" / f"{task.task_id}-r{r}"
+            trace = agent.run_episode(task, budget=EPISODE_BUDGET, seed=seed, out_dir=trace_dir)
+            _absorb(led, trace.usage)
+            verdicts.append(bool(trace.verdict))
+        runs.append(TaskRuns(task.task_id, task.family, task.split, verdicts))
+    return runs, led
+
+
+# --------------------------------------------------------------------- 统计
+
+
+def _sd(xs: list[float]) -> float:
+    if len(xs) < 2:
+        return float("nan")
+    m = sum(xs) / len(xs)
+    return math.sqrt(sum((x - m) ** 2 for x in xs) / (len(xs) - 1))
+
+
+def required_n(diffs: list[float], mde: float = DEFAULT_MDE) -> int:
+    """由实测配对差的标准差反推样本量：$n \\ge (1.96 s / \\mathrm{MDE})^2$。
+
+    这是 §6.3 第 4 条"先用试验运行估计方差，再决定样本量"的落地公式，
+    取 z=1.96（双侧 95%），单位 = 配对的任务数。
+    """
+    s = _sd(diffs)
+    if not s or math.isnan(s):
+        return -1
+    return math.ceil((1.96 * s / mde) ** 2)
+
+
+def flips(runs: list[TaskRuns]) -> int:
+    """R 次运行结果不一致的题数：不一致越多，说明单次运行的噪声越大。"""
+    return sum(1 for r in runs if 0 < sum(r.verdicts) < len(r.verdicts))
+
+
+# --------------------------------------------------------------------- 主流程
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="E01 四格运行器")
+    ap.add_argument("--train-episodes", type=int, default=8, help="四格在训练集上各花的 episode 数 E")
+    ap.add_argument("--repeats", type=int, default=3, help="每道封存题的独立运行次数 R")
+    ap.add_argument("--sealed-limit", type=int, default=0, help="封存题数上限，0=全部 16 题")
+    ap.add_argument("--temperature", type=float, default=0.7, help="四格同值；None 则用服务端默认")
+    ap.add_argument("--base-seed", type=int, default=20260923)
+    ap.add_argument("--out", default="", help="运行目录，默认 experiments/runs/E01-<runid>")
+    ap.add_argument("--trial", action="store_true", help="只跑 2 题 × 1 次，用于验证通路")
+    args = ap.parse_args(argv)
+
+    if args.trial:
+        args.sealed_limit = 2
+        args.repeats = 1
+        args.train_episodes = 2
+
+    backend = build_backend("openai", temperature=args.temperature)
+    run_id = new_run_id("E01")
+    out_dir = Path(args.out) if args.out else RUNS_ROOT / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    train_tasks = load_tasks("train")
+    sealed_tasks = load_tasks("sealed")
+    if args.sealed_limit:
+        sealed_tasks = sealed_tasks[: args.sealed_limit]
+    if not train_tasks or not sealed_tasks:
+        print("ERROR: 任务集里没有 train / sealed 划分；先跑 experiments/lab/build_taskset.py")
+        return 2
+
+    started = datetime.now(timezone.utc).isoformat()
+    t0 = time.time()
+    config = {
+        "experiment": "E01",
+        "run_id": run_id,
+        "protocol": "experiments/protocols/E01.md",
+        "public_protocol": "spec/outline-v0.4.md §6.3",
+        "started_at": started,
+        "git_head": git_head(),
+        "model": backend.model,
+        "base_url": backend.base_url,
+        "temperature": backend.temperature,
+        "episode_budget": EPISODE_BUDGET.as_dict(),
+        "E_train_episodes": args.train_episodes,
+        "R_repeats": args.repeats,
+        "base_seed": args.base_seed,
+        "n_train_tasks": len(train_tasks),
+        "n_sealed_tasks": len(sealed_tasks),
+        "mde": DEFAULT_MDE,
+        "unit": "task",
+        "trial": bool(args.trial),
+    }
+    print(f"[{run_id}] model={backend.model} E={args.train_episodes} R={args.repeats} "
+          f"sealed={len(sealed_tasks)} train={len(train_tasks)}")
+
+    memory_by_grid: dict[str, list[dict]] = {}
+    ledgers: dict[str, dict] = {}
+    results: dict[str, list[TaskRuns]] = {}
+
+    for grid in GRIDS:
+        print(f"[{run_id}] train {grid} ...", flush=True)
+        lessons, led = train_phase(grid, backend, train_tasks, args.train_episodes, out_dir)
+        memory_by_grid[grid] = lessons
+        print(f"[{run_id}] sealed {grid} ...", flush=True)
+        runs, led_sealed = sealed_phase(grid, backend, sealed_tasks, args.repeats, lessons,
+                                        out_dir, backend.temperature, args.base_seed)
+        for k, v in led_sealed.items():
+            led[k] = led.get(k, 0) + v
+        ledgers[grid] = led
+        results[grid] = runs
+        pr = sum(r.pass_rate for r in runs) / max(1, len(runs))
+        print(f"[{run_id}] {grid}: pass@1 均值 {pr:.3f} "
+              f"({sum(sum(r.verdicts) for r in runs)}/{sum(len(r.verdicts) for r in runs)} 次运行通过)",
+              flush=True)
+
+    # ---------------- 判决
+    d41 = paired_diff(results["grid4"], results["grid1"], unit="task", label="grid4-grid1")
+    d42 = paired_diff(results["grid4"], results["grid2"], unit="task", label="grid4-grid2")
+    d43 = paired_diff(results["grid4"], results["grid3"], unit="task", label="grid4-grid3")
+    fam = by_family(results["grid4"], results["grid1"])
+
+    diffs41 = [a.pass_rate - b.pass_rate for a, b in zip(results["grid4"], results["grid1"])]
+    diffs42 = [a.pass_rate - b.pass_rate for a, b in zip(results["grid4"], results["grid2"])]
+    sizing = {
+        "sd_paired_diff_41": _sd(diffs41),
+        "sd_paired_diff_42": _sd(diffs42),
+        "n_required_41": required_n(diffs41),
+        "n_required_42": required_n(diffs42),
+        "n_available_tasks": len(sealed_tasks),
+        "formula": "n >= (1.96 * sd(paired per-task diff) / MDE)^2, MDE=0.03",
+        "flips_by_grid": {g: flips(results[g]) for g in GRIDS},
+    }
+
+    summary = {
+        "config": config,
+        "finished_at": datetime.now(timezone.utc).isoformat(),
+        "wall_seconds_total": round(time.time() - t0, 2),
+        "verdicts": {
+            g: {r.task_id: r.verdicts for r in results[g]} for g in GRIDS
+        },
+        "pass_rate_by_grid": {
+            g: round(sum(r.pass_rate for r in results[g]) / max(1, len(results[g])), 4) for g in GRIDS
+        },
+        "grid_labels": GRID_LABELS,
+        "ledger": ledgers,
+        "judgement": {"P1_d41": d41, "P1b_d42": d42, "d43": d43},
+        "by_family_41": fam,
+        "sample_sizing": sizing,
+        "memory": {
+            "grid2_external": build_external_memory(),
+            "grid4_lessons": memory_by_grid["grid4"],
+        },
+    }
+    (out_dir / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    (out_dir / "config.json").write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    RESULTS_ROOT.mkdir(parents=True, exist_ok=True)
+    (RESULTS_ROOT / f"{run_id}.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    (RESULTS_ROOT / f"{run_id}.md").write_text(
+        render_md(summary), encoding="utf-8"
+    )
+
+    print(json.dumps({
+        "run_id": run_id,
+        "pass_rate": summary["pass_rate_by_grid"],
+        "d41": {k: d41[k] for k in ("point", "ci95_low", "ci95_high", "degraded", "reason")},
+        "d42": {k: d42[k] for k in ("point", "ci95_low", "ci95_high", "degraded", "reason")},
+        "sizing": sizing,
+    }, ensure_ascii=False, indent=2))
+    print(f"[{run_id}] 结果目录：{out_dir}")
+    return 0
+
+
+def render_md(s: dict) -> str:
+    """结果表。所有数字都来自本次运行的原始记录，本函数不做任何取整以外的加工。"""
+    c = s["config"]
+    led = s["ledger"]
+    lines = [
+        f"# E01 四格结果 · 运行 {c['run_id']}",
+        "",
+        f"> 协议：`{c['protocol']}`；公共协议：`{c['public_protocol']}`。",
+        f"> 原始记录：`experiments/runs/{c['run_id']}/`；本表由 `experiments/lab/run_e01.py` 生成，不含人工填写的数字。",
+        f"> 试验运行：{'是' if c['trial'] else '否'}。",
+        "",
+        "## 1. 运行参数",
+        "",
+        "| 项 | 值 |",
+        "| --- | --- |",
+        f"| 模型 | `{c['model']}` @ `{c['base_url']}` |",
+        f"| 解码温度 | {c['temperature']} |",
+        f"| 提交号 | `{c['git_head']}` |",
+        f"| 开始时间（UTC） | {c['started_at']} |",
+        f"| 训练集 episode 配额 E | {c['E_train_episodes']}（四格同值） |",
+        f"| 封存题数 / 每题独立运行 R | {c['n_sealed_tasks']} / {c['R_repeats']} |",
+        f"| episode 内上限 | 调用 {c['episode_budget']['max_calls']}、步数 {c['episode_budget']['max_steps']} |",
+        f"| 预注册 MDE | {c['mde']} |",
+        f"| 重采样单位 | {c['unit']} |",
+        "",
+        "## 2. 主指标 pass@1",
+        "",
+        "| 格 | 定义 | pass@1（题均） | 通过 / 总运行 | episode 数 | 模型调用 | 提示 token | 生成 token | 墙钟（s） |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for g in GRIDS:
+        v = s["verdicts"][g]
+        passed = sum(sum(x) for x in v.values())
+        total = sum(len(x) for x in v.values())
+        L = led[g]
+        lines.append(
+            f"| {g} | {s['grid_labels'][g]} | {s['pass_rate_by_grid'][g]:.4f} | {passed}/{total} | "
+            f"{L['episodes']} | {L['calls']} | {L['prompt_tokens']} | {L['completion_tokens']} | "
+            f"{L['wall_seconds']:.1f} |"
+        )
+    j = s["judgement"]
+    d41, d42, d43 = j["P1_d41"], j["P1b_d42"], j["d43"]
+    lines += [
+        "",
+        "## 3. 判决（配对差，效应量 + 95% 自助区间，单位 = 任务）",
+        "",
+        "| 比较 | 服务命题 | 点估计 | 95% 区间 | 降级 | 原因 |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for name, d, prop in (("格4 − 格1", d41, "P1"), ("格4 − 格2", d42, "P1b"), ("格4 − 格3", d43, "—")):
+        lines.append(
+            f"| {name} | {prop} | {d['point']:+.4f} | "
+            f"[{d['ci95_low']:+.4f}, {d['ci95_high']:+.4f}] | "
+            f"{'是' if d['degraded'] else '否'} | {d['reason']} |"
+        )
+    lines += [
+        "",
+        "## 4. 分族（格 4 − 格 1）",
+        "",
+        "| 族 | 配对题数 | 点估计 |",
+        "| --- | --- | --- |",
+    ]
+    for fam, v in s["by_family_41"].items():
+        lines.append(f"| {fam} | {v['n_pairs']} | {v['point']:+.4f} |")
+    sz = s["sample_sizing"]
+    lines += [
+        "",
+        "## 5. 方差与样本量反推",
+        "",
+        f"- 配对差标准差：格4−格1 = {sz['sd_paired_diff_41']:.4f}，格4−格2 = {sz['sd_paired_diff_42']:.4f}",
+        f"- 反推所需配对题数（公式 {sz['formula']}）：格4−格1 = {sz['n_required_41']}，格4−格2 = {sz['n_required_42']}",
+        f"- 当前可用封存题数：{sz['n_available_tasks']}",
+        f"- R 次运行结果不一致的题数（按格）：{sz['flips_by_grid']}",
+        "",
+        "## 6. 记忆内容",
+        "",
+        "### 格 2（$t=0$ 外部构建，只读）",
+        "",
+    ]
+    for t in s["memory"]["grid2_external"]:
+        lines.append(f"- {t}")
+    lines += ["", "### 格 4（训练期由 agent 自己写入，判决期冻结）", ""]
+    for item in s["memory"]["grid4_lessons"]:
+        lines.append(
+            f"- [{item['index']}] （源题 {item['source_task']}，族 {item['source_family']}，"
+            f"该次验收{'通过' if item['source_verdict'] else '未通过'}）{item['text']}"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

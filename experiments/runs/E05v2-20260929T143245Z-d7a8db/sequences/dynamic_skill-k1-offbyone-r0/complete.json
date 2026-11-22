@@ -1,0 +1,47 @@
+{
+  "arm": "dynamic_skill",
+  "k": 1,
+  "family": "offbyone",
+  "seed": 20260929,
+  "verdicts": {
+    "offbyone-01": false,
+    "offbyone-02": true
+  },
+  "events": [
+    {
+      "task_id": "offbyone-01",
+      "split": "train",
+      "role": "build",
+      "first_verdict": false,
+      "retrieved": false,
+      "trace": "00-offbyone-01\\trace.json",
+      "origin_admission": "origin_failed"
+    },
+    {
+      "task_id": "offbyone-02",
+      "split": "train",
+      "role": "reuse",
+      "first_verdict": true,
+      "retrieved": false,
+      "trace": "01-offbyone-02\\trace.json"
+    }
+  ],
+  "ledger": {
+    "episodes": 2,
+    "repair_episodes": 0,
+    "calls": 10,
+    "build_calls": 4,
+    "reuse_calls": 6,
+    "repair_calls": 0,
+    "prompt_tokens": 3705,
+    "completion_tokens": 439,
+    "wall_seconds": 7.9891317000146955,
+    "admitted": 0,
+    "rejected": 1,
+    "revision_used": 0,
+    "revision_denied": 0,
+    "retrieved": 0,
+    "contract_checks": 1
+  },
+  "final_skill": null
+}

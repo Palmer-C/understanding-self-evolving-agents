@@ -1,0 +1,141 @@
+{
+  "kind": "offline_teaching_example_not_E03b",
+  "model_calls": 0,
+  "checks": [
+    "add_and_version",
+    "retry_does_not_duplicate_event",
+    "request_id_payload_mismatch_rejected",
+    "scope_enforced_for_read_and_write",
+    "stale_delete_rejected",
+    "delete_preserves_history_in_fixture",
+    "delete_recreate_avoids_aba"
+  ],
+  "passed": 7,
+  "events": [
+    {
+      "request_id": "a",
+      "action": "ADD",
+      "key": "exception",
+      "applied": true,
+      "reason": "applied",
+      "before": null,
+      "after": {
+        "value": "Return None on empty stack",
+        "scope": "project-A",
+        "version": 1
+      }
+    },
+    {
+      "request_id": "b",
+      "action": "DELETE",
+      "key": "exception",
+      "applied": false,
+      "reason": "scope_denied",
+      "before": null,
+      "after": null
+    },
+    {
+      "request_id": "c",
+      "action": "UPDATE",
+      "key": "exception",
+      "applied": true,
+      "reason": "applied",
+      "before": {
+        "value": "Return None on empty stack",
+        "scope": "project-A",
+        "version": 1
+      },
+      "after": {
+        "value": "Raise IndexError on empty stack",
+        "scope": "project-A",
+        "version": 2
+      }
+    },
+    {
+      "request_id": "d",
+      "action": "DELETE",
+      "key": "exception",
+      "applied": false,
+      "reason": "version_conflict",
+      "before": {
+        "value": "Raise IndexError on empty stack",
+        "scope": "project-A",
+        "version": 2
+      },
+      "after": {
+        "value": "Raise IndexError on empty stack",
+        "scope": "project-A",
+        "version": 2
+      }
+    },
+    {
+      "request_id": "e",
+      "action": "DELETE",
+      "key": "exception",
+      "applied": true,
+      "reason": "applied",
+      "before": {
+        "value": "Raise IndexError on empty stack",
+        "scope": "project-A",
+        "version": 2
+      },
+      "after": null
+    },
+    {
+      "request_id": "f",
+      "action": "ADD",
+      "key": "exception",
+      "applied": true,
+      "reason": "applied",
+      "before": null,
+      "after": {
+        "value": "New contract",
+        "scope": "project-A",
+        "version": 3
+      }
+    },
+    {
+      "request_id": "g",
+      "action": "UPDATE",
+      "key": "exception",
+      "applied": false,
+      "reason": "version_conflict",
+      "before": {
+        "value": "New contract",
+        "scope": "project-A",
+        "version": 3
+      },
+      "after": {
+        "value": "New contract",
+        "scope": "project-A",
+        "version": 3
+      }
+    }
+  ],
+  "arithmetic": {
+    "loss_thresholds": [
+      "1/10",
+      "2/5"
+    ],
+    "gate_baseline": 4000,
+    "gate_total": 1680,
+    "gate_saving": "29/50",
+    "delete_advantage": "-1/2"
+  },
+  "limitations": [
+    "single_process_in_memory_fixture",
+    "authenticated_scope_is_assumed_not_implemented",
+    "no_semantic_truth_validator",
+    "no_durable_or_tamper_proof_storage",
+    "no_policy_training_or_performance_claim"
+  ],
+  "script_sha256": "1c2c6de24b1a8837d8abc7e07440d6b9d1e46b530812b3911e5e23c41388e606",
+  "classification": "new deterministic interface/arithmetic replay, no learned policy or E03b run",
+  "amac_arithmetic": {
+    "latency_reduction_percent": 30.98407726442182,
+    "F1_difference": 0.10699999999999998,
+    "opposite_unit_vectors_cosine": -1,
+    "novelty_one_minus_cosine": 2,
+    "note": "Arithmetic from cited rounded table values or explicit teaching vectors; not new admission predictions"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "derived_from_rounded_published_table_not_new_experiment",
+  "source": "AFlow Table 1",
+  "scores": {
+    "aflow": "80.3",
+    "cot_sc": "76.0",
+    "adas": "67.2"
+  },
+  "score_point_gaps": [
+    "43/10",
+    "131/10"
+  ],
+  "relative_percent_gaps": [
+    5.657894736842105,
+    19.49404761904762
+  ]
+}

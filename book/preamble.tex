@@ -1,0 +1,132 @@
+% preamble.tex —— 全书宏包与自定义命令
+% 引擎：XeLaTeX；中文：ctex（Windows 字体集）；参考文献：biber/biblatex
+
+\documentclass[11pt,a4paper,openany]{book}
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[top=2.6cm,bottom=2.6cm,left=2.6cm,right=2.4cm]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage[hidelinks,bookmarksnumbered]{hyperref}
+\usepackage[backend=biber,style=authoryear,sorting=nyt,maxbibnames=4]{biblatex}
+% Load after biblatex so its URL penalties allow full commit identifiers to wrap.
+\usepackage{xurl}
+\addbibresource{bib/references.bib}
+% Parenthesize author-year citations so they remain distinct from Chinese prose.
+\let\cite\parencite
+
+% Reserve room for section numbers such as 16.10 in the table of contents.
+\makeatletter
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{3.5em}}
+\makeatother
+
+% ---------- 草稿开关：定稿时改为 \draftfalse ----------
+\newif\ifdraft
+\draftfalse
+\newcommand{\TODO}[1]{\ifdraft\textcolor{red}{\textbf{[待写：#1]}}\fi}
+\newcommand{\CITECHECK}[1]{\ifdraft\textcolor{orange}{\textbf{[待核来源：#1]}}\fi}
+
+% ---------- 数字身份：cited / calc / measured ----------
+% 第一个参数一律用 ASCII 身份（cited / calc / measured），与 tools/check_consistency.py
+% 的白名单一致；显示的中文标签由查表给出，避免中文身份与检查规则冲突。
+\makeatletter
+\@namedef{datalabel@cited}{引用}
+\@namedef{datalabel@calc}{计算}
+\@namedef{datalabel@measured}{实测}
+\newcommand{\datalabel}[1]{\@ifundefined{datalabel@#1}{#1}{\@nameuse{datalabel@#1}}}
+\makeatother
+\newcommand{\data}[2]{#2\,\raisebox{0.35ex}{\tiny\textcolor{gray!70!black}{[\datalabel{#1}]}}}
+\newcommand{\cited}[1]{\data{cited}{#1}}
+\newcommand{\calcnum}[1]{\data{calc}{#1}}
+\newcommand{\measured}[1]{\data{measured}{#1}}
+
+% ---------- 章首四件套 ----------
+\newcommand{\chaptergoal}[1]{\paragraph{本章问题}#1}
+\newcommand{\chapterprops}[1]{\paragraph{关联研究问题}#1}
+\newcommand{\chapterfig}[1]{\paragraph{核心图}#1}
+\newcommand{\chapterpitfall}[1]{\paragraph{本章反例}#1}
+
+% ---------- 六段式 ----------
+\newtcolorbox{failurebox}{
+  colback=orange!5!white, colframe=orange!60!black,
+  title={具体失败}, fonttitle=\bfseries, boxrule=0.4pt, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+\newtcolorbox{principlebox}{
+  colback=blue!5!white, colframe=blue!55!black,
+  title={选择原则}, fonttitle=\bfseries, boxrule=0.4pt, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+\newtcolorbox{pitfallbox}{
+  colback=red!4!white, colframe=red!55!black,
+  title={反例与失效}, fonttitle=\bfseries, boxrule=0.4pt, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+\newcommand{\designquestion}[1]{\subsection*{设计问题}\noindent#1}
+\newcommand{\falsifier}[1]{\paragraph{检验条件}#1}
+\newcommand{\openquestion}[1]{\paragraph{开放问题}#1}
+
+% ---------- 命题环境 ----------
+\newtheorem{proposition}{研究问题}[chapter]
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{example}{例}[chapter]
+
+\newcommand{\sixquestions}{%
+  \noindent\textit{读者方法卡：请用具体工件与来源填写以下六问。}\par
+  \begin{enumerate}[label=Q\arabic*.]
+    \item 改什么：\dotfill
+    \item 根据什么改：\dotfill
+    \item 怎样改：\dotfill
+    \item 什么时候改：\dotfill
+    \item 保留什么：\dotfill
+    \item 怎样检验：\dotfill
+  \end{enumerate}
+}
+
+% ---------- 代码样式（listings，不依赖 shell-escape） ----------
+\lstset{
+  basicstyle=\ttfamily\small,
+  frame=single,
+  framerule=0.3pt,
+  backgroundcolor=\color{gray!6!white},
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  tabsize=2,
+  columns=fullflexible,
+  keepspaces=true,
+  extendedchars=true,
+  literate={-}{-}1
+}
+\lstdefinelanguage{json}{
+  basicstyle=\ttfamily\small,
+  keywords={true,false,null},
+  morestring=[b]"
+}
+
+% ---------- 表格：结果表的统一格式 ----------
+\newcommand{\resulttablenote}{%
+  \begin{footnotesize}
+  表中数字身份：[引用] 原论文报告；[计算] 本书计算脚本；[实测] 本书 \texttt{experiments/} 实测。
+  \end{footnotesize}
+}
+
+\hypersetup{
+  pdftitle={深入理解自进化 Agent：经验如何变成可检验的能力变化},
+  pdfauthor={shawn},
+  pdfsubject={Agent 自进化},
+  citecolor=blue!60!black,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}

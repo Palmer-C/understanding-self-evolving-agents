@@ -1,0 +1,9 @@
+% figures/ch06-ladder.tex —— 第 6 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch06.tex 中 \input{figures/ch06-ladder}
+% 图主体在 ch06-ladder-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch06-ladder-body}
+\caption{记忆操作的决策边界：策略提出动作，环境检查并提交，后续反馈用于评价或训练。该图是机制示意，不是方法优劣或学习程度的实测排名。}
+\label{fig:ch06-ladder}
+\end{figure}

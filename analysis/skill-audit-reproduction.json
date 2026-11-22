@@ -1,0 +1,893 @@
+{
+  "identity": "Independent arithmetic and semantic-event reconstruction of frozen archives; not E05 rerun or capability estimate",
+  "api_calls": 0,
+  "legacy": {
+    "status": "Not a reader reproduction input: original legacy run excluded from frozen package; dependent numeric table withdrawn from book; historical derived artifacts retained"
+  },
+  "v2": {
+    "source_identity": {
+      "run_e05_v2.py": {
+        "sha256": "2e02573f28360462eff5f60bd5781f8608d454d34d775b87fd87a3e64616dfdd",
+        "recorded_sha256": "25b18367d2580294ad9a6c5810e2649e407b129734d3fe4e53bc727d596c6408",
+        "match": false,
+        "lf_sha256": "25b18367d2580294ad9a6c5810e2649e407b129734d3fe4e53bc727d596c6408",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "e05_v2.py": {
+        "sha256": "8ccea1c0159a2cd448281ad0899e4057cd5c8a95bd23bc521c11c21732d7f9d0",
+        "recorded_sha256": "2746e9758d3f2c1dcf03991bbaa7f71e447d7cdb380c3504facaad6c9cd8a34b",
+        "match": false,
+        "lf_sha256": "2746e9758d3f2c1dcf03991bbaa7f71e447d7cdb380c3504facaad6c9cd8a34b",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "run_e05.py": {
+        "sha256": "10e81f1c8e567a877d82cb80e539a0123efcf4e23201938352ce84e66da470a1",
+        "recorded_sha256": "faadd64fda27d5e884a582de7e9c63ae7eeb557a2b036405f3fd7e2676a49664",
+        "match": false,
+        "lf_sha256": "faadd64fda27d5e884a582de7e9c63ae7eeb557a2b036405f3fd7e2676a49664",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "e05_arms.py": {
+        "sha256": "e8b99d084e44fbd276138db8eb5a2441ce4ef18db43e0457cd42e3ad2ec8397d",
+        "recorded_sha256": "f60093209cd4bb261d479936242b9d050d15491e57cbd89b52262a135b95588f",
+        "match": false,
+        "lf_sha256": "f60093209cd4bb261d479936242b9d050d15491e57cbd89b52262a135b95588f",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "run_e01.py": {
+        "sha256": "f2c77316321769677d95551f8463beaafd849447860bf2ca0a073b081369cfe3",
+        "recorded_sha256": "6e8d9414dcc5147f002e200a4ff3e7928258599ff5b1d2e6265cb025bb50560b",
+        "match": false,
+        "lf_sha256": "6e8d9414dcc5147f002e200a4ff3e7928258599ff5b1d2e6265cb025bb50560b",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "e01_arms.py": {
+        "sha256": "3c129e4e7870e55d1d59fdc1df208c5a302d07b4c155b1f7443a0695f386c461",
+        "recorded_sha256": "fbcab6c186444cee632b9dea61076dd2cea779821fb46edc30a5c404cd847bf8",
+        "match": false,
+        "lf_sha256": "fbcab6c186444cee632b9dea61076dd2cea779821fb46edc30a5c404cd847bf8",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "static_agent.py": {
+        "sha256": "cba65d8f3db313068b492abe5a4cbb20b3fc2a23adb2df86c7f0c1dd49629a83",
+        "recorded_sha256": "233512adaa8a2aca816a47ce5892b067202ebf80dcc1cad2265d5b5031b2b85f",
+        "match": false,
+        "lf_sha256": "233512adaa8a2aca816a47ce5892b067202ebf80dcc1cad2265d5b5031b2b85f",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "backends.py": {
+        "sha256": "25e2a7de5d0e14e79fd8c617869f3e43fe8635e5b4586d2f28964885ae8d8086",
+        "recorded_sha256": "25e2a7de5d0e14e79fd8c617869f3e43fe8635e5b4586d2f28964885ae8d8086",
+        "match": true,
+        "lf_sha256": "25e2a7de5d0e14e79fd8c617869f3e43fe8635e5b4586d2f28964885ae8d8086",
+        "accepted_match": true,
+        "match_mode": "raw"
+      },
+      "budget.py": {
+        "sha256": "84b0883cc51f73d261c44b1eed6c114afa5e551185370a9d40debb62ef47a129",
+        "recorded_sha256": "84b0883cc51f73d261c44b1eed6c114afa5e551185370a9d40debb62ef47a129",
+        "match": true,
+        "lf_sha256": "84b0883cc51f73d261c44b1eed6c114afa5e551185370a9d40debb62ef47a129",
+        "accepted_match": true,
+        "match_mode": "raw"
+      },
+      "sandbox.py": {
+        "sha256": "4f71cfe0020182eeede8f3f71e2a707e07c4674641dd1187c3e4ed0ef974b223",
+        "recorded_sha256": "4f71cfe0020182eeede8f3f71e2a707e07c4674641dd1187c3e4ed0ef974b223",
+        "match": true,
+        "lf_sha256": "4f71cfe0020182eeede8f3f71e2a707e07c4674641dd1187c3e4ed0ef974b223",
+        "accepted_match": true,
+        "match_mode": "raw"
+      },
+      "tasks.py": {
+        "sha256": "e9021d8ae7ca6bc81fe8abac55397a19090efe2533fcc7fb1b44d1dbe78842cc",
+        "recorded_sha256": "e9021d8ae7ca6bc81fe8abac55397a19090efe2533fcc7fb1b44d1dbe78842cc",
+        "match": true,
+        "lf_sha256": "e9021d8ae7ca6bc81fe8abac55397a19090efe2533fcc7fb1b44d1dbe78842cc",
+        "accepted_match": true,
+        "match_mode": "raw"
+      },
+      "taskset_spec.py": {
+        "sha256": "a777202d7738523f91dae778fcc9eebd51bb88932b552d10649d5d05813385fe",
+        "recorded_sha256": "af8de20f685d82a1e03c7c346818aae90b3baa50263c06f4e984a55579a7ebb1",
+        "match": false,
+        "lf_sha256": "af8de20f685d82a1e03c7c346818aae90b3baa50263c06f4e984a55579a7ebb1",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      },
+      "trace.py": {
+        "sha256": "9cde7aa5f26a625b678b16d6b4c6268ee3de79ed50b377e77f790ee9c6c8be7e",
+        "recorded_sha256": "9cde7aa5f26a625b678b16d6b4c6268ee3de79ed50b377e77f790ee9c6c8be7e",
+        "match": true,
+        "lf_sha256": "9cde7aa5f26a625b678b16d6b4c6268ee3de79ed50b377e77f790ee9c6c8be7e",
+        "accepted_match": true,
+        "match_mode": "raw"
+      },
+      "protocol": {
+        "sha256": "7303668b8b394cb10b4a961ae30e6de84454c7812146c111f2f8e2a86d508088",
+        "recorded_sha256": "cc579ff17a81e1869928cbdc0f6afc54461877dae34ef0e36977577bf6501182",
+        "match": false,
+        "lf_sha256": "cc579ff17a81e1869928cbdc0f6afc54461877dae34ef0e36977577bf6501182",
+        "accepted_match": true,
+        "match_mode": "crlf_to_lf"
+      }
+    },
+    "sequences": [
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/dynamic_skill-k0-offbyone-r0/complete.json",
+        "sha256": "6e5d9292e51a19fd855149fc099f3e8f179be4cf63bfe4a87b1cd4ffebb969dc",
+        "arm": "dynamic_skill",
+        "k": 0,
+        "ledger": {
+          "episodes": 1,
+          "repair_episodes": 0,
+          "calls": 2,
+          "build_calls": 2,
+          "reuse_calls": 0,
+          "repair_calls": 0,
+          "prompt_tokens": 447,
+          "completion_tokens": 60,
+          "wall_seconds": 1.7214435000205413,
+          "admitted": 0,
+          "rejected": 1,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 0,
+          "contract_checks": 1
+        },
+        "final_skill": null,
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/dynamic_skill-k0-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "0ebf97b30ba009fe8c2349f1bab30ceb9d48dcda39f88b162a732ca19ecdbaab",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": false,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json",
+              "origin_admission": "origin_failed"
+            },
+            "usage": {
+              "calls": 2,
+              "steps": 2,
+              "prompt_tokens": 447,
+              "completion_tokens": 60,
+              "wall_seconds": 1.7214435000205413,
+              "tool_calls": 1,
+              "test_runs": 0,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [],
+            "errors": [
+              "回复中没有可解析的 CALL 或 FINISH"
+            ],
+            "model_protocol_failures": [
+              "<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"read_file\">\n<｜｜DSML｜｜ parameter name=\"path\" string=\"true\">main.py</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>"
+            ]
+          }
+        ]
+      },
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/dynamic_skill-k1-offbyone-r0/complete.json",
+        "sha256": "16eac92c9b6ee4572a71c4e28c454931638efecab4d1e6be97fa6685fffb3d73",
+        "arm": "dynamic_skill",
+        "k": 1,
+        "ledger": {
+          "episodes": 2,
+          "repair_episodes": 0,
+          "calls": 10,
+          "build_calls": 4,
+          "reuse_calls": 6,
+          "repair_calls": 0,
+          "prompt_tokens": 3705,
+          "completion_tokens": 439,
+          "wall_seconds": 7.9891317000146955,
+          "admitted": 0,
+          "rejected": 1,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 0,
+          "contract_checks": 1
+        },
+        "final_skill": null,
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/dynamic_skill-k1-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "18da95dcca901420704a0ee489754e9b871b244afbda81f6439b9982d72bd0b4",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": false,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json",
+              "origin_admission": "origin_failed"
+            },
+            "usage": {
+              "calls": 4,
+              "steps": 4,
+              "prompt_tokens": 1240,
+              "completion_tokens": 280,
+              "wall_seconds": 3.7561770000029355,
+              "tool_calls": 3,
+              "test_runs": 0,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              }
+            ],
+            "reference": null,
+            "successful_writes": [],
+            "errors": [
+              "回复中没有可解析的 CALL 或 FINISH"
+            ],
+            "model_protocol_failures": [
+              "The bug is clear: `range(a, b)` excludes `b`, but the function should be inclusive.\n\nCALL write_file {\"path\": \"main.py\", \"content\": \"def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n\"}"
+            ]
+          },
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/dynamic_skill-k1-offbyone-r0/01-offbyone-02/trace.json",
+            "sha256": "3b3a4a6fdf9a0058ddd1ad4f8104b3a2b3e5c90ebb75a144c841de1ff7f6bd2a",
+            "event": {
+              "task_id": "offbyone-02",
+              "split": "train",
+              "role": "reuse",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "01-offbyone-02\\trace.json"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2465,
+              "completion_tokens": 159,
+              "wall_seconds": 4.23295470001176,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          }
+        ]
+      },
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/replan-k0-offbyone-r0/complete.json",
+        "sha256": "754c298ab473513358958d69d2a1df684d86271b232bca1d230303d430f9b29d",
+        "arm": "replan",
+        "k": 0,
+        "ledger": {
+          "episodes": 1,
+          "repair_episodes": 0,
+          "calls": 6,
+          "build_calls": 6,
+          "reuse_calls": 0,
+          "repair_calls": 0,
+          "prompt_tokens": 2473,
+          "completion_tokens": 142,
+          "wall_seconds": 5.775685200002044,
+          "admitted": 0,
+          "rejected": 0,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 0,
+          "contract_checks": 0
+        },
+        "final_skill": null,
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/replan-k0-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "0f879c524cb057220843dbd334e45ccdd0237cfe581f3c8f134fce2ee4f2facd",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2473,
+              "completion_tokens": 142,
+              "wall_seconds": 5.775685200002044,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          }
+        ]
+      },
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/replan-k1-offbyone-r0/complete.json",
+        "sha256": "6a4ad564ec07688d25bc77951a07e700231de06fd0c368f52cf8a2d301161e0d",
+        "arm": "replan",
+        "k": 1,
+        "ledger": {
+          "episodes": 2,
+          "repair_episodes": 0,
+          "calls": 12,
+          "build_calls": 6,
+          "reuse_calls": 6,
+          "repair_calls": 0,
+          "prompt_tokens": 4753,
+          "completion_tokens": 375,
+          "wall_seconds": 11.126075399923138,
+          "admitted": 0,
+          "rejected": 0,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 0,
+          "contract_checks": 0
+        },
+        "final_skill": null,
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/replan-k1-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "500629b4fccbc1e811817f4386700e505763c9f65a72547cb6e6113f510c225b",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2288,
+              "completion_tokens": 148,
+              "wall_seconds": 5.353621199959889,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          },
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/replan-k1-offbyone-r0/01-offbyone-02/trace.json",
+            "sha256": "f9cf812ea7eea19b7774ee2b3cdf54c314e862d7443849f7861c50c88704c8f0",
+            "event": {
+              "task_id": "offbyone-02",
+              "split": "train",
+              "role": "reuse",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "01-offbyone-02\\trace.json"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2465,
+              "completion_tokens": 227,
+              "wall_seconds": 5.772454199963249,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          }
+        ]
+      },
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/static_skill-k0-offbyone-r0/complete.json",
+        "sha256": "f290f41a0f9a060d1612f3694e64829bbf85a841f27128f3bc88f695a78c068a",
+        "arm": "static_skill",
+        "k": 0,
+        "ledger": {
+          "episodes": 1,
+          "repair_episodes": 0,
+          "calls": 6,
+          "build_calls": 6,
+          "reuse_calls": 0,
+          "repair_calls": 0,
+          "prompt_tokens": 2288,
+          "completion_tokens": 180,
+          "wall_seconds": 5.6926880000391975,
+          "admitted": 1,
+          "rejected": 0,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 0,
+          "contract_checks": 1
+        },
+        "final_skill": {
+          "name": "offbyone-sum_inclusive",
+          "signature": "sum_inclusive(a, b)",
+          "requires": "python>=3.8",
+          "applies_when": "边界与差一：区间端点含/不含、循环上界",
+          "does_not_apply_when": "Not verified for a different input contract or interface.",
+          "code": "# main.py\ndef sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n",
+          "verified_on": "offbyone-01",
+          "fail_conditions": "Only the origin task was verified; adaptation remains necessary."
+        },
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/static_skill-k0-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "205a1a0142d5be7bbf1683c59726920896aab784545a07357f87a6f719562904",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json",
+              "origin_admission": "admitted"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2288,
+              "completion_tokens": 180,
+              "wall_seconds": 5.6926880000391975,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          }
+        ]
+      },
+      {
+        "complete": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/static_skill-k1-offbyone-r0/complete.json",
+        "sha256": "d08afdf717cd281ff29d8d68607394180139aff63dbe36659e0c081bf989746f",
+        "arm": "static_skill",
+        "k": 1,
+        "ledger": {
+          "episodes": 2,
+          "repair_episodes": 0,
+          "calls": 12,
+          "build_calls": 6,
+          "reuse_calls": 6,
+          "repair_calls": 0,
+          "prompt_tokens": 5365,
+          "completion_tokens": 358,
+          "wall_seconds": 11.386090800049715,
+          "admitted": 1,
+          "rejected": 0,
+          "revision_used": 0,
+          "revision_denied": 0,
+          "retrieved": 1,
+          "contract_checks": 1
+        },
+        "final_skill": {
+          "name": "offbyone-sum_inclusive",
+          "signature": "sum_inclusive(a, b)",
+          "requires": "python>=3.8",
+          "applies_when": "边界与差一：区间端点含/不含、循环上界",
+          "does_not_apply_when": "Not verified for a different input contract or interface.",
+          "code": "# main.py\ndef sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n",
+          "verified_on": "offbyone-01",
+          "fail_conditions": "Only the origin task was verified; adaptation remains necessary."
+        },
+        "traces": [
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/static_skill-k1-offbyone-r0/00-offbyone-01/trace.json",
+            "sha256": "93d6d8855ec18728466f1ee518d85de8018467c3d05240a4340eb9a26c9034d4",
+            "event": {
+              "task_id": "offbyone-01",
+              "split": "train",
+              "role": "build",
+              "first_verdict": true,
+              "retrieved": false,
+              "trace": "00-offbyone-01\\trace.json",
+              "origin_admission": "admitted"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 2288,
+              "completion_tokens": 138,
+              "wall_seconds": 5.698295900016092,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": null,
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          },
+          {
+            "path": "experiments/runs/E05v2-20260929T143245Z-d7a8db/sequences/static_skill-k1-offbyone-r0/01-offbyone-02/trace.json",
+            "sha256": "f67286d8851b22c670428a44a5e933311c5966e5ff85e31fe9122d6c81056ca6",
+            "event": {
+              "task_id": "offbyone-02",
+              "split": "train",
+              "role": "reuse",
+              "first_verdict": true,
+              "retrieved": true,
+              "trace": "01-offbyone-02\\trace.json"
+            },
+            "usage": {
+              "calls": 6,
+              "steps": 6,
+              "prompt_tokens": 3077,
+              "completion_tokens": 220,
+              "wall_seconds": 5.687794900033623,
+              "tool_calls": 5,
+              "test_runs": 1,
+              "unpriced": true,
+              "usd": null,
+              "notes": []
+            },
+            "actual_tools": [
+              {
+                "tool": "list_files",
+                "args": {}
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "main.py"
+                }
+              },
+              {
+                "tool": "read_file",
+                "args": {
+                  "path": "test_main.py"
+                }
+              },
+              {
+                "tool": "write_file",
+                "args": {
+                  "path": "main.py",
+                  "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+                }
+              },
+              {
+                "tool": "run_tests",
+                "args": {}
+              }
+            ],
+            "reference": " passed its origin task only; adapt and test it for this task:\n- [offbyone-sum_inclusive] sum_inclusive(a, b)\n  适用：边界与差一：区间端点含/不含、循环上界\n  不适用：Not verified for a different input contract or interface.\n  失败条件：Only the origin task was verified; adaptation remains necessary.\n# main.py\ndef sum_inclusive(a, b):\n    return sum(range(a, b + 1))\n\n",
+            "successful_writes": [
+              {
+                "path": "main.py",
+                "content": "def count_between(xs, lo, hi):\n    return sum(1 for x in xs if lo <= x <= hi)\n"
+              }
+            ],
+            "errors": [],
+            "model_protocol_failures": []
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "calls": 48,
+      "prompt_tokens": 19031,
+      "completion_tokens": 1554
+    },
+    "episodes": 9,
+    "passed": 7
+  },
+  "teaching": {
+    "k": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "replan": [
+      0,
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50
+    ],
+    "fixed_skill": [
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32
+    ],
+    "maintained_skill": [
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      36,
+      38,
+      40,
+      42,
+      44
+    ],
+    "figure_sha256": "9ec704b0ee7ce7befaa45522b8751161ffa1eb0f04ba0db0f6d9db23cedf6b84"
+  },
+  "interpretation": [
+    "Reference injected only in static reuse; direct function execution not observed",
+    "Dynamic origins fail protocol parsing before writes; no skill admission; successful reuse uses empty reference",
+    "No repair episodes observed; no causal reference-benefit estimate or P4 verdict",
+    "48 generate calls and zero recorded current-process retries; not independent network-service billing verification"
+  ]
+}

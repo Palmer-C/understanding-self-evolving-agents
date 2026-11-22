@@ -1,0 +1,9 @@
+% figures/ch10-where.tex —— 第 10 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch10.tex 中 \input{figures/ch10-where}
+% 图主体在 ch10-where-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch10-where-body}
+\caption{四种写入位置的记录与恢复条件。它们不是费用必然递增的阶梯；版本可恢复也不等于外部影响已撤销。}
+\label{fig:ch10-where}
+\end{figure}

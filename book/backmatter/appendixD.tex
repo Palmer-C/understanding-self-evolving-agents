@@ -1,0 +1,356 @@
+% backmatter/appendixD.tex —— 附录 D 可复现环境、版本与运行格式
+% 数字身份纪律：E01单回合读数绑定E01-20260923T152230Z-90acda，
+% E05v2索引读数绑定E05v2-20260929T143245Z-d7a8db；其余按所述归档与构造示例分记。
+% 本附录描述的是本书实验台自身的落盘格式，不参与任何命题判决。
+\chapter{可复现环境、版本与运行格式}
+\label{app:repro}
+
+本书的任何一条实测数字都要能被追回到一次具体运行。
+本附录给出这条链路上每一环的格式：运行叫什么、落在哪里、每个字段是什么意思、
+以及怎样先核对归档，再区分离线复算与新的模型运行。
+
+\section{运行标识与目录}
+
+\begin{sloppypar}
+历史E01/E02/E03运行的标识由实验名、UTC时间戳和6位十六进制随机串拼成，
+例如 \texttt{E01-20260923T152230Z-90acda}。
+时间戳取自协调世界时，随机后缀用于降低同秒内运行重名的概率，不表示实验条件，也不保证绝不重名。
+新运行还应在创建目录时拒绝已有路径；当前E11 v2与E12 v2入口使用\texttt{exist\_ok=False}，而历史工具并非全部如此。运行号生成与拒绝覆盖是两道不同的检查。
+\end{sloppypar}
+
+\begin{sloppypar}
+历史E01/E02/E03运行在 \texttt{experiments/runs/<run\_id>/} 下主要保存三类工件：
+\texttt{config.json}（这次运行的主要入参）、
+E01/E02的训练轨迹位于\path{traces/<arm>/train/<task_id>-e<episode>/trace.json}，评价轨迹位于\path{traces/<arm>/sealed/<task_id>-r<repeat>/trace.json}。
+E03的评价轨迹位于\path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.json}，来源轨迹位于\path{traces/source/<split>/<task_id>-e<episode>/trace.json}（每回合一条轨迹）。另有
+\texttt{summary.json}（聚合结果与判决）。
+路径中的\texttt{arm}、\texttt{split}与\texttt{task\_id}分别表示实验臂、拆分与题号，\texttt{episode}和\texttt{repeat}分别表示训练回合序号与评价重复序号。
+\texttt{experiments/results/}保留部分汇总及渲染副本，不能当作完整输入目录。本版以\nolinkurl{analysis/inputs.json}列出唯一输入路径和SHA；冲突处理见第~\ref{ch05}章，文件放在runs目录本身不证明它就是可裁定的正确事实。
+\end{sloppypar}
+
+\clearpage
+\section{config.json：这次运行的入参}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{6.6cm}}
+\caption{运行入参：哪些字段决定了结果能不能复现}\label{tab:appd-config}\\
+\toprule
+字段 & 例 & 为什么必须记 \\
+\midrule\endfirsthead
+\multicolumn{3}{l}{表\thetable（续）}\\
+\toprule
+字段 & 例 & 为什么必须记 \\
+\midrule\endhead
+\midrule\multicolumn{3}{r}{续下页}\\\endfoot
+\bottomrule\endlastfoot
+\texttt{git\_head} & \texttt{89cec63...} & 代码版本入口；还需工作区差异与实际文件哈希 \\
+\texttt{model} / \texttt{base\_url} & \texttt{deepseek-flash} & 模型与后端身份；别名相同不保证服务或权重版本相同 \\
+\texttt{temperature} & \texttt{0.7} & 采样参数；未作为干预因素时应按协议保持一致 \\
+\texttt{episode\_budget} & 调用 8 / 步数 12 & 任务内配额；等总预算还需加入任务外费用 \\
+\texttt{E\_train\_episodes} / \texttt{R\_repeats} & \texttt{8} / \texttt{5} & 训练配额与每题重复次数；独立性须核对重置和依赖 \\
+\texttt{base\_seed} & \texttt{20260924} & 记录标签的起点；不保证服务方使用同一种子 \\
+\texttt{mde} / \texttt{unit} & \texttt{0.03} / \texttt{task} & 历史目标字段与重采样单位；须核对实际分析 \\
+\end{longtable}
+
+\section{trace.json：一个 episode 的回合记录}
+
+下表说明历史静态执行器保留的轨迹字段。它记录模型文本、部分工具事件和最终判定，不是供应商完整响应或宿主全部副作用的逐项记录。
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{9.4cm}}
+\caption{单条轨迹的字段：谁跑的、跑了什么、花了多少、判定从哪来}\label{tab:appd-trace}\\
+\toprule
+字段 & 含义 \\
+\midrule\endfirsthead
+\multicolumn{2}{l}{表\thetable（续）}\\
+\toprule
+字段 & 含义 \\
+\midrule\endhead
+\midrule\multicolumn{2}{r}{续下页}\\\endfoot
+\bottomrule\endlastfoot
+\texttt{run\_id} / \texttt{agent} / \texttt{task\_id} & 回合标识、调用者名称与题号；父实验、臂与阶段仍须按目录和配置连接 \\
+\texttt{seed} & 调用者传入的回合标签；生成规则随运行器与阶段而异，不能一律由\texttt{base\_seed}推回 \\
+\texttt{started\_at} & 开始时间（UTC） \\
+\texttt{steps} & 事件序列，以\texttt{kind}区分system / model / tool\_result / error / verdict \\
+\texttt{usage} & 调用数、步数、提示与生成 token、墙钟秒数；\texttt{usd} 一律为 \texttt{null} \\
+\texttt{budget} & 五项预算上限；停止须联查事件和终局判定，没有统一停止原因字段；token和墙钟阈值不是请求硬截断 \\
+\texttt{verdict} / \texttt{verdict\_source} & 判定结果与来源；此处历史静态执行器调用 \texttt{task.verify}，新版合同须另核对 \\
+\texttt{persistent\_writes} & 申报的版本层写入；旧静态执行器对非空列表抛异常，空列表不能证明不存在未登记写入 \\
+\end{longtable}
+
+\begin{sloppypar}
+举一个真实的例子。E01 运行 \path{E01-20260923T152230Z-90acda} 中
+\path{traces/grid4/sealed/classstate-07-r0/trace.json} 记录的那次 episode：
+模型调用 \measured{3} 次、提示 token \measured{958}、生成 token \measured{84}、
+墙钟\measured{2.14}秒，保存\measured{8}条事件记录；\texttt{usage.steps}为\measured{3}，对应执行循环次数，不等于事件条数。该回合判定为未通过，
+判定来源写作 \texttt{task.verify（真实执行验收命令）}。
+这几个数来自该回合归档。其\texttt{run\_id}为\path{static-20260923T154931Z-26925f}，不同于父实验的E01编号；\texttt{agent}为\texttt{grid4-sealed}。先由目录确定父实验、臂与阶段，再用配置和事件核对，不能只将两层\texttt{run\_id}作等值连接。\texttt{wall\_seconds}在最终\texttt{task.verify}之前取值，因此这段计时不包含最后一次验收的完整耗时。
+\end{sloppypar}
+
+\texttt{usage} 里的 \texttt{usd} 恒为 \texttt{null} 且 \texttt{unpriced} 为真：
+后端不返回价格，本书的成本账只报实物量（调用数、token 数、墙钟时间），
+折美元要等 \texttt{calculations/pricing.yaml} 拿到有出处的定价表
+（已登记 \texttt{agent/BLOCKERS.md}）。
+
+旧后端在响应缺少用量字段时会将对应token默认记为零；没有保留原始响应时，不能据一个零字段认定真实用量已知为零。该静态轨迹也没有逐项保存外部任务题面、供应商完整响应或不可变模型修订身份。复核时应连接任务文件与配置，并把无法恢复的服务和用量信息保留为未知。
+
+\section{复现步骤}
+
+\begin{sloppypar}
+复现首先分清目标：重算已有记录、使用脚本后端检查装置、还是重新发送付费模型请求。前两类不需要重新生成真实模型轨迹，后一类要检查数据范围、后端身份、额度和授权。先核对目标协议与实际文件，保留原运行；新版入口使用独立目录。不要在原始记录所在目录尝试“清理后重跑”，也不要把任务集重新生成当成读取旧记录的必要步骤。
+
+后端检查应在真实执行之前进行。\texttt{check\_backend.py}在模型名与密钥齐全且未指定\texttt{--no-probe}时尝试一次最小模型请求，该请求也应进入调用与费用范围。指定\texttt{--no-probe}只检查所需配置字段，服务是否可用还需另外验证。运行之后再检查后端，无法追溯证明先前每个请求都处于相同条件。已知可用的服务状态也不构成未来运行一定成功的保证。
+
+记录Git提交号有助于定位实现，但未提交改动、任务内容与协议也需单独保存。两个提交产生不同结果不自动排除复现失败；反过来，相同提交也不能保证远程模型、依赖或数据完全相同。应逐项解释差异，不用提交号单独判定可复现性。
+\end{sloppypar}
+
+\section{先离线复核，再决定是否重新运行}
+\label{sec:appd-offline}
+
+\subsection{第一层：检查文件是否属于所述运行}
+
+复核一个表格时，最小输入不是那张表格，而是运行标识、配置、原始记录与生成表格的规则。先确认引用路径确实存在，再确认文件内容与证据索引中的哈希一致。哈希一致只能说明字节未变，不证明这些字节真实、充分或没有遗漏；但没有这一层，后来发现的差异可能只是两个分析者读取了不同版本。
+
+同一运行可以同时有原始轨迹、人工可读摘要与后续审计报告。它们的职责不同。原始轨迹保存当时观察到的事件，摘要按某套规则压缩事件，审计报告解释摘要可能遗漏或混淆的部分。当三者不一致时，应沿着字段定义寻找原因，不能简单选择数值最符合预期的一份。原始记录也可能缺失，遇到这种情形应登记缺口，而不是凭摘要重造一条看似完整的轨迹。
+
+文件路径与语义标识也应分开。目录中一个序列可能按实验臂、复用格点和重复编号分层；单个任务标识只说明题目，不说明它在实验中的角色。第15章的两条相同题号轨迹可能分别处在来源阶段与评价阶段，输入记忆和预算也不同。使用题号连接表格前，至少还要核对运行、臂、阶段和重复标识，避免将不同回合错误配对。
+
+对跨日期续跑，新增文件属于原运行的哪个部分，应有明确的父运行和配置对应。若后续解释指出某项模型版本信息不可恢复，就保留“不确定”，不从相同别名推导权重相同。能够成功加载配置，只证明配置语法可读；它不证明旧运行的服务条件已经重建。
+
+\subsection{第二层：重算已记录的事件与数量}
+
+本版提供一个只读取E05 v2归档的案例索引脚本。它检查六个完整序列，将每个事件连接到保存的轨迹，按序列核对调用数，再汇总主回合、独特题目与通过数。它不发送模型请求，不修改归档轨迹，也不把新版协议应用到旧记录上。运行后更新的是派生案例索引。
+
+\begin{verbatim}
+python calculations/reproduce_ch15_case.py -o reader-work/ch15.json
+\end{verbatim}
+
+\begin{sloppypar}
+示例将索引另存为\path{reader-work/ch15.json}，目标已存在时拒绝覆盖；省略\texttt{-o}选项时沿用\path{analysis/ch15-case-index-reproduction.json}默认位置并更新该派生索引。归档复算应得到\measured{6}个序列、\measured{9}个主回合、\measured{48}次调用和\measured{7}次通过，并区分\measured{2}道独特题与\measured{1}个任务族。这些分母没有互相替代关系：九条轨迹不是九道独立题，七次通过也不是七次有效技能更新。
+\end{sloppypar}
+
+若脚本发现调用数与序列账不一致，应保存差异，并进一步查看哪些事件被纳入了两边。不要直接将一侧改成另一侧以让检查变绿。可能的原因包括字段原本是累计量、重试单列、附加修复被另记，或者记录确实不完整。查清字段语义后，才决定修订哪一份派生报告。错误消息是调查入口，不能只被当作需要消除的障碍。
+
+通过数也要追溯到实际验收字段。回复中声称成功、工具动作没有报错、回合内一次测试成功与最终判定通过，分别指向不同事件。读者可以利用索引定位原始轨迹，再按事件顺序检查。索引本身没有推断模型为何行动，也没有证明某条被检索经验对最终答案具有因果作用。
+
+\subsection{第三层：复算教学算术，不冒充模型重复实验}
+
+附录B、D、F的平台记录、事件分母与历史成本算术，以及附录C的两动作数学例，可分别复算：
+\begin{verbatim}
+python calculations/reproduce_platform_appendices.py
+python calculations/reproduce_rl_arithmetic.py
+\end{verbatim}
+两者另存本版分析文件。平台入口中的接口演示使用显式合成夹具，没有执行候选或请求模型；数学入口只导入旧脚本的纯计算函数，不覆盖旧的有日期报告。
+
+第4章的反馈审计还可离线重算：
+\begin{verbatim}
+python calculations/reproduce_feedback_audit.py
+\end{verbatim}
+它核对E02轨迹与汇总、正文配对差和栈案例，并比较错误方法与局部候选的容器状态。输出位于\path{analysis/feedback-audit-reproduction.json}。局部候选执行正确不代表Agent曾经执行该修改；未归档的中间评审原文仍然缺失。
+
+第5章的检索与来源成本可用以下入口复核：
+\begin{verbatim}
+python calculations/reproduce_memory_audit.py
+\end{verbatim}
+该入口读取SHA绑定的经验文件和任务规格，重建选中条目，再与归档提示逐项比较；它不调用模型，也不补造缺失的渲染用量。
+
+第6章的操作接口与局部算术可单独复核：
+\begin{verbatim}
+python calculations/reproduce_memory_operations.py
+\end{verbatim}
+此入口只重放教学对象，结果另存\path{analysis/memory-operations-reproduction.json}，不覆盖旧检查日志。
+
+第7章的四题选择偏差算例与来源表格算术可用以下入口核对：
+\begin{verbatim}
+python calculations/reproduce_context_audit.py
+\end{verbatim}
+它以精确分数计算等能力候选的最高开发分期望，另列ACE正文表4与附录表12的不同成本范围，以及GEPA最佳候选出现时点与总预算的比值。结果另存以下文件，不构成E04或外部论文实验复现：
+\begin{quote}\ttfamily
+analysis/\allowbreak context-audit-reproduction.json
+\end{quote}
+
+第8章的代码参考注入、来源拒绝与费用图使用以下入口：
+\begin{verbatim}
+python calculations/reproduce_skill_audit.py
+\end{verbatim}
+它只读随书E05 v2轨迹，输出\path{analysis/skill-audit-reproduction.json}，并复核教学成本数组。复算报告同时保留所检出源码的原始字节SHA、CRLF转为LF后的SHA及历史登记值，并注明匹配方式。此换行比较用于登记的源码与协议，实质文本差异会触发核对错误。旧E05累计账未纳入冻结包，历史分析脚本不属于本版可直接复算入口，依赖它的数值表已撤下。
+
+\begin{samepage}
+第9章的来源表格差值、独立候选覆盖率、排程反例与摊销算例可复算：
+\begin{verbatim}
+python calculations/reproduce_workflow_arithmetic.py
+\end{verbatim}
+\end{samepage}
+输出位于\path{analysis/}\allowbreak\path{workflow-arithmetic-reproduction.json}。这些计算不产生E06结果，也不代替来源论文的实际运行。
+
+第10章的SEAL表格与热图差值、成功样本归一化、教学梯度、成本交点和给定区间判据可复算：
+\begin{verbatim}
+python calculations/reproduce_parameter_arithmetic.py
+\end{verbatim}
+结果位于\path{analysis/}\allowbreak\path{parameter-arithmetic-reproduction.json}。它只做确定性计算，没有训练参数模型，也不产生E08能力证据。
+
+第11章的课程漂移、过滤分母、F1与格式奖励合账及来源表格差值可复算：
+\begin{verbatim}
+python calculations/reproduce_curriculum_arithmetic.py
+\end{verbatim}
+输出位于\path{analysis/}\allowbreak\path{curriculum-arithmetic-reproduction.json}，保持教学设定与论文报告的身份，不产生E07或E09训练结果。
+
+第13章的历史触发信号、暖机占位、精确概率、三策略落点与成本算例可复算：
+\begin{verbatim}
+python calculations/reproduce_timing_audit.py
+\end{verbatim}
+结果另存于\path{analysis/}\allowbreak\path{timing-audit-reproduction.json}。它核对固定历史输入和教学模型，不执行E11，也不能估计替代调度策略的闭环成绩。
+
+第14章的噪声比较、精度规划、余弦反例、单文件恢复与临时文件权限反例可复算：
+\begin{verbatim}
+python calculations/reproduce_reliability_audit.py
+\end{verbatim}
+输出位于\path{analysis/}\allowbreak\path{reliability-audit-reproduction.json}。旧E12运行器未纳入冻结包，记账故障只从另存的有来源身份的短摘录复现；该入口不执行E12，也不提供操作系统隔离或行为等价证明。
+
+第15章并列引用的E01范围、任务族差值、读取者成本比例、题级点估计反号和E05令牌差值另有算术入口：
+\begin{verbatim}
+python calculations/reproduce_case_arithmetic.py
+\end{verbatim}
+结果位于\path{analysis/}\allowbreak\path{case-arithmetic-reproduction.json}。它区分80个封存评价回合与88个计时主回合，不把既有不同运行拼成一次集成实验。
+
+第16章的语料比例、振荡、条件风险、零故障上限与独立选择算例可另行复算：
+\begin{verbatim}
+python calculations/reproduce_scope_arithmetic.py
+\end{verbatim}
+结果保存为：
+\begin{quote}\ttfamily
+analysis/\allowbreak scope-arithmetic-reproduction.json
+\end{quote}
+它还以构造输入检查FGT与BWT使用不同参照，不产生本书的长期保持率或实测故障概率。
+
+第10—16章同时包含来源论文报告值、真实运行记录和人为教学例。教学例用于说明比较口径，必须可以计算，也必须保持其人为设定的身份。下列脚本复算成本直线交点、难度代理、混合分布均值、父代权重、效用、折扣后代增长、交互差和长期概率例。
+
+\begin{verbatim}
+python calculations/reproduce_teaching_arithmetic.py
+\end{verbatim}
+
+输出中的“通过”表示公式结果与保存的教学数值相符。它不表示E07、E08、E10或长期运行已经成功。脚本中的成本单位、条件故障概率与独立性都来自各例明确给定的条件；更改条件会改变答案，不能拿计算结果为条件本身作证。例如，独立比较的错误概率例只能解释选择风险，不能用来估计本书各项实际比较的误判概率。
+
+复算也不代替公式来源核对。父代选择权重即使计算无误，若使用了不属于该算法版本的资格条件，仍然是在精确计算错误问题。第12章因此分别登记DGM与HyperAgents的合格集合、缩放中点和子代计数。公式身份、输入身份和算术结果需要同时正确，任何一项缺失都不能靠另外两项补齐。
+
+对于有舍入的报告，应优先使用保存的未舍入量计算，最后再按表格精度显示。若手工用已经四舍五入的标准差反推样本数，结果可能与原计算相差一个整数。应该解释差异来自哪一层舍入，而不把它当成实验结果变化。附录A的样本量核算与本附录的教学核算，正是两类不同来源的派生量。
+
+\subsection{第四层：检查展示文件来自当前源稿}
+
+正文正确而PDF过期，是交付链中另一类可复现性问题。本版构建入口把当前书稿与依赖复制到临时构建目录，生成结果后留下诊断文件。检查时应读取诊断指定的实际日志，而不是仅凭主目录中某个旧日志的时间。编译退出成功也要同时核对交叉引用、缺字和图表资源是否来自当前源文件。过高浮动表格可能被裁掉而没有编译错误；构建审计还检查这类专门警告，不能只查\texttt{Overfull}。
+
+\begin{verbatim}
+python calculations/audit_book_build.py
+\end{verbatim}
+
+这个脚本需要用于PDF检查的依赖，核对当前PDF、实际构建快照与书稿源文件的对应关系，并检查构建状态。它与归档复算、教学算术入口使用不同的工具链。若正文刚改而新构建尚未结束，快照比较失败是合理的提醒：当前展示物仍对应旧稿。应等待真实构建完成再核对，而不是关闭该比较。
+
+版面阅读仍不可省略。没有文字溢出，不意味着图中箭头指向正确；引用编号存在，不意味着来源真的支持那句话；数学符号能够排版，也不意味着单位一致。自动检查负责发现一部分可形式化问题，页面抽检负责发现视觉问题，来源与推理核对负责判断内容。三者的通过范围应分别报告。
+
+\subsection{什么结果需要新运行编号}
+
+若只是用相同规则重新汇总原始记录，新产物是旧运行的派生分析。若更换分析口径，例如重采样层级或缺失处理，应登记新的分析版本，而不制造新的模型运行编号。若重新向模型发出请求，即使题目和提示相同，也产生新的执行事件，需要保存新轨迹及其与旧设计的关系。这三种版本变化不应混用。
+
+修复运行器后更需要新旧分离。E05 v3修改了格式处理、预算生命周期和技能准入行为；它的未来运行将回答新版装置的问题，不能倒替旧版中失败的几个回合。将成功旧回合与修复后的新回合拼成一套“完整新版”，会同时隐藏修复前看到过哪些结果，以及重新采样付出了多少资源。
+
+若目的是复现外部方法，读者还需准备相应模型、环境、数据与预算。本书的短程代码实验台不能仅通过更改方法名称就变成参数训练、长期研究或完整软件工程基准。可以先做一个受限原型，但应将其标成原型并列出删去的机制。教学实现便于理解，不自动继承原论文全部结论。
+
+
+\section{运行E01新版的离线检查}
+
+从仓库根目录启动以下入口，可以复查附录B的控制流与文件边界，不需要模型密钥。当前版本使用标准库构造输入；默认入口只打印就绪报告，显式选择离线演示后才创建新的本地记录目录。它没有付费执行选项，也不能用一个参数把构造结果切换成真实能力实验。
+
+\begin{verbatim}
+python -m unittest experiments.lab.test_e01_v2_contracts
+python -m unittest experiments.lab.test_e01_v2_offline
+python -m unittest experiments.lab.test_e01_v2_file_boundary
+python -m unittest experiments.lab.test_e01_v2_analysis
+python -m unittest experiments.lab.test_e01_v2_manifest
+python -m unittest experiments.lab.test_e01_v2_execution
+python -m unittest experiments.lab.test_e01_v2_evaluation_journal
+python -m unittest experiments.lab.test_e05_v4_tools
+python -m experiments.lab.run_e01_v2
+python -m experiments.lab.run_e01_v2 --offline-demo
+python calculations/demo_e01_final_journal.py
+\end{verbatim}
+
+前七组分别检查E01设计合同、调度与整条流程、公开文件边界、描述分析、任务清单、外部验收输入输出及持久评测日志；第八组检查E05 v4草案的独立文件工具。它们都不证明候选进程隔离已经完成；失败时应先保留报错与版本，不把旧输出复制过来充当本次通过。演示每次使用新的编号，默认落在本仓库的\nolinkurl{experiments/offline/}下，目录已存在时拒绝覆盖。读者可以通过入口的帮助查看输出目录选项，将教学记录保存在自己指定的位置。
+
+最后一条命令单独演示持久日志的预留、重开、清理对账与缺失保留，每次另建目录；它与前一条序列记忆演示的记录布局不同。两种演示都不执行候选代码。结果顶层明确写有合成工程记录身份、真实API调用为零以及尚未实现的边界。序列记忆演示的各任务目录分别保存提交、构造评价、资源事件和汇总，便于检查提交是否先于评价、一次逻辑生成是否包含多次请求尝试。不要把演示目录放进真实实验结果汇总脚本，也不要把预设失败改成成功后仍声称复现了同一份流程。
+
+\begin{sloppypar}
+\begin{samepage}
+旧文件组件的缺口由可靠性复核入口中的权限反例重现：
+\begin{quote}\ttfamily\small
+calculations/\allowbreak reproduce\_reliability\_audit.py
+\end{quote}
+\end{samepage}
+其中的权限反例只在新建临时目录中使用虚构标记；同一入口的其他部分另外读取明确列出的历史记录。反例通过表示复现了旧实现的边界不足；新版文件工具测试通过表示指定接口拒绝了对应请求。两者都不能替代候选进程的操作系统权限隔离。
+\end{sloppypar}
+
+\subsection{公开提炼与近期读取的独立演示}
+
+新增组件可单独检查：
+\begin{verbatim}
+python -m unittest experiments.lab.test_e01_v2_public_memory
+python calculations/demo_e01_public_memory.py
+\end{verbatim}
+
+本版的公开记忆、准入凭据与持久准入演示均使用下列文件中的新接口夹具：
+\begin{quote}\ttfamily\small
+calculations/\allowbreak platform\_demo\_fixtures.py
+\end{quote}
+这些接口夹具与仓库保留的历史JSON任务目录是不同输入；不能将夹具冒充旧任务或其验收答案。演示检查的是事件顺序与记录关联，不应为运行演示而覆写历史任务目录。
+
+第二条只向标准输出打印构造请求、来源记录及读取快照，不保存正式实验结果，不发送模型请求，也不执行候选。任务标签、公开请求、回复与笔记均为手写的接口夹具。应检查公开提炼载荷不含宿主文件，在线读取逐次替换，迁移快照保持固定；不能把这些结构观察当作模型解决任务或生成了合格经验。旧演示与本演示采用不同读取配置，分别保留身份。
+
+\subsection{复核来源、回复与准入记录的关联}
+
+以下入口使用独立的脚本材料演示请求、回复片段、审核与发布的连接：
+\begin{verbatim}
+python -m unittest experiments.lab.test_e01_v2_admission_receipts
+python calculations/demo_e01_admission_receipts.py
+python calculations/audit_ch13_trigger_replay.py
+python calculations/audit_ch14_cosine_bound.py
+\end{verbatim}
+
+前两条不发送请求或执行候选。读者可以检查候选是否等于保存回复中指定的片段、审核引用的摘要是否一致、发布后快照是否包含同一条目。示例的审核类别是脚本夹具，不是实际语义审核；不能将其改标为模型结果或人类批准。该组件尚无磁盘重开协议，也没有接入真实运行器。
+
+第三条只读旧轨迹并复算第\ref{ch13}章的触发信号，区分暖机占位值与有效窗口；它不会重跑任务或覆盖旧结果。第四条以精确分数复核第\ref{ch14}章的余弦差反例，检验的是一个数学推论所需的条件，不是模型性能或原文系统的复现。两条审计均只向标准输出返回结果，正式复核时应另存带时间的记录，并保留旧文件身份。
+
+
+\begin{samepage}
+\subsection{复核一次经验准入在中断后怎样恢复}
+
+前节的内存组件保持原样；新增持久日志将一次提取的派发机会、回复、用量、候选片段、审核和结果快照联系起来。以下命令只运行构造数据，不发送模型请求：
+\begin{verbatim}
+python -m unittest experiments.lab.test_e01_v2_admission_journal
+python calculations/demo_e01_admission_journal.py
+\end{verbatim}
+\end{samepage}
+
+演示先保存调用与派发预留，关闭数据库后重新打开，确认未完成请求阻止重发。随后填入明确标作脚本夹具的回复与用量，再经一次重开形成候选和审核，最后保存记忆快照。这里的关闭和重开是恢复测试，不是声称服务商恰好执行一次；真实请求可能在本地未拿到回复时已经完成。遇到这种不确定状态，程序保留未知并等待协调，不能用一次新成功响应覆盖它。
+
+输出中的token数是人为检查值，不能计入本书实测成本。数据库事务保证的是本组件所保存的关联一致性：成功回复与该次用量一同提交，旧句柄不能重复结算，重复发布不能增加条目。审核仍是宿主提供的声明，既不证明经验正确，也不认证审核者身份。返回Memory快照也不等于已恢复部署进程、工具缓存和外部效果。
+
+这一单元只限制一次online提取的资源，不负责跨任务的总预算。为下一任务新建数据库，不能被当作取得一份免费配额。独立的离线编排组件已连接运行身份、共享预算权威、持久序列游标与合成准备记忆；它只将U臂提取纳入共享池，没有覆盖准备、求解、测试与重试的完整费用。真实准备记忆、实际候选执行和服务适配仍需接通。
+
+\subsection{序列编排的离线检查}
+
+以下三组检查分别覆盖跨单元身份与预算游标、M0及记忆合并、组件编排：
+\begin{verbatim}
+python -m unittest experiments.lab.test_e01_v2_orchestration
+python -m unittest experiments.lab.test_e01_v2_m0_memory
+python -m unittest experiments.lab.test_e01_v2_assembly
+\end{verbatim}
+检查使用构造材料和本地临时记录，不发送模型请求。完成单元在重开后不再支取预算、不重复合并记忆，是局部恢复不变量；它不保证任意中途退出后能够自动续跑，也不证明整个实验的真实token与墙钟已被硬封顶。单次准入的发布快照与多次累计后的存储须按各自定义核对，不能仅因某条笔记进入存储就称整个快照相等。
+
+\section{历史运行环境与本版构建条件}
+
+\begin{itemize}
+  \item 历史环境日志记载Python\texttt{3.13}（如\path{agent/nightly/2026-09-24.md}）；这不是每条轨迹各自记录的解释器身份。实验运行、论文抽取和书稿审查的依赖不同，应分别记录。
+  \item 历史验收命令使用标准库\texttt{unittest}。更换测试框架前应核对发现规则、失败处理与退出码，再判断新旧结果是否可合并。
+  \item 模型后端经OpenAI兼容接口调用，本书运行入口从环境变量或\texttt{experiments/lab/.env}读取凭据；凭据不作为配置和轨迹的主动记录字段。
+  \item \begin{sloppypar}
+        后端对指定网络异常及HTTP状态重试，例如读超时、429、500、502、503和504。本包保留的运行器可以把\texttt{backend\_retries\_total}写入配置，但归档E01/E02配置及其汇总配置没有该字段，不能从当前源码补称当时已记录。E03续跑配置中的计数也只反映对应后端实例，不能覆盖早期进程。历史\texttt{usage.calls}在逻辑生成成功返回后增加一次，内部HTTP尝试不逐次进入该字段；没有完整请求账时，重试总数和失败用量应保持缺失。
+        \end{sloppypar}
+  \item 本版经 \texttt{book/build.ps1} 调用TeX Live 2023的XeLaTeX；该入口采用临时构建目录绕开已遇到的中文路径问题，并保存实际构建诊断。
+\end{itemize}

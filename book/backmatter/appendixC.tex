@@ -1,0 +1,275 @@
+% backmatter/appendixC.tex —— 附录 C 强化学习必要基础
+% 数字身份纪律：公式是标准定义，不需要身份标签；
+% JitRL / Mem-α / MEM1 / GEPA 的具体数字一律 \cited{}（出处见 source-map 附录 C 各条）。
+% 本附录只给读第 10、11 章与第 6 章谱系所必需的 RL 部分，不写成 RL 教材。
+\chapter{强化学习的必要基础}
+\label{app:rl}
+
+第6章的记忆操作、第10章的参数学习与第11章的交互训练，共同涉及策略、回报与更新目标。
+本附录从这三个对象出发，用可手算的模型解释梯度、基线与概率约束。
+
+奖励的定义决定哪些行为获得反馈。阅读一种训练方法时，需要同时辨认奖励来源、更新对象与求解方式。
+
+\section{三个对象：策略、回报、价值}
+\label{sec:appc-objects}
+
+\begin{itemize}
+  \item \textbf{策略} $\pi(a\mid s)$：在状态 $s$ 下选动作 $a$ 的分布。
+        在LLM Agent中，动作可以按token、整段输出或工具调用定义；不同粒度对应不同轨迹和归因问题。
+  \item \textbf{回报} $G_t=\sum_{u\ge t}\gamma^{\,u-t} r_u$：从时刻 $t$ 起、
+        按折扣因子 $\gamma\in[0,1]$ 折现的累计奖励；有限回合在终止处截断；无限时域若奖励有界且$\gamma<1$，回报收敛，取$\gamma=1$时还需另外的收敛条件\cite{jitrl-2601}。
+        $\gamma$ 越小，越只关心眼前。
+  \item \textbf{价值} $V^{\pi}(s)=\mathbb E_{\pi}[G_t\mid s_t=s]$：
+        从状态 $s$ 出发、按策略 $\pi$ 走下去能拿到的期望回报。
+        \emph{优势} $A^{\pi}(s,a)=Q^{\pi}(s,a)-V^{\pi}(s)$ 回答的是另一个问题：
+        \textbf{在这个状态下选这个动作，比按惯例选好多少}。
+\end{itemize}
+
+策略梯度可以使用实际回报、动作价值或减去适当基线后的优势估计。基线主要用于调整估计方差，不是“得分本身完全不能学习”的理由。相关条件见策略梯度原始分析\cite{policy-gradient-1999}。在Agent任务中，还要区分环境状态$s$与模型实际看到的观察或历史；记忆压缩可能改变观察信息，却没有改变真实环境的全部状态。
+
+\section{策略梯度与优势}
+\label{sec:appc-pg}
+
+以有限回合、无折扣总回报目标为例。设初始状态分布、环境转移与奖励函数的定义及其外部参数在本次求导中固定，策略可微，并满足交换微分与期望的条件。奖励样本仍可随所采轨迹变化。若回合在预定时域结束，状态还应包含剩余步数等决策所需的时间信息。以下期望按当前策略取，$A_t$先取该策略的真实优势。若改用折扣目标或其他状态抽样约定，还需保留相应权重。
+
+\begin{equation}
+\nabla_\theta J(\theta)=\mathbb E\Big[\,\sum_t \nabla_\theta \log \pi_\theta(a_t\mid s_t)\,A_t\,\Big].
+\label{eq:appc-pg}
+\end{equation}
+
+每个采样项以优势作权重，为所选动作的对数概率提供上升或下降方向。同一个参数还会影响其他动作，各项梯度也可能冲突，因此一次完整更新不保证每个正优势动作的概率都上升。
+
+用估计值代替真实优势时，一种充分条件是给定状态与动作后的条件均值等于该策略的真实优势。构造采样代理目标时，把这份估计作为本轮固定权重，求导路径不再穿过优势估计的计算。其他合法基线的抵消条件见本附录后面的两动作算例。
+式~\eqref{eq:appc-pg} 为理解第10、11章的参数更新提供起点。SEAL 把参数相关适配评分视为固定量的近似，见第~\ref{sec:ch10-sealloops}节。
+
+\begin{principlebox}
+训练数据决定了直接观察到的反馈，但参数共享会影响未采样动作与其他输入上的输出。因此，“奖励没有单列某个行为”不等于该行为不会变化。Mem-$\alpha$没有独立评估冲突消解，不能由此断言删除动作在梯度中不受约束；下游正确率和内容合法性仍可能提供间接信号\cite{memalpha-2509}。缺少单独检查意味着难以确认这部分行为，而不是获得了无影响保证。
+\end{principlebox}
+
+\section{KL 约束与信任域}
+\label{sec:appc-kl}
+
+步长过大或反复使用旧策略采样的数据，可能使局部代理目标不能可靠描述新策略；并非每次直接梯度更新都会发生这种问题。
+一种局部策略改进模型是在固定状态、给定优势估计的条件下，对动作分布加上相对参考策略 $\pi_{\theta}$ 的 KL 约束：
+
+\begin{equation}
+\max_{\pi}\ \mathbb E_{\pi}[A]\quad \text{s.t.}\quad \mathrm{KL}(\pi\,\|\,\pi_{\theta})\le \varepsilon .
+\label{eq:appc-kl}
+\end{equation}
+
+这里取$\varepsilon\ge0$，期望和KL均针对该状态的动作分布；扩展到多个状态时须声明状态权重，不能悄悄把局部代理替换成新策略下的完整环境目标。
+
+PPO的裁剪版本使用概率比的分段代理目标，原论文也讨论自适应KL惩罚版本\cite{ppo-1707}。裁剪不是所有状态上KL距离的硬保证。GRPO使用组内相对信号，具体归一化与KL项按各实现核对；不能仅凭算法名称推断每一步更新必然安全。
+
+\begin{sloppypar}
+Mem-$\alpha$ 的原文将去掉 GRPO 的 KL 项作为鼓励探索的设计\cite{memalpha-2509}；固定公开主训练脚本却仍配置策略 KL 损失\cite{memalpha-code-2025}。两层 KL 开关及其版本边界见第~\ref{sec:ch06-config-identity} 节。
+从目标函数看，去掉某项显式惩罚会移除这一项直接约束；其他裁剪、步长和训练数据因素仍存在。判断实际更新采用了哪些约束，需要读有效配置与损失计算。
+\end{sloppypar}
+
+\section{无梯度的那一支：JitRL 的闭式解}
+\label{sec:appc-jitrl}
+
+若基础模型参数$\theta$保持冻结，就不能用式~\eqref{eq:appc-pg}直接更新这组参数。
+JitRL 的做法是把策略改进写成对 logit 的一次加法，并给出
+给定优势估计时KL惩罚目标的\emph{闭式最优解}\cite{jitrl-2601}
+（原论文式8—12及Theorem~4.1，此处取$\beta>0$，KL惩罚系数为$1/\beta$）。
+
+\begin{equation}
+\pi^{*}(a\mid s)\ \propto\ \pi_{\theta}(a\mid s)\,
+\exp\!\big(\beta\widehat A(s,a)\big).
+\label{eq:appc-jitrl}
+\end{equation}
+
+式~\eqref{eq:appc-jitrl} 说明：\textbf{不需要梯度也能做一次策略改进}，
+在给定动作集合与优势估计的数学问题中成立；实际收益还取决于估计质量和偏置实现，不能由闭式解单独保证。
+奖励由LLM评估器从完整轨迹生成逐步奖励 $r_t$，再折成 $G_t$\cite{jitrl-2601}。
+
+\begin{principlebox}
+\textbf{这条支线在本书谱系里的位置。}
+JitRL 用 RL 学的是\emph{任务策略}（选哪个动作），
+写入与检索规则固定，原文未见显式遗忘机制\cite{jitrl-2601}。
+因此它不属于第 6 章的``记忆操作学习化''谱系——
+判据是决策权归谁，不是有没有用到 RL。
+这一点在第 6 章被写成了反例二。
+\end{principlebox}
+
+\section{三处用法的对照}
+\label{sec:appc-table}
+
+\begin{table}[htbp]
+\centering
+\caption{本书涉及的三处RL用法：更新对象与奖励来源}
+\label{tab:appc-rl}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{3.3cm}}
+\toprule
+方法 & 算法 & 改什么 & 奖励来源 \\
+\midrule
+MEM1 & PPO（端到端） & $\theta$；记忆管理成为策略的一部分\cite{mem1-2506} & 任务回报（QA用EM，WebShop用环境奖励）\cite{mem1-2506} \\
+Mem-$\alpha$ & GRPO（原文去 KL） & 记忆构建策略\cite{memalpha-2509} & 四项加权：正确率、工具格式、压缩率、内容合法性\cite{memalpha-2509} \\
+JitRL & KL 惩罚闭式解（无梯度） & 只对 logit 加偏置\cite{jitrl-2601} & LLM评估器从轨迹生成逐步奖励\cite{jitrl-2601} \\
+\bottomrule
+\end{tabular}
+
+\vspace{2mm}
+\begin{footnotesize}
+前两行都更新策略参数，只是策略承担的功能不同；第三行冻结基础模型参数，通过记忆检索与输出偏置改变动作分布。
+本书第6章区分准入、组织、触发和操作策略等决策对象；是否使用梯度只是实现方式之一。
+\end{footnotesize}
+\end{table}
+
+表~\ref{tab:appc-rl} 三行的奖励来源各不相同，而这正是本书要读者盯住的地方：
+算法、更新对象和奖励设计都不同，不能用其中一栏替代其余两栏。
+更换奖励定义，可能改变同一算法所强化的行为。
+
+\section{奖励是设计决定}
+\label{sec:appc-reward}
+
+第10—12章讨论的不同更新对象都需要区分训练机制与实测收益。
+
+\begin{itemize}
+  \item MEM1按任务回报训练，问答任务用答案EM，WebShop用环境内置奖励\cite{mem1-2506}。
+        记忆的可读性与保留要求没有单列奖励项。有效的状态管理可以通过任务回报受到间接优化，要确认这些具体要求还需分别检查。
+  \item Mem-$\alpha$ 把压缩率写成一项奖励 $r_3=1-l_m/l_c$\cite{memalpha-2509}。
+        这一项立刻使``写得更短''变成可获利的行为，
+        与第 7 章的 brevity bias 是同一个方向上的两种压力。
+  \item JitRL的逐步奖励由LLM评估器生成\cite{jitrl-2601}，
+        原论文自陈信用分配错误会污染优势估计。
+        这与第 4 章的验证层级是同一件事：
+        奖励误差会影响更新方向，需要检查反馈来源和误差结构；不能把二者简化成没有操作定义的数值上限等式。
+\end{itemize}
+
+因此本书在讨论任何``用 RL 学记忆操作''的主张时，
+先问的不是算法，而是三件事：
+奖励有几项、每一项由谁判定、以及哪一项为``做错了''负责。
+第 6 章的反例一与第 14 章的治理问题都是这三问的具体形态。
+
+
+\section{用两个动作把梯度和基线算一遍}
+\label{sec:appc-two-action}
+
+本节把一般公式压缩到一个可以手算的教学环境。环境只有一个状态、两个动作，选动作$a_1$固定得到奖励\calcnum{1}，选$a_0$固定得到\calcnum{0}，回合立即结束。令$p=\pi_z(a_1)=1/(1+\exp(-z))$，则$\pi_z(a_0)=1-p$。这里$z$是一个标量参数，没有语言模型、工具或跨任务记忆；下面所有数字都是本书计算，不是训练结果。
+
+期望回报为$J(z)=p$，直接求导得到
+\begin{equation}
+ \frac{\mathrm dJ}{\mathrm dz}=p(1-p).
+\end{equation}
+从采样角度看，两种动作的对数概率导数分别为
+\begin{equation}
+ \frac{\mathrm d\log\pi_z(a_1)}{\mathrm dz}=1-p,
+ \qquad
+ \frac{\mathrm d\log\pi_z(a_0)}{\mathrm dz}=-p.
+\end{equation}
+用实际奖励乘对应导数，抽到$a_1$时得到$1-p$，抽到$a_0$时得到零；按动作概率取期望，仍是$p(1-p)$。这个最小例子直接说明：不减基线的回报也可以给出正确的期望梯度。优势估计的价值不能用“原始得分没有学习信号”来解释。
+
+若在这一状态减去一个不依赖所选动作的固定基线$b$，则两种采样梯度变为$(1-p)(1-b)$和$pb$。它们的加权平均是
+\begin{equation}
+ p(1-p)(1-b)+(1-p)pb=p(1-p).
+\end{equation}
+基线项抵消，源于概率分布对参数求导后总和为零，而不是因为基线“非常接近真值”。一般策略梯度分析对基线与函数近似的条件有更完整的说明\cite{policy-gradient-1999}。如果所谓基线依赖当前动作，或实现把不该反向传播的估计器一起当成目标求导，就不能直接使用上面的抵消论证。
+
+令$p=\calcnum{0.25}$。不减基线时，抽到$a_1$的梯度为\calcnum{0.75}，抽到$a_0$为零；平均梯度为\calcnum{0.1875}，采样方差为\calcnum{0.10546875}。若取状态价值$b=\calcnum{0.25}$，两个采样梯度分别为\calcnum{0.5625}与\calcnum{0.0625}，平均不变，方差降为\calcnum{0.046875}。在这个例子中，减去状态价值确实降低了采样噪声。
+
+但“任何基线都会降低方差”依然不成立。若随意取$b=\calcnum{2}$，两个采样梯度变为\calcnum{-0.75}与\calcnum{0.50}，平均仍为\calcnum{0.1875}，方差却升到\calcnum{0.29296875}。期望正确与方差小是两件事。反过来，本例取$b=\calcnum{0.75}$时，两种采样梯度恰好都为\calcnum{0.1875}，方差为零；这个特殊环境中的最优降方差基线也不等于状态价值\calcnum{0.25}。
+
+这里的零方差由单状态、单参数、两动作和确定奖励这一特殊结构得到，不能据此推广成语言模型训练的现成解法。它的用途是拆开三个常被混用的条件：估计是否无偏、噪声有多大、实际参数更新后任务是否改善。复杂网络的不同参数对应不同梯度方向，同一个基线可能无法同时实现各方向最小方差；工具任务还会有轨迹长度、环境转移和奖励估计误差。
+
+\subsection{优势的符号不是每个输入上的行为保证}
+
+在上述单参数环境中，若采样到$a_1$且优势为正，小幅梯度上升会提高$z$，进而提高$p$，这与“鼓励好动作”的直观一致。到了共享参数的模型，一个参数同时影响许多状态和动作，某条样本的更新会改变未采样输入的输出。多个样本梯度也可能相互抵消，有限步长下代理目标的局部方向还不一定描述真实回报变化。
+
+因此，阅读记忆管理训练时，不能把“奖励没有单列删除”解释为删除概率不变，也不能把“压缩奖励为正”解释为全部任务只会缩短不会丢信息。需要分别检查动作定义、采样到的行为、各奖励项、策略变化和任务后果。梯度公式说明反馈怎样进入参数，不替代更新后的能力测量。
+
+\section{PPO裁剪到底裁掉哪一项}
+
+PPO裁剪代理目标对一个已采样动作使用概率比$\rho=\pi_{\mathrm{new}}(a\mid s)/\pi_{\mathrm{old}}(a\mid s)$，并取两项中的较小者\cite{ppo-1707}：
+\begin{equation}
+ \ell(\rho,\widehat A)
+ =\min\!\left(\rho\widehat A,
+  \operatorname{clip}(\rho,1-\epsilon,1+\epsilon)\widehat A\right).
+ \label{eq:appc-ppo-piecewise}
+\end{equation}
+这里取$0<\epsilon<1$，并要求所采动作在旧策略下的概率为正，使概率比有定义。裁剪是代理目标中的运算，不能直接读成新旧策略的全部概率比都被系统强制限制在该区间。原论文式7给出这一形式；以下四个数值格点是本书教学输入，不是原论文实验成绩。
+
+\begin{table}[htbp]
+\centering
+\caption{PPO教学格点，令$\epsilon=\calcnum{0.2}$，观察取最小值后的单样本目标}
+\label{tab:appc-ppo-example}
+\begin{tabular}{rrrrr}
+\toprule
+$\rho$ & $\widehat A$ & 未裁剪项 & 裁剪项 & 最终目标 \\
+\midrule
+\calcnum{1.5} & \calcnum{1} & \calcnum{1.5} & \calcnum{1.2} & \calcnum{1.2} \\
+\calcnum{1.5} & \calcnum{-1} & \calcnum{-1.5} & \calcnum{-1.2} & \calcnum{-1.5} \\
+\calcnum{0.5} & \calcnum{1} & \calcnum{0.5} & \calcnum{0.8} & \calcnum{0.5} \\
+\calcnum{0.5} & \calcnum{-1} & \calcnum{-0.5} & \calcnum{-0.8} & \calcnum{-0.8} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+第一行中，优势为正，概率比已经大于上界，继续提高该比值不会从这一单样本项获得额外奖励；第二行优势为负，提高同一个比值反而扩大不利项，目标保留未裁剪的\calcnum{-1.5}。所以，“超出范围一律截为常数”连单样本目标都没有准确描述，优势符号决定哪一边的改善被抑制。
+
+第三、四行对应另一端：正优势动作的概率过度下降仍受惩罚，负优势动作降低到一定程度后不再通过该项获得额外改善。这个设计约束的是从旧策略样本构成的代理收益。
+
+用两个动作可以看清裁剪与距离约束的差别。设旧策略为$q=(1/2,1/2)$，两个动作的优势分别为$(c,-c)$，其中$c>0$；新策略为$p=(x,1-x)$。当$(1+\epsilon)/2<x<1$时，两个动作的裁剪项分别进入$(1+\epsilon)c$和$-(1-\epsilon)c$的平台，按旧策略加权后的代理目标恒为$\epsilon c$。但两个方向的KL距离仍会变化：
+\begin{align*}
+ \mathrm{KL}(q\|p)&=-\tfrac12\log\!\bigl(4x(1-x)\bigr)
+       \longrightarrow\infty,\\
+ \mathrm{KL}(p\|q)&=x\log(2x)+(1-x)\log\!\bigl(2(1-x)\bigr)
+       \longrightarrow\log2,
+ \qquad x\longrightarrow1.
+\end{align*}
+裁剪宽度决定了平台从哪里开始，却没有把策略限制在预先指定的小KL半径内。这个反例并不预测优化器必然走到极端，而是说明：即使代理目标相同，策略距离仍可相差很大；还须区分KL的方向。
+
+实际复现还需明确动作粒度。若动作按整个回答定义，概率比涉及序列概率；若按token定义，每个位置都有条件分布和掩码。MEM1重建训练轨迹时，用二维注意力掩码限制每个位置能看到的历史，再用一维信息掩码把外部返回的token排除出策略损失；前者约束条件输入，后者约束哪些位置接受更新\cite{mem1-2506}。原文附录A.7还说明，位置编号为训练效率作了近似。因此，恢复了注意力可见范围，不等于逐token恢复了原推理时的全部条件。动作粒度、条件输入与损失位置须分别核对，才能解释一次记忆写入或工具调用如何获得信用。
+
+\section{KL惩罚的闭式解与系数方向}
+
+考虑一个固定状态和有限动作集合，给定参考分布$q_a>0$与优势估计$\widehat A_a$。在$\beta>0$下最大化
+\begin{equation}
+ \sum_a p_a\widehat A_a
+ -\frac{1}{\beta}\sum_a p_a\log\frac{p_a}{q_a},
+ \qquad \sum_a p_a=1.
+ \label{eq:appc-kl-objective}
+\end{equation}
+对归一化条件引入乘子，内点的一阶条件给出
+\begin{equation}
+ \widehat A_a-\frac{1}{\beta}
+  \left(\log\frac{p_a}{q_a}+1\right)+\lambda=0.
+\end{equation}
+与动作无关的常数可以合入归一化因子，因此
+\begin{equation}
+ p_a^*=\frac{q_a\exp(\beta\widehat A_a)}
+ {\sum_b q_b\exp(\beta\widehat A_b)}.
+\end{equation}
+有限动作集合上，负KL项是严格凹的，参考分布为正且$\beta>0$时得到相应的唯一最优分布。这里最优的对象是式~\eqref{eq:appc-kl-objective}这个给定估计的数学问题。优势有误、奖励与目标不一致或后续环境不同，都可能使真实任务收益不随之提高。
+
+这个写法采用$1/\beta$作为惩罚系数，与本书引用的JitRL公式一致\cite{jitrl-2601}。若另一篇论文把惩罚直接写成$\lambda\mathrm{KL}$，对应指数就是$\widehat A/\lambda$。因而不能只比较两个算法中的“beta更大”，便断言它们都更保守或都更激进；应先找到系数实际乘在哪一项。本例中$\beta$增大意味着惩罚减弱，优势权重变强。
+
+用一个构造值验证方向：参考分布为$(\calcnum{0.75},\calcnum{0.25})$，两动作优势分别为$(\calcnum{0},\calcnum{1})$，取$\beta=\log 3$。未归一化权重变成$(\calcnum{0.75},\calcnum{0.75})$，新分布为$(\calcnum{0.50},\calcnum{0.50})$。新分布相对参考的KL约为\calcnum{0.143841}，惩罚后的目标约为\calcnum{0.369070}，高于参考分布的\calcnum{0.25}。这些数可以手算或由附带脚本复核。
+
+若参考分布对某动作严格为零，有限正向KL约束下不能直接给该动作正质量；闭式解中的支持集条件不能忽略。给零概率加平滑项是一种新的参考分布选择，应说明改动，而不称原公式自动创造了从未支持的动作。实际语言模型的token概率、数值截断和候选过滤还可能使理论分布与实现支持集合不同，需核对具体推理接口。
+
+\section{把数学最优和Agent收益分开检查}
+
+一个奖励模型把某条轨迹评得更好，只提供了关于该评价规则的反馈。将它转换为优势，再正确实现梯度或闭式偏置，依旧可能优化一个偏离目标的信号。错误可以发生在奖励定义、轨迹归因、优势估计、更新求解或部署环境任一层，不能把所有失败都归结为学习率。
+
+复核时可以从最便宜的数学例题开始：检查概率归一化、系数方向、梯度符号、掩码和单位；再检查有限脚本环境中的事件流、预算、失败处理及状态保留；最后才在独立数据上测量真实收益。前一层通过是后一层可解释的条件之一，却不是后者的替代品。E01新版的离线选择器测试同样遵循这一区分：选中哪个合成候选可以精确验证，但这个候选的工程通过标记不会变成真实模型的能力成绩。
+
+\begin{sloppypar}
+本节复算脚本为\texttt{calculations/reproduce\_rl\_arithmetic.py}，包括四种基线的均值与方差、PPO四格和KL两动作例。它只对人为指定的输入求值，没有参数训练、模型采样或任务收益推断。读者若修改奖励值或参考分布，应同时更新目标式与限制说明，而不只改最后的数字。
+\end{sloppypar}
+
+\section{本附录不覆盖什么}
+\label{sec:appc-limits}
+
+\begin{itemize}
+  \item \textbf{不覆盖价值学习方法}（Q 学习、DQN 系）。
+        本书涉及的三种用法都是策略类方法。
+  \item \textbf{不覆盖 RLHF 与偏好优化}（DPO 及其变体）。
+        第10章已解释DPO的偏好目标，本附录不扩写完整RLHF流程。
+  \item \textbf{不给出任何训练配置的推荐值}。
+        超参（学习率、批大小、KL 系数）高度依赖具体任务与算力，
+        本书不抄任何一个具体配置来冒充通用建议。
+  \item \textbf{不把 RL 当成更强的替代品}。
+        GEPA与GRPO在具体任务与预算下的比较见第7章；异质任务分数、最佳候选出现时点和总搜索预算应分开。该案例支持有条件的方法选择，不能推出参数更新普遍较差，也不能把算法名称当成能力层级。
+\end{itemize}

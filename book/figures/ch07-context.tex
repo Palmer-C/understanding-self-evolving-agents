@@ -1,0 +1,9 @@
+% figures/ch07-context.tex —— 第 7 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch07.tex 中 \input{figures/ch07-context}
+% 图主体在 ch07-context-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch07-context-body}
+\caption{上下文更新的两条路径：整体重写与增量提案都需要内容检查、版本记录和外部评价。更新形式改变审计方式，不自动保证正确性。}
+\label{fig:ch07-context}
+\end{figure}

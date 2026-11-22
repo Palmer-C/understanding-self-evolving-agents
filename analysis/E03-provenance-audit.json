@@ -1,0 +1,410 @@
+{
+  "run": "E03-20260925T152453Z-254845",
+  "summary_sha256": "15d3586986f698d052d13bf1d0b2c0cd3404eee980944107190d72673d0180d5",
+  "partial_sha256": "f9e75ad1124421572b6600b936760a8fc3de9e5053bae0547f612ead167e6fd0",
+  "config": {
+    "experiment": "E03+E03c",
+    "run_id": "E03-20260925T152453Z-254845",
+    "protocol": "experiments/protocols/E03.md",
+    "public_protocol": "spec/outline-v0.4.md §6.3",
+    "started_at": "2026-09-25T15:24:53.839282+00:00",
+    "git_head": "6bbefbd90fe43aecaad3a7cdbf65bca16236eee9",
+    "model_same": "deepseek-flash",
+    "model_cross": "deepseek-v4-pro",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.7,
+    "episode_budget": {
+      "max_calls": 8,
+      "max_steps": 12,
+      "max_prompt_tokens": 200000,
+      "max_completion_tokens": 20000,
+      "max_wall_seconds": 600.0
+    },
+    "E_train_episodes": 8,
+    "R_repeats": 5,
+    "base_seed": 20260925,
+    "mde": 0.03,
+    "unit": "task",
+    "in_episode_verification": false,
+    "retrieve_k": 2,
+    "raw_item_chars": 600,
+    "held_out_families": [
+      "sortkey",
+      "strindex"
+    ],
+    "split_A_train_tasks": 12,
+    "split_A_test_tasks": 16,
+    "split_B_train_tasks": 16,
+    "split_B_test_tasks": 16,
+    "split_A_arms": [
+      "base_same",
+      "form_raw",
+      "form_summary",
+      "form_structured"
+    ],
+    "split_B_arms": [
+      "base_same",
+      "base_cross",
+      "fit_solver_same",
+      "fit_solver_cross",
+      "fit_domain_same",
+      "fit_domain_cross"
+    ],
+    "trial": false,
+    "backend_retries_same": 0,
+    "backend_retries_cross": 0
+  },
+  "finished_at": "2026-09-28T15:42:46.959082+00:00",
+  "arms": [
+    {
+      "split": "A",
+      "arm": "base_same",
+      "n": 80,
+      "summary_pass": 72,
+      "trace_pass": 70,
+      "conflicts": [
+        {
+          "split": "A",
+          "arm": "base_same",
+          "task_id": "sortkey-03",
+          "repeat": 2,
+          "summary": true,
+          "partial": true,
+          "trace": false,
+          "trace_run_id": "static-20260926T090253Z-97664c",
+          "started_at": "2026-09-26T09:02:53.548270+00:00",
+          "trace_path": "experiments/runs/E03-20260925T152453Z-254845/traces/A/base_same/sortkey-03-r2/trace.json",
+          "sha256": "58b3273cce4251b4a823f6ccebeb34952271be97a127e0330cdf4f0123b1ceb2",
+          "matches": false
+        },
+        {
+          "split": "A",
+          "arm": "base_same",
+          "task_id": "sortkey-03",
+          "repeat": 3,
+          "summary": true,
+          "partial": true,
+          "trace": false,
+          "trace_run_id": "static-20260926T090256Z-6f8e13",
+          "started_at": "2026-09-26T09:02:56.819115+00:00",
+          "trace_path": "experiments/runs/E03-20260925T152453Z-254845/traces/A/base_same/sortkey-03-r3/trace.json",
+          "sha256": "bf38c5d7ea89f8fd634b4258cdc03960a82a24fcec54a8579b89e116af462c07",
+          "matches": false
+        }
+      ],
+      "trace_usage": {
+        "calls": 391,
+        "prompt_tokens": 142315,
+        "completion_tokens": 23457,
+        "wall_seconds": 535.6857030995889
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 399,
+        "prompt_tokens": 146154,
+        "completion_tokens": 23808,
+        "wall_seconds": 560.3939779997454,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": -8,
+        "prompt_tokens": -3839,
+        "completion_tokens": -351,
+        "wall_seconds": -24.70827490015654
+      },
+      "analysis_status": "quarantined_baseline_and_all_relative_gains"
+    },
+    {
+      "split": "A",
+      "arm": "form_raw",
+      "n": 80,
+      "summary_pass": 71,
+      "trace_pass": 71,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 384,
+        "prompt_tokens": 299511,
+        "completion_tokens": 27034,
+        "wall_seconds": 439.9046720000915
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 384,
+        "prompt_tokens": 299511,
+        "completion_tokens": 27034,
+        "wall_seconds": 439.9046720000915,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "A",
+      "arm": "form_summary",
+      "n": 80,
+      "summary_pass": 62,
+      "trace_pass": 62,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 376,
+        "prompt_tokens": 155673,
+        "completion_tokens": 34108,
+        "wall_seconds": 463.65250510006445
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 376,
+        "prompt_tokens": 155673,
+        "completion_tokens": 34108,
+        "wall_seconds": 463.65250510006445,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "A",
+      "arm": "form_structured",
+      "n": 80,
+      "summary_pass": 61,
+      "trace_pass": 61,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 367,
+        "prompt_tokens": 175584,
+        "completion_tokens": 22253,
+        "wall_seconds": 404.30967099999543
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 367,
+        "prompt_tokens": 175584,
+        "completion_tokens": 22253,
+        "wall_seconds": 404.30967099999543,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "base_same",
+      "n": 80,
+      "summary_pass": 55,
+      "trace_pass": 55,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 365,
+        "prompt_tokens": 138358,
+        "completion_tokens": 27698,
+        "wall_seconds": 427.8195863996516
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 365,
+        "prompt_tokens": 138358,
+        "completion_tokens": 27698,
+        "wall_seconds": 427.8195863996516,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "base_cross",
+      "n": 80,
+      "summary_pass": 21,
+      "trace_pass": 21,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 276,
+        "prompt_tokens": 121395,
+        "completion_tokens": 61652,
+        "wall_seconds": 903.1623097000411
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 276,
+        "prompt_tokens": 121395,
+        "completion_tokens": 61652,
+        "wall_seconds": 903.1623097000411,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "fit_solver_same",
+      "n": 80,
+      "summary_pass": 56,
+      "trace_pass": 56,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 358,
+        "prompt_tokens": 153464,
+        "completion_tokens": 32774,
+        "wall_seconds": 374.2314798993757
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 358,
+        "prompt_tokens": 153464,
+        "completion_tokens": 32774,
+        "wall_seconds": 374.2314798993757,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "fit_solver_cross",
+      "n": 80,
+      "summary_pass": 29,
+      "trace_pass": 29,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 301,
+        "prompt_tokens": 249265,
+        "completion_tokens": 172180,
+        "wall_seconds": 2084.9186977002537
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 301,
+        "prompt_tokens": 249265,
+        "completion_tokens": 172180,
+        "wall_seconds": 2084.9186977002537,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "fit_domain_same",
+      "n": 80,
+      "summary_pass": 56,
+      "trace_pass": 56,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 356,
+        "prompt_tokens": 178277,
+        "completion_tokens": 27297,
+        "wall_seconds": 331.5079514000099
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 356,
+        "prompt_tokens": 178277,
+        "completion_tokens": 27297,
+        "wall_seconds": 331.5079514000099,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    },
+    {
+      "split": "B",
+      "arm": "fit_domain_cross",
+      "n": 80,
+      "summary_pass": 34,
+      "trace_pass": 34,
+      "conflicts": [],
+      "trace_usage": {
+        "calls": 306,
+        "prompt_tokens": 207725,
+        "completion_tokens": 132228,
+        "wall_seconds": 1514.7015778991627
+      },
+      "summary_ledger": {
+        "episodes": 80,
+        "calls": 306,
+        "prompt_tokens": 207725,
+        "completion_tokens": 132228,
+        "wall_seconds": 1514.7015778991627,
+        "side_calls": 0,
+        "side_prompt_tokens": 0,
+        "side_completion_tokens": 0
+      },
+      "usage_differences": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0
+      },
+      "analysis_status": "verdict_matched_descriptive_only"
+    }
+  ],
+  "adjudication": "No unique replacement/retry lineage in the archived artifacts. Do not select summary or trace as corrected truth. Suspend A/base_same and all A baseline-relative effects and cost efficiency; retain matched memory-arm direct contrasts. Raw artifacts unchanged.",
+  "runner_chain": {
+    "sealed_phase": "trace.verdict -> TaskRuns -> partial.verdicts -> summary.verdicts",
+    "resume": "partial verdicts and ledgers reused per completed arm; no trace hashes bound to checkpoint",
+    "trace_path": "fixed split/arm/task-repeat path can overwrite; overwriting is a possible mechanism, not established fact",
+    "score": "StaticAgent writes trace.verdict from task.verify; additional verify return is ignored in sealed_phase",
+    "backend_retries_recorded": [
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "identity": "Public preview inputs. E01/E02 use archived bytes. E03 uses the separately identified path-redacted derivative for numerical replay. The memory_files entries identify private historical sources.",
+  "summaries": {
+    "E01-20260923T152230Z-90acda": {
+      "path": "experiments/runs/E01-20260923T152230Z-90acda/summary.json",
+      "sha256": "34847232bb8999ac27391d90fd1f25324e5c5e905ec5ebf89cb9199ddfb74960"
+    },
+    "E02-20260924T153511Z-421eac": {
+      "path": "experiments/runs/E02-20260924T153511Z-421eac/summary.json",
+      "sha256": "61d5b100a665a1d4596dc4b8931234976f6078e10bfe73c9e9e376bd954656ba"
+    },
+    "E03-20260925T152453Z-254845": {
+      "path": "analysis/public-inputs/E03-20260925T152453Z-254845-summary.json",
+      "sha256": "eb8b2962c6e462f4ac9362ef43a8eef6e971eaceb958bf05cf0fb47db1cd6a7a",
+      "original_sha256": "15d3586986f698d052d13bf1d0b2c0cd3404eee980944107190d72673d0180d5",
+      "original_path": "experiments/runs/E03-20260925T152453Z-254845/summary.json",
+      "changed_json_fields": [
+        [
+          "memory",
+          "A",
+          "form_raw",
+          1,
+          "text"
+        ],
+        [
+          "memory",
+          "B",
+          "form_raw",
+          6,
+          "text"
+        ]
+      ]
+    }
+  },
+  "suspended": {
+    "run_id": "E03-20260925T152453Z-254845",
+    "arm": "A/base_same",
+    "reason": "summary/checkpoint 72/80 versus saved trace verdicts 70/80; usage differs too; no unique replacement chain",
+    "affected": [
+      "baseline pass rate as corrected fact",
+      "all gains_A points and intervals",
+      "baseline-relative cost efficiency",
+      "conclusion all three memory arms below baseline"
+    ]
+  },
+  "retained_E03": [
+    "memory-arm pass-rate descriptions",
+    "direct structured-minus-summary and raw-minus-summary",
+    "split B direct and corresponding-baseline comparisons, conditional on archived versions"
+  ],
+  "memory_files": {
+    "A": {
+      "path": "experiments/runs/E03-20260925T152453Z-254845/memory_A.json",
+      "sha256": "4cb441bc02781698e3655e0b37d9a9e9d9cb8905ef3c8e7242feb2b7c2349c2f"
+    },
+    "B": {
+      "path": "experiments/runs/E03-20260925T152453Z-254845/memory_B.json",
+      "sha256": "0f66a047e9e3bdd3e25e7e64343519b90cb56fa574cbe662e965dec0c9550314"
+    }
+  }
+}

@@ -1,0 +1,222 @@
+% backmatter/appendixF.tex —— 附录 F 实验成本核算
+% 历史汇总表由 experiments/lab/cost_report.py 聚合，来源与渲染恢复另有保存工件支持。
+% 原始记录保留在 experiments/runs/<run_id>/。金额换算需要用量与对应价目。
+\chapter{实验成本核算}
+\label{app:cost}
+
+\begin{failurebox}
+token 数量需要连同输入、输出的构成与对应单价，才能换算为费用。
+本书已经跑完的三次运行里，历史汇总中的提示 token 占 \calcnum{79.8}\%、生成 token 占 \calcnum{20.2}\%（表 \ref{tab:appF-total}），
+两类 token 若采用不同单价，费用占比就不等于数量占比。
+本书实验的账目先按实物量报告，金额估算还需补齐有来源的价目。
+\end{failurebox}
+
+一个教学算例可以说明数量与费用的区别。假设每个输入 token 的单价为 \calcnum{1} 个费用单位，输出为 \calcnum{4} 个费用单位。方案 A 使用 \calcnum{900} 个输入和 \calcnum{100} 个输出 token，共 \calcnum{1000} 个 token，费用为 \calcnum{1300} 个单位。方案 B 使用 \calcnum{100} 个输入和 \calcnum{800} 个输出 token，共 \calcnum{900} 个 token，费用为 \calcnum{3300} 个单位。B 的总量较少，但输出占比更高，在这组假设单价下费用更高。算例中的单价仅用于教学。
+
+\section{成本账的三条口径}
+
+\begin{enumerate}
+  \item \textbf{先查总账是否已含旁路。}E01/E02 的调用与 token 总数已包含旁路分项；
+        E03 的臂账主要覆盖测试回合，来源与渲染另记。不能仅凭相同字段名将各账重复相加。
+        把副账藏起来，跨任务更新看起来就没有构建成本——这正是第 1 章公理 2 要求重新回答的那个问题。
+  \item \textbf{分别报告实物量及其覆盖范围。}调用次数、提示 token、生成 token 与回合计时分别列示。
+        当前实验台的费用记录尚未接入有来源的价目，\texttt{Usage} 默认将 \texttt{usd} 置为 \texttt{null}、\texttt{unpriced} 置为真（附录 \ref{app:repro}）。
+  \item \textbf{墙钟不是机器成本。}它含网络等待，与本机当时的出口质量相关，
+        跨运行比较需要控制或说明机器、网络与计时边界；同一运行内也要保证覆盖环节一致。
+\end{enumerate}
+
+\section{三次运行的账目}
+\label{sec:appF-ledger}
+
+\begin{sloppypar}
+下表由 \texttt{python experiments/lab/cost\_report.py} 从
+\texttt{analysis/inputs.json}列明并绑定SHA的\texttt{experiments/runs/<run-id>/summary.json}中读取\texttt{ledger}，可离线复算历史汇总。缺任一必需运行、输入哈希不符或必需账字段缺失时，脚本失败，不输出不完整合计。
+配置记录的同模型别名为 \texttt{deepseek-flash}，E03 的换读取者别名为 \texttt{deepseek-v4-pro}，温度为 \measured{0.7}。E01/E02 每臂训练配额 $E=$\measured{8}，E03 将该配额用于每个拆分的来源采集；评价阶段每题重复运行 $R=$\measured{5} 次。
+\end{sloppypar}
+
+\begin{small}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.2cm}rrrrr}
+\caption{E01/E02/E03 三次运行历史汇总中的已记录成本（覆盖范围见表注）}\label{tab:appF-ledger}\\
+\toprule
+运行 & episode 数 & 调用次数 & 提示 token & 生成 token & 回合计时和（秒） \\
+\midrule
+\endfirsthead
+\caption[]{三次运行历史汇总中的已记录成本（续）}\\
+\toprule
+运行 & episode 数 & 调用次数 & 提示 token & 生成 token & 回合计时和（秒） \\
+\midrule
+\endhead
+E01 四格（\measured{4} 臂） & \measured{352} & \measured{1970} & \measured{932284} & \measured{187008} & \measured{1605.7} \\
+E02 六臂 & \measured{528} & \measured{2464} & \measured{1038298} & \measured{210359} & \measured{2113.1} \\
+E03 十臂 & \measured{800} & \measured{3488} & \measured{1825406} & \measured{561032} & \measured{7504.6} \\
+\midrule
+合计 & \calcnum{1680} & \calcnum{7922} & \calcnum{3795988} & \calcnum{958399} & \calcnum{11223.4} \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+\vspace{2mm}
+\begin{footnotesize}
+数字身份：[实测] 本书运行 \texttt{E01-20260923T152230Z-90acda}、\texttt{E02-20260924T153511Z-421eac}、\\
+\texttt{E03-20260925T152453Z-254845}，聚合脚本 \texttt{experiments/lab/cost\_report.py}。
+E03 已含全部 \measured{10} 个臂，其中第 \measured{10} 臂 \texttt{fit\_domain\_cross}
+于 2026-09-28 由跨日期的 \texttt{--resume-latest} 续跑补齐（此前阻塞于换模型后端余额，HTTP 402）；
+合计行为上方三行相加，身份为[计算]，不是完整生命周期总量。A/base\_same的保存轨迹比该历史臂账少8次调用、3839个提示token、351个生成token，计时和少约24.7083秒；判定亦冲突（第~\ref{ch05}章）。原账仅作历史记录，不将其改成所谓已校正总量，也不据此判断基线成本效率。
+E03 的来源与渲染成本在续跑汇总中缺失，恢复范围见本附录\S\ref{sec:appf-e03-recovered}；E01/E02 的调用总数已含各自旁路分项。历史\texttt{calls}按已返回的逻辑生成计数，不是HTTP请求尝试总数；早期失败与内部重试没有完整逐次用量账，不能用某个续跑进程的计数补齐全程。\par
+\end{footnotesize}
+
+\section{单位量：把账换成可比的形式}
+
+\begin{sloppypar}
+除以回合数只消除一种规模差异；任务、模型和计费范围不同仍不可直接归因。E01、E02的分母分别按\calcnum{$4(8+80)=352$}与\calcnum{$6(8+80)=528$}合计训练和封存评价；E03的\mbox{\calcnum{$10\times80=800$}}只含十臂封存评价，来源采集另列于后文。表~\ref{tab:appF-unit}因此是各自账目范围内的描述性均值，不是共同阶段的单位任务成本。
+\end{sloppypar}
+
+\begin{table}[htbp]
+\centering
+\caption{历史汇总除以episode数：描述性实物量，非已校正成本}
+\label{tab:appF-unit}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.4cm}rrrr}
+\toprule
+运行 & 调用次数 & 提示 token & 生成 token & 回合计时和（秒） \\
+\midrule
+E01 & \calcnum{5.60} & \calcnum{2649} & \calcnum{531} & \calcnum{4.56} \\
+E02 & \calcnum{4.67} & \calcnum{1966} & \calcnum{398} & \calcnum{4.00} \\
+E03 & \calcnum{4.36} & \calcnum{2282} & \calcnum{701} & \calcnum{9.38} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{sloppypar}
+按历史汇总除以各自的回合数，E03 的每 episode 调用次数为 \calcnum{4.36}，低于 E01 的 \calcnum{5.60}，
+每 episode 平均回合计时却是后者的约 \calcnum{2.1} 倍。E03 的换读取者臂耗时更长，模型、输出长度与运行时段均可能影响计时（详见下节）。
+\textbf{调用次数相近不等于耗时相近}——这也是"只报调用数"的成本表会误导的地方。
+\end{sloppypar}
+
+\section{换读取者的成本：E03 的换模型臂}
+\label{sec:appF-cross}
+
+\begin{sloppypar}
+E03比较同模型（\texttt{deepseek-flash}）与换模型（\texttt{deepseek-v4-pro}）读取者。
+设计上配对记忆与题目，但续跑跨日期、后端别名可变，尚不能隔离模型效应（表 \ref{tab:appF-cross}）。
+\end{sloppypar}
+
+\begin{table}[htbp]
+\centering
+\caption{换读取者后的成本变化：同模型臂与换模型臂逐项对照}
+\label{tab:appF-cross}
+\begin{small}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.0cm}rrrr}
+\toprule
+臂 & 调用次数 & 提示 token & 生成 token & 回合计时和（秒） \\
+\midrule
+\texttt{base\_same} & \measured{365} & \measured{138358} & \measured{27698} & \measured{427.8} \\
+\texttt{base\_cross} & \measured{276} & \measured{121395} & \measured{61652} & \measured{903.2} \\
+\texttt{fit\_solver\_same} & \measured{358} & \measured{153464} & \measured{32774} & \measured{374.2} \\
+\texttt{fit\_solver\_cross} & \measured{301} & \measured{249265} & \measured{172180} & \measured{2084.9} \\
+\bottomrule
+\end{tabular}
+\end{small}
+
+\vspace{2mm}
+\begin{footnotesize}
+数字身份：[实测] 本书运行 \texttt{E03-20260925T152453Z-254845}（拆分 B，每臂 \measured{80} 个 episode）。
+\end{footnotesize}
+\end{table}
+
+\begin{sloppypar}
+换读取者之后，调用次数反而下降（\measured{365} → \measured{276}、\measured{358} → \measured{301}），
+提示 token 在基线上也下降，但\textbf{生成 token 与回合计时和大幅上升}：
+拟合到求解器这一对从 \measured{32774} 生成 token / \measured{374.2} 秒
+变成 \measured{172180} 生成 token / \measured{2084.9} 秒。
+如果只统计调用次数，会得出"换模型更省"的相反结论。
+这也是第 15 章讨论迁移时必须同时给四张账的原因。
+\end{sloppypar}
+
+\section{为什么本书实验账暂不折算金额}
+
+\begin{itemize}
+  \item 当前 \texttt{Usage} 的默认金额为 \texttt{null}（附录 \ref{app:repro}）。
+        本书实验的金额估算需要完整用量与对应价目，论文自报金额则按原文注明来源。
+  \item 定价随供应商、时段、批量折扣变化，且提示与生成两类 token 定价不同，
+        把本书的实物量折算成金额需要一张有出处的定价表（\texttt{calculations/pricing.yaml}，待办）。
+  \item 跨论文金额比较需要统一价格假设：各家用的是不同时点的不同价目，
+        把"花了多少钱"放在一起比，会同时混入价目和方法差异。
+\end{itemize}
+
+\begin{sloppypar}
+本书的做法是：本书实验的已知成本用实物量表述，尽量并列报告调用、输入、输出和对应时间范围；引用论文金额另标出处。
+如需金额估算，先补齐缺失用量，再区分输入、输出、缓存及相应价目；
+账目本身不依赖任何具体价格。
+\end{sloppypar}
+
+读外部费用表时也要逐项展开。本书所引JitRL版本的表9虽以训练成本为题，正文与成本附录实际将WebRL的GPU训练周期费用估算，同JitRL等方法按API使用量计算的运行费用并列\cite{jitrl-2601}。将这样的金额用于部署比较，还需明确训练费摊销给多少任务，以及准备、验证与后续推理是否已经入账。
+
+\begin{table}[htbp]
+\centering
+\caption{E01/E02/E03 三次运行历史汇总已记录的 token 构成}
+\label{tab:appF-total}
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.0cm}r>{\raggedright\arraybackslash}p{3.0cm}}
+\toprule
+项 & 数值 & 说明 \\
+\midrule
+提示 token 合计 & \calcnum{3795988} & 上表已记录输入 \\
+生成 token 合计 & \calcnum{958399} & 上表已记录输出 \\
+token 合计 & \calcnum{4754387} & 上两项之和 \\
+提示占比 & \calcnum{79.8}\% & 四舍五入到一位小数 \\
+生成占比 & \calcnum{20.2}\% & 四舍五入到一位小数 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{pitfallbox}
+\textbf{反例：把墙钟当成机器成本做跨论文比较。}
+本书 E02 的 \measured{2113.1} 秒是回合计时之和，未完整包含旁路反馈与经验生成，不是六臂端到端耗时。旧静态执行器还在最后一次验收前取得回合计时，不能将该字段解释为包含终验的全过程墙钟。
+调用与 token 总数已经包含这些旁路调用，其分项不得再相加。
+换机器、时段或重新采样可能同时改变耗时、轨迹、调用与 token 数；跨运行比较必须先统一各项口径。
+\end{pitfallbox}
+
+\begin{pitfallbox}
+\textbf{反例：把"训练免费"当成"没有演化成本"。}
+JitRL 一类方法不执行该阶段的权重训练，但经验采集、检索、反馈与推理仍有成本。无参数更新不能被解释成无计算投入。
+本书的 $C_{\text{evolve}}$（第 13 章）要求把构建、验证、回归三部分都算进去；
+只对比训练算力，会把"不需要训练"的方法系统性地判成更便宜。
+\end{pitfallbox}
+
+\openquestion{本附录前三次历史汇总覆盖 \calcnum{1680} 个 episode，仍缺 E03 渲染用量及部分计时；E05 v2 的小规模试跑另见第~\ref{ch08}章，未混入这里的三次运行合计。按调用数或 token 定义的交点可以在相应完整账目内讨论；美元交点还需要可靠价目与用量。不同成本定义不能合并成一个无条件的回本次数。}
+
+\section{E03 续跑后的来源与渲染成本缺口}
+\label{sec:appf-e03-recovered}
+
+最终汇总的 \texttt{side\_ledger} 全零，不能解释为没有构建费用。
+续跑流程重建了这张账，却没有从中断文件恢复早期的来源采集与经验渲染用量。
+离线逐条读取来源轨迹，恢复 \measured{16} 个回合、\measured{79} 次调用、
+\measured{29443} 个输入 token、\measured{4243} 个输出 token，回合计时和约 \measured{72.09} 秒。
+
+保留实现对拆分 A 的两种模型形式、拆分 B 的四种模型形式分别处理八份来源；
+按已保存条目重建为 \calcnum{48} 次成功渲染调用。原始渲染 token 用量缺失，
+不能用最终经验长度替代，也不能把续跑段的耗时当整项实验墙钟。
+这里新增的是审计补表，没有修改历史结果或重新调用模型。
+
+\begin{sloppypar}
+本附录前面的总数保留为历史汇总覆盖范围，不能用于完整生命周期效率排名。
+可恢复的来源账、推算的渲染次数与未知的渲染用量分别登记于
+\path{analysis/memory-audit-reproduction.json}；旧的有日期报告保留供追溯。
+只有补齐或明确约束缺失部分以后，才能作更强的成本比较。
+\end{sloppypar}
+
+\section{唯一请求账怎样避免重复与漏计}
+\label{sec:appf-requestjournal}
+
+新版 E11、E12 把模型费用合计建立在同一个请求记录层上。每次逻辑生成有独立标识，其下再列网络尝试；episode 轨迹可以引用这些记录，却不能在总账中再贡献一份相同用量。执行器、候选构建器和恢复评价都通过这一层调用，才能让“总调用上限”覆盖实验的实际全部阶段。
+
+设一个教学请求第一次连接中断，第二次成功，成功响应报告输入\calcnum{100}、输出\calcnum{20}个 token。可确认的记录是一件逻辑生成、两次传输尝试、\calcnum{120}个已知 token，以及第一次尝试用量未知。不能把它报告成恰好\calcnum{120}个总 token；也不能把同一成功回复在后端账和 episode 账中各加一次，变成\calcnum{240}。这些数是核算示例，不是本书新增的模型请求。
+
+未知项应保留原因。没有收到响应、响应缺用量字段、进程在记录完成前退出，虽然都会造成缺失，后续可恢复途径可能不同。供应商账单若能够匹配请求标识，可以作为额外证据补账；仅凭本地候选长度通常无法恢复生成过程消耗。补账时应保留原始缺失状态和新增来源，不能重写成运行当时就已知道。
+
+阶段账同样需要互斥的归属。按E12新版设计，共同初始记忆与候选池服务于多个臂，实际执行时共享准备支出只计一次；可以为经济分析另外分摊，但分摊表应清楚注明规则，不能与实际支出再次相加。恢复复评若实际执行，会产生额外请求，即使恢复后的文件完全等于旧文件，这些请求也不能因“回到了原点”而取消。当前E12新版只有离线验证，不能将该设计描述成已有付费支出。
+
+预算与费用有不同的时间方向。请求计数上限可以在下一次派发之前拒绝新调用；实际 token 常要等响应返回后才知道。当前新版运行器中的已知 token 与墙钟阈值是前置软停止检查，单次调用或本地验收可能越过阈值。请求数有上限并不意味着金额已硬封顶，失败请求未知费用也不会因为达到停止线而消失。
+
+并发环境还要求区分请求时长和用户等待。多个请求同时等待时，各请求耗时之和可以大于整个阶段墙钟，两者各有用途，不能当成独立费用直接相加。E11、E12拟定的小试按预定顺序运行，离线记录已区分请求与阶段范围；真实小试尚未执行。更换并发策略后，应重新核对这些量的包含关系。
+
+离线脚本后端可以生成已知回复和可人工核对的用量，以检查分项和总数是否相等。它能发现重复加账、恢复漏账或停止线未覆盖候选构建，却不能验证真实提供方的计费口径。工程验证通过后，首次真实小试仍需逐项核对原始响应与汇总；两类证据相接，才可能得到范围明确的模型成本记录。

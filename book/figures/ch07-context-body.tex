@@ -1,0 +1,16 @@
+\begin{tikzpicture}[
+ box/.style={draw,rounded corners=2pt,text width=31mm,minimum height=13mm,align=center,font=\small},
+ arrow/.style={-{Stealth[length=1.6mm]},thick}
+]
+\node[box,fill=gray!10] (old) at (0,0) {原上下文\\保存版本};
+\node[box,fill=orange!12] (rewrite) at (4.2,1.15) {整体重写\\生成完整候选};
+\node[box,fill=blue!10] (delta) at (4.2,-1.15) {增量提案\\标明目标与修改};
+\node[box,fill=orange!8] (diff) at (8.4,1.15) {比较前后差异\\检查遗漏与新增};
+\node[box,fill=blue!8] (merge) at (8.4,-1.15) {检查版本与冲突\\合并合法提案};
+\draw[arrow] (old)--(rewrite);
+\draw[arrow] (old)--(delta);
+\draw[arrow] (rewrite)--(diff);
+\draw[arrow] (delta)--(merge);
+\node[align=left,text width=136mm,font=\footnotesize] at (4.2,-2.5)
+{两种路径都应保存候选、检查内容变化并独立评价。增量便于定位修改，仍可能追加错误或造成冲突；整体重写有遗漏风险，也可以通过版本差异审计。图中没有性能排名。};
+\end{tikzpicture}

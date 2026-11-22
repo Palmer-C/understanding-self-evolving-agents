@@ -1,0 +1,69 @@
+{
+  "identity": "teaching_assumptions_and_source_table_arithmetic_not_experiment",
+  "window_rule": "independent Bernoulli failures; two adjacent windows of size two; absolute difference >=0.5",
+  "p_half": [
+    "5/8",
+    0.625
+  ],
+  "p_quarter": [
+    "69/128",
+    0.5390625
+  ],
+  "run2_in_8_p_quarter": [
+    "20905/65536",
+    0.3189849853515625
+  ],
+  "teaching_trace": {
+    "verdicts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true
+    ],
+    "construction_positions_1based": {
+      "per_task": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "periodic": [
+        2,
+        4,
+        6
+      ],
+      "event": [
+        1,
+        5,
+        6,
+        7
+      ]
+    }
+  },
+  "dmem_table1_cost_ratio": 5.16614420062696,
+  "dmem_table1_reduction_percent": 80.64320388349515,
+  "dmem_v1_reduction_percent_vs_synchronous": 70.32766990291262,
+  "dmem_v3_v4_cost_ratio": 1.664576802507837,
+  "jitrl_table9_webrl_ratio": 34.13793103448276,
+  "hypothetical_gate_break_even": {
+    "N": 100,
+    "update_cost": 10,
+    "signal_cost": 1,
+    "fixed_cost": 50,
+    "r_upper_strict": 0.85
+  },
+  "quality_ratio_counterexample": {
+    "baseline": {
+      "successes": 8,
+      "cost": 10
+    },
+    "event": {
+      "successes": 6,
+      "cost": 5
+    }
+  }
+}

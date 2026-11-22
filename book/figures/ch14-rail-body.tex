@@ -1,0 +1,21 @@
+% Proposed responsibility boundaries; not a claim of deployed OS isolation.
+\begin{tikzpicture}[x=1cm,y=1cm,
+  block/.style={draw,rounded corners=2pt,text width=3cm,minimum height=1cm,align=center,font=\small},
+  arrow/.style={-{Stealth[length=1.7mm]},thick},
+  note/.style={text width=13cm,align=left,font=\footnotesize}]
+  \node[block,fill=blue!8] (raw) at (0,2) {只追加原始记录\\来源、反馈、历史版本};
+  \node[block,fill=orange!10] (memory) at (0,-0.2) {可变状态与快照\\摘要、技能、检索索引};
+  \node[block,fill=orange!10] (candidate) at (5,2) {候选版本\\绑定来源与依赖清单};
+  \node[block,fill=gray!8] (dev) at (5,-0.2) {开发测试与反馈\\允许排错的具体范围};
+  \node[block,fill=green!9] (judge) at (10,2) {独立评价流程\\固定规则与版本记录};
+  \node[block,fill=green!9] (result) at (10,-0.2) {结果与发布决定\\报告实际信息边界};
+  \draw[arrow] (raw) -- (candidate);
+  \draw[arrow] (memory.east) -- (candidate.south west);
+  \draw[<->,>=Stealth,thick] (candidate.south) -- (dev.north);
+  \draw[arrow] (candidate) -- node[above,font=\scriptsize] {提交工件} (judge);
+  \draw[arrow] (judge) -- (result);
+  \draw[dashed,thick] (7.5,-1.1) -- (7.5,3.1);
+  \node[font=\scriptsize] at (10,3.05) {评价规则不由候选直接改写};
+  \draw[arrow] (raw.south) -- node[right,font=\scriptsize] {追溯、重建} (memory.north);
+  \node[note,anchor=north west] at (-1.5,-1.6) {图示为设计分工：开发反馈可以可读；最终评价若声明隐藏，须另有实际访问隔离。\\本书旧实验的测试写入限制与查询账不构成完整隐藏测试，也不构成操作系统级沙箱。};
+\end{tikzpicture}

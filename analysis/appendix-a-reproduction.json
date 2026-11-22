@@ -1,0 +1,152 @@
+{
+  "identity": "constructed teaching inputs and exact arithmetic; not model calls or confidence coverage validation",
+  "families": [
+    {
+      "name": "A",
+      "task_count": 8,
+      "assigned_difference": 0.1
+    },
+    {
+      "name": "B",
+      "task_count": 2,
+      "assigned_difference": -0.2
+    },
+    {
+      "name": "C",
+      "task_count": 2,
+      "assigned_difference": 0.3
+    },
+    {
+      "name": "D",
+      "task_count": 2,
+      "assigned_difference": -0.1
+    }
+  ],
+  "equal_family_difference": 0.025,
+  "pooled_task_difference": 0.05714285714285714,
+  "exhaustive_conditional_bootstrap": {
+    "draws": 256,
+    "distinct_means": 19,
+    "quantile_definition": "inverse empirical CDF, index ceil(p*N)-1, no interpolation",
+    "q025": -0.15,
+    "q975": 0.2,
+    "resampling_scope": "four observed family means held fixed; does not validate frequentist coverage",
+    "distribution": [
+      {
+        "mean": -0.2,
+        "multiplicity": 1
+      },
+      {
+        "mean": -0.175,
+        "multiplicity": 4
+      },
+      {
+        "mean": -0.15,
+        "multiplicity": 6
+      },
+      {
+        "mean": -0.125,
+        "multiplicity": 8
+      },
+      {
+        "mean": -0.1,
+        "multiplicity": 13
+      },
+      {
+        "mean": -0.075,
+        "multiplicity": 16
+      },
+      {
+        "mean": -0.05,
+        "multiplicity": 22
+      },
+      {
+        "mean": -0.025,
+        "multiplicity": 24
+      },
+      {
+        "mean": 0.0,
+        "multiplicity": 22
+      },
+      {
+        "mean": 0.025,
+        "multiplicity": 28
+      },
+      {
+        "mean": 0.05,
+        "multiplicity": 22
+      },
+      {
+        "mean": 0.075,
+        "multiplicity": 24
+      },
+      {
+        "mean": 0.1,
+        "multiplicity": 19
+      },
+      {
+        "mean": 0.125,
+        "multiplicity": 12
+      },
+      {
+        "mean": 0.15,
+        "multiplicity": 16
+      },
+      {
+        "mean": 0.175,
+        "multiplicity": 4
+      },
+      {
+        "mean": 0.2,
+        "multiplicity": 10
+      },
+      {
+        "mean": 0.25,
+        "multiplicity": 4
+      },
+      {
+        "mean": 0.3,
+        "multiplicity": 1
+      }
+    ]
+  },
+  "missing_pair_example": {
+    "planned_pairs": 14,
+    "complete_pairs": 10,
+    "observed_difference_sum": 1,
+    "complete_case_mean": 0.1,
+    "bounds_on_planned_mean": [
+      -0.21428571428571427,
+      0.35714285714285715
+    ]
+  },
+  "cost_ratio_example": {
+    "gains": [
+      0.1,
+      0.2
+    ],
+    "costs": [
+      2,
+      10
+    ],
+    "mean_of_ratios": 0.035,
+    "ratio_of_sums": 0.025
+  },
+  "assigned_random_effect_example": {
+    "family_variance": 0.04,
+    "task_variance": 0.09,
+    "repeat_variance": 0.16,
+    "variance_of_mean": {
+      "F4_T5_R2": 0.0185,
+      "F4_T5_R20": 0.0149,
+      "F40_T5_R2": 0.00185
+    },
+    "standard_error": {
+      "F4_T5_R2": 0.13601470508735444,
+      "F4_T5_R20": 0.12206555615733702,
+      "F40_T5_R2": 0.04301162633521313
+    },
+    "scope": "independent additive zero-mean components; not fitted to binary E01 data"
+  },
+  "calls": 0
+}

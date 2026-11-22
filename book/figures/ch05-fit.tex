@@ -1,0 +1,11 @@
+% figures/ch05-fit.tex —— 第 5 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch05.tex 中 \input{figures/ch05-fit}
+% 图主体在 ch05-fit-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch05-fit-body}
+\caption{同一条来源记录可向求解器或问题域两种方向渲染，再交给同模型与换模型读取者。
+图示为比较结构，不预设哪种形式更好。每个读取者都需要自己的无记忆基线；
+还须核对渲染造成的内容、长度与检索变化，不能把同源等同于其他条件完全相同。}
+\label{fig:ch05-fit}
+\end{figure}

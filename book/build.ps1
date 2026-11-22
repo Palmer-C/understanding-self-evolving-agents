@@ -1,0 +1,108 @@
+﻿# build.ps1 —— 编译全书
+# 从仓库根目录运行 powershell -File .\book\build.ps1。
+# 含非 ASCII 字符的目录可能影响 biber 读取 main.bcf；可用 -BuildRoot 选择 ASCII 临时目录。
+# 引擎：XeLaTeX（ctex + Windows 字体集），参考文献：biber，由 latexmk 统一调度。
+
+param(
+    [switch]$Clean,
+    [string]$BuildRoot,
+    [string]$Latexmk = 'latexmk'
+)
+
+$ErrorActionPreference = 'Continue'
+$here = Split-Path -Parent $MyInvocation.MyCommand.Definition
+# 每次在独立目录构建，避免复用上一次编译的中间文件。
+$latexmkCommand = Get-Command -Name $Latexmk -CommandType Application -ErrorAction Stop | Select-Object -First 1
+$tmp = if ($BuildRoot) { $BuildRoot } else { [System.IO.Path]::GetTempPath() }
+if (-not $tmp) { throw '请使用 -BuildRoot 指定可写的临时构建目录。' }
+$tmp = [System.IO.Path]::GetFullPath($tmp)
+[System.IO.Directory]::CreateDirectory($tmp) | Out-Null
+$work = Join-Path $tmp "seab-build-$([System.Diagnostics.Process]::GetCurrentProcess().Id)-$([Guid]::NewGuid().ToString('N'))"
+$latexmk = $latexmkCommand.Source
+$outdir = Join-Path $here 'build'
+
+if ($Clean -and (Test-Path $work)) { Remove-Item $work -Recurse -Force }
+if (-not (Test-Path $work)) { New-Item -ItemType Directory -Force -Path $work | Out-Null }
+foreach ($sub in @('build', 'build\chapters', 'build\frontmatter', 'build\backmatter')) {
+    $d = Join-Path $work $sub
+    if (-not (Test-Path $d)) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
+}
+
+# 同步源文件（排除构建目录与产物）
+Get-ChildItem -Path $here -Recurse -File | Where-Object {
+    $_.FullName -notlike '*\build\*' -and (
+        $_.Extension -ne '.pdf' -or
+        $_.FullName.StartsWith((Join-Path $here 'figures\generated\'), [System.StringComparison]::OrdinalIgnoreCase)
+    )
+} | ForEach-Object {
+    $rel = $_.FullName.Substring($here.Length).TrimStart('\')
+    $dst = Join-Path $work $rel
+    $dd = Split-Path -Parent $dst
+    if (-not (Test-Path $dd)) { New-Item -ItemType Directory -Force -Path $dd | Out-Null }
+    Copy-Item -LiteralPath $_.FullName -Destination $dst -Force -ErrorAction Stop
+}
+Push-Location $work
+$log = & $latexmk -xelatex -interaction=nonstopmode -file-line-error -outdir=build main.tex 2>&1 | Out-String
+$code = $LASTEXITCODE
+Pop-Location
+
+if (-not (Test-Path $outdir)) { New-Item -ItemType Directory -Force -Path $outdir | Out-Null }
+$log | Out-File (Join-Path $outdir 'build.log') -Encoding utf8
+
+$srcPdf = Join-Path $work 'build\main.pdf'
+
+# undef 判据：只看 latexmk 收敛之后的最终 main.log，不再扫 latexmk 的 stdout。
+# 旧判据用 -match 'Undefined (citation|reference)'（大小写不敏感），把 LaTeX 的汇总行
+# "There were undefined references." 也算成一条；首轮 pass 必然出该行（\include 的章节 aux
+# 要等 aux 收敛），于是 undef 虚高且不随收敛归零。同时真实条目
+# "LaTeX Warning: Reference `x' undefined" 反而不匹配该模式——既误报又漏报。
+# 新判据只认带名字的条目行，并显式排除汇总行；来源是最终 pass 的日志，故收敛后即为 0。
+# 修复（2026-09-20 第 6 班）：原先 main.log 缺失时 $undef 记 0，build-status 会出现
+# "假绿"（第 3 班 handoff 已登记该风险）。现在缺失时记 -1，明确表示"无法验证"：
+# 出现 undef=-1 时必须以 exit != 0 为准，不得把 -1 当作 0 通过验收。
+# 修复（2026-09-20 第 6 班）：Join-Path 在本机 PS 5.1 以 -File 子进程方式运行时，
+# 会把 $finalLog 偶发赋成 null（同一份脚本连续跑几次，finalLog 时有时无，
+# 而紧邻的 $srcPdf 用同样的 Join-Path 却是好的）。加一道显式拼接回退，
+# 并把实际使用的工作目录写进 build-diag.txt，便于下一班核对 undef 判据的来源。
+$finalLog = Join-Path $work 'build\main.log'
+if (-not $finalLog) { $finalLog = "$work\build\main.log" }
+$undefCount = -1
+@("tmp=[$tmp]", "work=[$work]", "finalLog=[$finalLog]") | Out-File (Join-Path $outdir 'build-diag.txt') -Encoding utf8
+if ($finalLog -and (Test-Path -LiteralPath $finalLog)) {
+    $undef = @(Get-Content -LiteralPath $finalLog | Where-Object {
+        ($_ -match 'Reference\s+.+\s+undefined' -or $_ -match 'Citation\s+.+\s+undefined') -and
+        $_ -notmatch 'There were undefined'
+    })
+    $undefCount = $undef.Count
+} else {
+    $undef = @()
+}
+$errs  = ($log -split "`n") | Where-Object { $_ -match ':\d+:\s' -and $_ -notmatch 'Latexmk' }
+
+$st = @()
+$st += "exit=$code"
+$st += "pdf=$((Test-Path $srcPdf))"
+$st += "undef=$undefCount"
+$st += "errors=$($errs.Count)"
+$st | Out-File (Join-Path $outdir 'build-status.txt') -Encoding utf8
+
+# 失败产物只留在独立临时目录，不能覆盖上一份通过检查的PDF。
+$publishable = ($code -eq 0 -and (Test-Path $srcPdf) -and $undefCount -eq 0 -and $errs.Count -eq 0)
+if ($publishable) {
+    Copy-Item $srcPdf (Join-Path $outdir 'main.pdf') -Force
+    Copy-Item $srcPdf (Join-Path $here 'main.pdf') -Force
+}
+# 先清掉上一轮的产物报告，避免"本次干净但 errors.txt 仍写着上一次的错"这种误判
+foreach ($old in @('undefined.txt', 'errors.txt')) {
+    $p = Join-Path $outdir $old
+    if (Test-Path $p) { Remove-Item $p -Force }
+}
+if ($undef.Count -gt 0) { $undef | Select-Object -First 40 | Out-File (Join-Path $outdir 'undefined.txt') -Encoding utf8 }
+if ($errs.Count -gt 0)  { $errs  | Select-Object -First 40 | Out-File (Join-Path $outdir 'errors.txt') -Encoding utf8 }
+
+# 把真实验收结果传回调用者；不能因最后一次Out-File成功而返回0。
+if ($publishable) {
+    exit 0
+}
+if ($code -ne 0) { exit $code }
+exit 1

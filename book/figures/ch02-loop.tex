@@ -1,0 +1,10 @@
+% figures/ch02-loop.tex —— 第 2 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch02.tex 中 \input{figures/ch02-loop}
+% 图主体在 ch02-loop-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch02-loop-body}
+\caption{一次更新的闭环：执行器产生轨迹，反馈器产生信号，修改器产生候选版本，
+Gate 决定候选暂不发布、影子运行还是灰度发布。$\mathcal V$ 默认冻结，按固定的任务划分与验收规则，为执行和候选比较提供参照。}
+\label{fig:ch02-loop}
+\end{figure}

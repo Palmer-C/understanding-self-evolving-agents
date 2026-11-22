@@ -1,0 +1,14 @@
+% figures/timescale-standalone.tex —— 三层时间尺度图的单独编译入口
+% 用途：改图时不必编译全书。
+% 用法（在 ASCII 目录下，Windows 非 ASCII 路径会影响 TeX 工具链）：
+%   xelatex -interaction=nonstopmode timescale-standalone.tex
+\documentclass[11pt]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric}
+\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\pagestyle{empty}
+\begin{document}
+\input{timescale-body}
+\end{document}

@@ -1,0 +1,9 @@
+% figures/ch13-trigger.tex —— 第 13 章核心图（全书引用入口）
+% 用法：在 book/chapters/ch13.tex 中 \input{figures/ch13-trigger}
+% 图主体在 ch13-trigger-body.tex，便于单独编译与复用。
+\begin{figure}[htbp]
+\centering
+\input{figures/ch13-trigger-body}
+\caption{固定判定输入下的调度教学例：配额为\calcnum{4}次、周期为\calcnum{2}题、末题不构建。事件臂在第\calcnum{1、5、6、7}题后获准构建；首题来自冷启动，第五题的短窗变化恰好达到阈值。末题虽有请求，仍不构建。构建标记表示获准尝试，不代表发布成功或能力收益。实际模型运行的三臂判定可能不同。}
+\label{fig:ch13-trigger}
+\end{figure}

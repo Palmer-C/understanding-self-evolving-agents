@@ -1,0 +1,15 @@
+% 分析框架，非所有方法共同实现。
+\begin{tikzpicture}[
+ b/.style={draw,rounded corners=2pt,text width=3.2cm,minimum height=1.2cm,align=center,font=\small},
+ a/.style={-{Stealth[length=2mm]},thick}]
+ \node[b,fill=orange!10] (gen) at (0,0) {任务生成\\来源、变体与版本};
+ \node[b,fill=yellow!10] (filter) at (4.8,0) {课程筛选\\执行检查、去重\\或内部难度代理};
+ \node[b,fill=blue!8] (solve) at (9.6,0) {求解与学习\\轨迹、反馈与策略};
+ \draw[a] (gen.east)--node[above,font=\scriptsize]{候选}(filter.west);
+ \draw[a] (filter.east)--node[above,font=\scriptsize]{保留}(solve.west);
+ \draw[a] (solve.north) -- ++(0,0.65) -| node[pos=.25,above,font=\scriptsize]{表现或一致性代理反馈}(gen.north);
+ \node[b,fill=green!8] (eval) at (9.6,-2.3) {评价与保持\\明确范围与独立性};
+ \draw[a] (solve.south)--(eval.north);
+ \node[align=left,text width=7cm,font=\small] at (2.4,-2.3)
+ {筛选通过不保证正确；多数一致不代表真值。\\评价题参与选择后，应登记其开发用途。};
+\end{tikzpicture}

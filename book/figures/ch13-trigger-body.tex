@@ -1,0 +1,25 @@
+% Teaching schedule computed in calculations/ch13_calculations.py; no model outcomes.
+\begin{tikzpicture}[x=1cm,y=1cm,font=\scriptsize,
+  cell/.style={draw,rounded corners=1pt,minimum width=0.96cm,minimum height=0.5cm,inner sep=1pt},
+  build/.style={cell,fill=blue!12},
+  stop/.style={cell,fill=gray!12},
+  note/.style={align=left,text width=13cm,font=\footnotesize}]
+  \foreach \i in {1,...,8} {
+    \node at (2.1+1.35*\i,0) {题\i};
+  }
+  \node[anchor=east] at (2.8,-0.65) {固定判定};
+  \foreach \i/\v in {1/通,2/通,3/通,4/通,5/败,6/败,7/败,8/通} {
+    \node[cell] at (2.1+1.35*\i,-0.65) {\v};
+  }
+  \node[anchor=east] at (2.8,-1.45) {每任务};
+  \node[anchor=east] at (2.8,-2.2) {周期};
+  \node[anchor=east] at (2.8,-2.95) {事件};
+  \foreach \i in {1,2,3,4} {\node[build] at (2.1+1.35*\i,-1.45) {构建};}
+  \foreach \i in {5,6,7} {\node[stop] at (2.1+1.35*\i,-1.45) {额满};}
+  \foreach \i in {2,4,6} {\node[build] at (2.1+1.35*\i,-2.2) {构建};}
+  \foreach \i in {1,3,5,7} {\node[cell] at (2.1+1.35*\i,-2.2) {等待};}
+  \foreach \i in {1,5,6,7} {\node[build] at (2.1+1.35*\i,-2.95) {构建};}
+  \foreach \i in {2,3,4} {\node[cell] at (2.1+1.35*\i,-2.95) {等待};}
+  \foreach \y in {-1.45,-2.2,-2.95} {\node[stop] at (12.9,\y) {末题};}
+  \node[note,anchor=north west] at (0.5,-3.55) {三层事件分别记录：提出请求 $\rightarrow$ 配额准许构建 $\rightarrow$ 候选准入与发布。\\共同上限约束机会；实际调用、重试、已知用量与未知费用另行记账。};
+\end{tikzpicture}

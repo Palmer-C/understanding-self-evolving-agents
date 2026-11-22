@@ -1,0 +1,79 @@
+{
+  "kind": "constructed_exact_cost_example_not_experiment",
+  "model_calls": 0,
+  "assumptions": {
+    "replan_fixed": 0,
+    "replan_per_use": 5,
+    "skill_fixed": 12,
+    "skill_per_use": 2,
+    "maintenance_at_k": 6,
+    "maintenance_cost": 12
+  },
+  "k": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "replan": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    50
+  ],
+  "static_skill": [
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30,
+    32
+  ],
+  "maintained_skill": [
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    36,
+    38,
+    40,
+    42,
+    44
+  ],
+  "no_maintenance_equality": 4,
+  "maintenance_equalities": [
+    4,
+    8
+  ],
+  "maintenance_more_expensive_at": [
+    0,
+    1,
+    2,
+    3,
+    6,
+    7
+  ],
+  "script_sha256": "da9c481ee3da794e780e2c57d30992d48d07a60a8a68907cc255995487779f9d",
+  "figure_sha256": "9ec704b0ee7ce7befaa45522b8751161ffa1eb0f04ba0db0f6d9db23cedf6b84"
+}

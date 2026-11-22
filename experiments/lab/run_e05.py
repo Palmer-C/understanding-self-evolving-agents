@@ -1,0 +1,412 @@
+"""E05 运行器：技能固化的回本点与接口漂移（协议：`experiments/protocols/E05.md`）。
+
+用法：
+    python experiments/lab/run_e05.py --trial            # 极小规模验通路（不产生任何结论）
+    python experiments/lab/run_e05.py --repeats 2        # 首轮试验运行（估方差与反推样本量）
+
+本文件是**测量工具**：跑三组臂、在每个复用格点上累实物量账、用 `eval.paired_diff` 出区间，
+自己不写任何结论，也不填任何数字（所有数字来自本次运行的原始记录）。
+
+协议要点落地
+- §2：三臂 `replan` / `static_skill` / `dynamic_skill`，循环与预算完全相同，只有持久物不同。
+- §2.1：技能七字段契约；缺字段即降级为"自然语言经验"，并在结果里记 `contract_valid=False`。
+- §3：复用格点 $k\\in\\{0,1,2,4\\}$ 写死，族内题序按编号升序，不随机、不按结果挑。
+- §4：成本只报实物量（调用数 / token），$k^{\\*}$ 由 `e05_arms.break_even` 求出，无交点返回 None。
+- §5：接口漂移用**静态契约检查**，不调用模型；`unknown` 单独成类，不并进 `match`。
+- §7：未达预注册样本量一律停在 `open`；本运行器只出区间与原因，不改命题状态。
+
+技能条目是怎么来的（必须在结果里照抄这一段）
+- `code` 取自构建期那次真实 episode 最后写下的文件（不是参考实现，参考实现不进沙箱）；
+- `signature` 由任务集索引 `experiments/tasks/v1/index.csv` 的 `entry` 列给出；
+- `applies_when` 取自该族在 `taskset_spec.FAMILIES` 里的失效模式描述（与 E01 格 2 同来源）；
+- `does_not_apply_when` 是固定模板（入口名或参数个数与本条签名不一致时不适用），
+  由契约检查的语义决定，不由模型生成。
+这么做是为了让技能是**可复核的产物**而不是模型的一次自由发挥；代价是它没有模型生成的
+那份措辞多样性，这一点写进结果。
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from experiments.lab.backends import build_backend  # noqa: E402
+from experiments.lab.budget import Budget  # noqa: E402
+from experiments.lab.e05_arms import (  # noqa: E402
+    ARMS,
+    REUSE_GRID,
+    RevisionBudget,
+    Skill,
+    break_even,
+    classify_drift,
+    skill_memory_block,
+    validate_contract,
+)
+from experiments.lab.eval import DEFAULT_MDE, TaskRuns, paired_diff  # noqa: E402
+from experiments.lab.run_e01 import _last_written_code  # noqa: E402
+from experiments.lab.sandbox import Sandbox  # noqa: E402
+from experiments.lab.tasks import load_task_dir  # noqa: E402
+from experiments.lab.taskset_spec import FAMILIES  # noqa: E402
+from experiments.lab.trace import new_run_id  # noqa: E402
+
+TASKS_ROOT = REPO_ROOT / "experiments" / "tasks" / "v1"
+RUNS_ROOT = REPO_ROOT / "experiments" / "runs"
+RESULTS_ROOT = REPO_ROOT / "experiments" / "results"
+
+EPISODE_BUDGET = Budget()  # max_calls=8 / max_steps=12，与 E01/E02/E03 同值
+
+# `dynamic_skill` 的修订预算 U（协议 §2）：人为栅格，写在配置里。
+REVISION_BUDGET_U = 1
+
+
+# --------------------------------------------------------------------- 工具
+
+
+def git_head() -> str:
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(REPO_ROOT),
+                             capture_output=True, text=True, timeout=30)
+        return out.stdout.strip() or "unknown"
+    except Exception:
+        return "unknown"
+
+
+def load_all_tasks() -> list:
+    tasks = []
+    for d in sorted(p for p in TASKS_ROOT.glob("*/*") if p.is_dir()):
+        if (d / "test.json").is_file():
+            tasks.append(load_task_dir(d))
+    return tasks
+
+
+def load_entries() -> dict[str, str]:
+    """任务 id → 入口函数名（来自任务集索引的 entry 列）。缺失时返回空串。"""
+    out: dict[str, str] = {}
+    idx = TASKS_ROOT / "index.csv"
+    if idx.is_file():
+        with idx.open(encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                out[row["task_id"]] = row.get("entry", "")
+    return out
+
+
+def by_family(tasks: list) -> dict[str, list]:
+    fams: dict[str, list] = {}
+    for t in sorted(tasks, key=lambda x: x.task_id):
+        fams.setdefault(t.family, []).append(t)
+    return {k: v for k, v in sorted(fams.items())}
+
+
+def _ledger() -> dict:
+    return {
+        "episodes": 0,
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "wall_seconds": 0.0,
+        "side_calls": 0,
+        "build_calls": 0,
+        "reuse_calls": 0,
+        "over_budget": 0,
+    }
+
+
+def _absorb(led: dict, usage: dict, bucket: str) -> None:
+    led["episodes"] += 1
+    for k in ("calls", "prompt_tokens", "completion_tokens"):
+        led[k] += int(usage.get(k, 0))
+    led["wall_seconds"] += float(usage.get("wall_seconds", 0.0))
+    led[bucket] += int(usage.get("calls", 0))
+
+
+def run_episode_isolated(agent, task, seed, out_dir):
+    sandbox = Sandbox.create_temp(prefix=task.task_id)
+    sandbox.protected = set(task.protected)
+    try:
+        trace = agent.run_episode(task, budget=EPISODE_BUDGET, sandbox=sandbox,
+                                  seed=seed, out_dir=out_dir, materialize=True)
+        return trace
+    finally:
+        sandbox.cleanup()
+
+
+# --------------------------------------------------------------------- 技能构建
+
+
+def build_skill(task, code: dict[str, str], entries: dict[str, str]) -> tuple[Skill, bool]:
+    """把构建期那次真实 episode 的产物封成一条技能条目（七字段）。
+
+    返回 `(skill, contract_valid)`。契约不完整的条目仍然会被注入，
+    但会在结果里被标成 `contract_valid=False`——协议 §2.1 要求这类条目不得算作技能。
+    """
+    entry = entries.get(task.task_id, "")
+    signature = f"{entry}(*)" if entry else ""
+    body = "\n".join(f"# {n}\n{c}" for n, c in sorted(code.items()))
+    skill = Skill(
+        name=f"{task.family}-{entry or task.task_id}",
+        signature=signature,
+        requires="python>=3.8",
+        applies_when=FAMILIES.get(task.family, {}).get("failure_mode", ""),
+        does_not_apply_when="任务入口名或参数个数与本条签名不一致时不适用",
+        code=body[:3000],
+        verified_on=task.task_id,
+        fail_conditions="构建期验收未通过时不入库" ,
+    )
+    ok, _ = validate_contract(skill)
+    return skill, ok
+
+
+# --------------------------------------------------------------------- 一个格点
+
+
+def run_one(arm: str, k: int, family: str, tasks: list, backend, base_seed: int,
+            repeats: int, out_dir: Path, entries: dict[str, str]) -> tuple[list[TaskRuns], dict, dict]:
+    """一个臂在一个格点、一个族上跑完构建 + k 次复用，重复 repeats 次。
+
+    返回 `(runs, ledger, drift)`；`runs` 按 task_id 给出该题在 repeats 次运行上的通过率。
+    """
+    from experiments.lab.e01_arms import memory_block  # 局部导入：与 e05_arms 共用同一份注入口径
+    from experiments.lab.static_agent import SYSTEM_PROMPT, StaticAgent
+
+    led = _ledger()
+    drift = {"match": 0, "drift:name": 0, "drift:arity": 0, "unknown": 0}
+    verdicts_by_task: dict[str, list[bool]] = {}
+
+    build_task = tasks[0]
+    reuse_tasks = tasks[1:1 + k]
+
+    for r in range(repeats):
+        seed0 = base_seed + r * 7919
+        # ---- 构建期：三臂同口径（都不带记忆），技能臂额外固化一次
+        agent = StaticAgent(backend=backend, system_prompt=SYSTEM_PROMPT, name=f"{arm}-build")
+        trace = run_episode_isolated(agent, build_task, seed0,
+                                     out_dir / "traces" / arm / f"k{k}" / family / f"build-r{r}")
+        _absorb(led, trace.usage, "build_calls")
+        code = _last_written_code(trace, dict(build_task.files))
+        skill, contract_ok = build_skill(build_task, code, entries)
+        verdicts_by_task.setdefault(build_task.task_id, []).append(bool(trace.verdict))
+
+        # ---- 复用期
+        skills = [skill]
+        for j, task in enumerate(reuse_tasks):
+            if arm == "replan":
+                prompt = SYSTEM_PROMPT
+            else:
+                block = skill_memory_block(skills, task.statement, k=1)
+                prompt = SYSTEM_PROMPT + (block or memory_block([s.render() for s in skills]))
+            agent = StaticAgent(backend=backend, system_prompt=prompt, name=f"{arm}-reuse{j}")
+            trace = run_episode_isolated(agent, task, seed0 + 13 * (j + 1),
+                                         out_dir / "traces" / arm / f"k{k}" / family
+                                         / f"{task.task_id}-r{r}")
+            _absorb(led, trace.usage, "reuse_calls")
+
+            c, _why = classify_drift(skills[0], task.statement)
+            drift[c] = drift.get(c, 0) + 1
+
+            # dynamic_skill：验收失败时允许 U 次修订；超限记 over_budget，不静默放行
+            if arm == "dynamic_skill" and not trace.verdict:
+                rb = RevisionBudget(u=REVISION_BUDGET_U)
+                if rb.spend():
+                    upd, _ = build_skill(task, _last_written_code(trace, dict(task.files)), entries)
+                    skills = [upd]
+                else:
+                    led["over_budget"] += 1
+            verdicts_by_task.setdefault(task.task_id, []).append(bool(trace.verdict))
+
+    runs = [TaskRuns(tid, family, "v1", vs) for tid, vs in sorted(verdicts_by_task.items())]
+    led["contract_valid"] = contract_ok
+    return runs, led, drift
+
+
+# --------------------------------------------------------------------- 主流程
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="E05 运行器（协议 experiments/protocols/E05.md）")
+    ap.add_argument("--repeats", type=int, default=2)
+    ap.add_argument("--grid", default="0,1,2,4", help="复用次数格点，逗号分隔")
+    ap.add_argument("--families", default="", help="只跑这些族（逗号分隔），默认全部 8 族")
+    ap.add_argument("--temperature", type=float, default=0.7)
+    ap.add_argument("--base-seed", type=int, default=20260928)
+    ap.add_argument("--out", default="")
+    ap.add_argument("--trial", action="store_true", help="极小规模验通路，不产生结论")
+    ap.add_argument("--resume", default="")
+    ap.add_argument("--resume-latest", action="store_true")
+    args = ap.parse_args(argv)
+
+    grid = tuple(int(x) for x in args.grid.split(",") if x.strip())
+    if args.trial:
+        grid = (0, 1)
+        args.repeats = 1
+
+    tasks = load_all_tasks()
+    fams = by_family(tasks)
+    if args.families:
+        keep = set(args.families.split(","))
+        fams = {k: v for k, v in fams.items() if k in keep}
+    entries = load_entries()
+
+    backend = build_backend("openai", temperature=args.temperature)
+
+    # ---- 断点续跑
+    resume_dir = None
+    if args.resume:
+        resume_dir = Path(args.resume)
+    elif args.resume_latest:
+        cands = sorted((p for p in RUNS_ROOT.glob("E05-*") if (p / "partial.json").is_file()
+                        and not (p / "summary.json").is_file()),
+                       key=lambda p: p.stat().st_mtime, reverse=True)
+        resume_dir = cands[0] if cands else None
+
+    if resume_dir is not None and resume_dir.exists():
+        out_dir = resume_dir
+        partial = json.loads((resume_dir / "partial.json").read_text(encoding="utf-8"))
+        run_id = partial["config"]["run_id"]
+        results = partial.get("results", {})
+        ledgers = partial.get("ledgers", {})
+        drifts = partial.get("drifts", {})
+        print(f"[{run_id}] RESUME：已载入 {len(results)} 个已完成格点，将跳过。", flush=True)
+    else:
+        run_id = args.out or new_run_id("E05")
+        out_dir = RUNS_ROOT / run_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        results, ledgers, drifts = {}, {}, {}
+
+    config = {
+        "experiment": "E05",
+        "run_id": run_id,
+        "protocol": "experiments/protocols/E05.md",
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "git_head": git_head(),
+        "model": getattr(backend, "model", "unknown"),
+        "temperature": args.temperature,
+        "episode_budget": EPISODE_BUDGET.as_dict(),
+        "repeats": args.repeats,
+        "grid": list(grid),
+        "families": sorted(fams),
+        "revision_budget_u": REVISION_BUDGET_U,
+        "mde": DEFAULT_MDE,
+        "trial": bool(args.trial),
+    }
+
+    for arm in ARMS:
+        for k in grid:
+            key = f"{arm}|k{k}"
+            if key in results:
+                print(f"[{run_id}] {key}：已完成（续跑跳过）", flush=True)
+                continue
+            agg: dict[str, list[bool]] = {}
+            led = _ledger()
+            dr = {"match": 0, "drift:name": 0, "drift:arity": 0, "unknown": 0}
+            for fam, ftasks in fams.items():
+                runs, l2, d2 = run_one(arm, k, fam, ftasks, backend, args.base_seed,
+                                       args.repeats, out_dir, entries)
+                for key2 in ("episodes", "calls", "prompt_tokens", "completion_tokens",
+                             "build_calls", "reuse_calls", "over_budget"):
+                    led[key2] += l2.get(key2, 0)
+                led["wall_seconds"] += l2.get("wall_seconds", 0.0)
+                for cname, cnt in d2.items():
+                    dr[cname] = dr.get(cname, 0) + cnt
+                for r in runs:
+                    agg.setdefault(r.task_id, []).extend(r.verdicts)
+            results[key] = {tid: vs for tid, vs in sorted(agg.items())}
+            ledgers[key] = led
+            drifts[key] = dr
+            pr = sum(sum(v) for v in agg.values()) / max(1, sum(len(v) for v in agg.values()))
+            print(f"[{run_id}] {key}: pass@1 {pr:.4f} "
+                  f"({sum(sum(v) for v in agg.values())}/{sum(len(v) for v in agg.values())})",
+                  flush=True)
+            (out_dir / "partial.json").write_text(
+                json.dumps({"config": config, "results": results,
+                            "ledgers": ledgers, "drifts": drifts},
+                           ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # ---- 统计
+    def runs_of(key: str) -> list[TaskRuns]:
+        lk = {t.task_id: t for t in tasks}
+        return [TaskRuns(tid, lk[tid].family, lk[tid].split, vs)
+                for tid, vs in results[key].items() if tid in lk]
+
+    gains = {}
+    for k in grid:
+        base_key = f"replan|k{k}"
+        for arm in ("static_skill", "dynamic_skill"):
+            key = f"{arm}|k{k}"
+            if key in results and base_key in results:
+                gains[f"k{k}:{arm}-replan"] = paired_diff(
+                    runs_of(key), runs_of(base_key), unit="task", mde=DEFAULT_MDE,
+                    label=f"{key}-{base_key}")
+
+    # ---- 成本账与回本点（协议 §4）：单位取模型调用数
+    cost_lines = {}
+    for k in grid:
+        row = {}
+        for arm in ARMS:
+            key = f"{arm}|k{k}"
+            if key not in ledgers:
+                continue
+            L = ledgers[key]
+            build = L["build_calls"]
+            reuse = L["reuse_calls"]
+            row[arm] = {
+                "build_calls": build,
+                "reuse_calls": reuse,
+                "skill_cost": build + k * reuse,
+                "replan_cost": (k + 1) * build,
+            }
+        cost_lines[f"k{k}"] = row
+    k_star = break_even_from_ledgers(ledgers, grid)
+
+    summary = {
+        "config": config,
+        "finished_at": datetime.now(timezone.utc).isoformat(),
+        "results": results,
+        "ledgers": ledgers,
+        "drifts": drifts,
+        "gains": gains,
+        "cost_lines": cost_lines,
+        "break_even_k": k_star,
+        "verdict_note": "首轮试验运行不改命题状态；未达预注册样本量一律停在 open。",
+    }
+    RESULTS_ROOT.mkdir(parents=True, exist_ok=True)
+    (RESULTS_ROOT / f"{run_id}.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out_dir / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print(f"[{run_id}] 完成。格点数 {len(results)}，回本点 k* = {k_star}", flush=True)
+    print(f"[{run_id}] 结果目录：{out_dir}", flush=True)
+    return 0
+
+
+def break_even_from_ledgers(ledgers: dict, grid: tuple[int, ...]) -> int | None:
+    """用实测账本求回本点：满足 $C_{\\text{skill}}(k)\\le C_{\\text{replan}}(k)$ 的最小正整数 $k$。
+
+    这里按**每个格点自己的实测调用数**逐点比较，而不是套一个拟合出来的斜率——
+    首轮的目的是看这条曲线长什么样，不是拟合它。
+    """
+    from experiments.lab.e05_arms import CostLedger
+    for k in grid:
+        if k < 1:
+            continue
+        sk = ledgers.get(f"static_skill|k{k}")
+        rp = ledgers.get(f"replan|k{k}")
+        if not sk or not rp:
+            continue
+        led = CostLedger(build_calls=rp["build_calls"], reuse_calls=sk["reuse_calls"])
+        if led.build_calls + k * led.reuse_calls <= (k + 1) * led.build_calls:
+            return k
+    return None
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

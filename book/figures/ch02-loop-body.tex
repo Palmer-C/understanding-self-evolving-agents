@@ -1,0 +1,24 @@
+% Vertical layout preserves final-size labels.
+\begin{tikzpicture}[
+ box/.style={draw,rounded corners=2pt,minimum height=11mm,text width=49mm,align=center,font=\small},
+ small/.style={draw,rounded corners=2pt,text width=27mm,minimum height=12mm,align=center,font=\small},
+ arrow/.style={-{Stealth[length=1.8mm]},thick}
+]
+\node[box,fill=blue!7] (ak) at (0,0) {$A_k$：已发布版本};
+\node[box,fill=gray!7] (run) at (0,-1.7) {执行器\\$\tau_{k,e}=\mathrm{Run}(A_k,T)$};
+\node[box,fill=gray!7] (fb) at (0,-3.4) {反馈器：产生信号$f$};
+\node[box,fill=orange!9] (upd) at (0,-5.1) {修改器：产生候选\\$\widetilde A_{k+1}=\mathrm{Update}(A_k,\tau,f)$};
+\node[box,fill=green!8] (gate) at (0,-6.8) {Gate：三级发布决策};
+\draw[arrow] (ak)--(run);\draw[arrow] (run)--(fb);
+\draw[arrow] (fb)--(upd);\draw[arrow] (upd)--(gate);
+\node[box,fill=red!5,draw=red!55!black] (v) at (7,-2.2) {$\mathcal V$默认冻结\\任务划分、验收器、最终测试集\\不在Updatable内（公理1）};
+\draw[arrow,red!55!black] (v.west)--++(-.8,0)|-(run.east);
+\draw[arrow,red!55!black] (v.south)--(7,-4.2)--(3.8,-4.2)--(3.8,-6.8)--(gate.east);
+\node[small,fill=red!5] (reject) at (-3.4,-8.7) {reject\\保留候选档案};
+\node[small,fill=yellow!10] (shadow) at (0,-8.7) {shadow\\影子运行};
+\node[small,fill=green!8] (accept) at (3.4,-8.7) {accept($r$)\\按比例灰度发布};
+\draw[arrow] (gate.south west)--(reject.north);
+\draw[arrow] (gate)--(shadow);\draw[arrow] (gate.south east)--(accept.north);
+\node[box,fill=blue!7] (next) at (7,-6.0) {$A_{k+1}$：被接受的下一版};
+\draw[arrow,dashed] (accept.east)-|(next.south);
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% A comparison design, not an ordering of measured outcomes.
+\begin{tikzpicture}[
+  box/.style={draw,rounded corners=2pt,text width=26mm,minimum height=12mm,align=center,font=\small},
+  note/.style={anchor=west,text width=30mm,align=left,font=\footnotesize},
+  arrow/.style={-{Stealth[length=1.6mm]},thick}
+]
+\node[box,fill=gray!10] (s) at (0,0) {同一来源记录\\轨迹与验收};
+\node[box,fill=orange!12] (a) at (4,1) {求解器方向\\候选行为补丁};
+\node[box,fill=blue!10] (b) at (4,-1) {问题域方向\\带条件的主张};
+\node[box,fill=green!10] (r1) at (8,1) {同模型读取};
+\node[box,fill=green!10] (r2) at (8,-1) {换模型读取};
+\draw[arrow] (s)--(a);
+\draw[arrow] (s)--(b);
+\draw[arrow] (a)--(r1);
+\draw[arrow] (a)--(r2);
+\draw[arrow] (b)--(r1);
+\draw[arrow] (b)--(r2);
+\node[note] at (9.7,1) {分别比较两种形式；\\减同模型无记忆基线};
+\node[note] at (9.7,-1) {分别比较两种形式；\\减换模型无记忆基线};
+\node[align=left,text width=140mm,font=\footnotesize] at (5.8,-2.2)
+{同源固定材料来源，渲染仍可改变内容、长度与检索。图中箭头表示比较路径，不表示已证实的迁移收益。};
+\end{tikzpicture}

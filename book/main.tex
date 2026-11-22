@@ -1,0 +1,59 @@
+% main.tex —— 全书主文件
+% 编译：powershell -ExecutionPolicy Bypass -File build.ps1
+\input{preamble}
+
+\begin{document}
+\raggedbottom
+
+% ================= 前置部分 =================
+\frontmatter
+\input{frontmatter/titlepage}
+\input{frontmatter/preface}
+\input{frontmatter/howto}
+\input{frontmatter/notation}
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+% ================= 正文 =================
+\mainmatter
+
+\part{定义问题与建立评价方法}
+\include{chapters/ch01}
+\include{chapters/ch02}
+\include{chapters/ch03}
+
+\part{模型参数之外的学习机制}
+\include{chapters/ch04}
+\include{chapters/ch05}
+\include{chapters/ch06}
+\include{chapters/ch07}
+\include{chapters/ch08}
+\include{chapters/ch09}
+
+\part{参数学习与更高层的自我修改}
+\include{chapters/ch10}
+\include{chapters/ch11}
+\include{chapters/ch12}
+
+\part{长期运行与系统工程}
+\include{chapters/ch13}
+\include{chapters/ch14}
+
+\part{贯穿案例与研究边界}
+\include{chapters/ch15}
+\include{chapters/ch16}
+
+% ================= 附录 =================
+\appendix
+\include{backmatter/appendixA}
+\include{backmatter/appendixB}
+\include{backmatter/appendixC}
+\include{backmatter/appendixD}
+\include{backmatter/appendixE}
+\include{backmatter/appendixF}
+\include{backmatter/appendixG}
+
+\backmatter
+\printbibliography[heading=bibintoc,title={参考文献}]
+
+\end{document}

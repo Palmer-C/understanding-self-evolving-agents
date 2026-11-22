@@ -1,0 +1,15 @@
+% Evidence responsibilities; no literature ranking or claim of an empty field.
+\begin{tikzpicture}[
+  box/.style={draw=gray!65,rounded corners=2pt,align=left,text width=3.55cm,
+              minimum height=2.8cm,inner sep=8pt,font=\small},
+  arrow/.style={-{Stealth[length=2mm]},thick,gray!70}
+]
+\node[box,fill=blue!4] (source) at (0,0) {\textbf{来源与设计}\\[4pt]
+术语与机制定位\\比较对象与目标量\\预算、信息和判据};
+\node[box,fill=green!4] (record) at (4.8,0) {\textbf{实现与观察}\\[4pt]
+版本和执行权限\\逐次记录与失败账\\离线检查和实测分开};
+\node[box,fill=orange!5] (claim) at (9.6,0) {\textbf{证据状态与范围}\\[4pt]
+可识别性与不确定性\\结果支持到哪一步\\未解决项继续保留};
+\draw[arrow] (source.east) -- (record.west);
+\draw[arrow] (record.east) -- (claim.west);
+\end{tikzpicture}
