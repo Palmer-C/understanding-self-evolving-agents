@@ -1,11 +1,17 @@
-param([string]$OutDir)
+param(
+    [Parameter(Position=0)][string]$OutDir,
+    [ValidatePattern('^(?:[0-9]{4}\.[0-9]{4,5}|[a-zA-Z][a-zA-Z.-]*/[0-9]{7})v[1-9][0-9]*\z')]
+    [string]$ArxivId,
+    [ValidatePattern('^[0-9a-fA-F]{64}\z')][string]$ExpectedSha256
+)
 
+$ErrorActionPreference = 'Stop'
+if ($ExpectedSha256 -and -not $ArxivId) { throw '-ExpectedSha256 requires a versioned -ArxivId.' }
 if (-not $OutDir) { $OutDir = Join-Path $PSScriptRoot 'files\papers' }
-
-$ErrorActionPreference = 'Continue'
-New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+$OutDir = [IO.Path]::GetFullPath($OutDir)
+[IO.Directory]::CreateDirectory($OutDir) | Out-Null
 $logf = Join-Path $OutDir '_download_log.txt'
-"=== run $(Get-Date -Format o) ===" | Out-File $logf -Encoding utf8
+"=== run $(Get-Date -Format o) ===" | Add-Content -LiteralPath $logf -Encoding utf8
 
 $papers = @(
   '2507.21046|survey-self-evolving-agents',
@@ -42,31 +48,99 @@ $papers = @(
   '2601.03236|magma'
 )
 
-$UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
-$n = 0
-foreach ($item in $papers) {
-  $parts = $item -split '\|'
-  $id = $parts[0]; $name = $parts[1]
-  $dst = Join-Path $OutDir ($name + '__' + $id + '.pdf')
-  $ok = $false
-  if (Test-Path $dst) {
-    $sz0 = (Get-Item $dst).Length
-    if ($sz0 -gt 20000) { "SKIP  $id  $name  (exists $([math]::Round($sz0/1KB,1)) KB)" | Add-Content $logf -Encoding utf8; $ok = $true; $n++ }
-  }
-  if (-not $ok) {
-    foreach ($px in @($null, 'http://127.0.0.1:7890')) {
-      try {
-        if ($px) { Invoke-WebRequest -Uri ('https://arxiv.org/pdf/' + $id) -OutFile $dst -Proxy $px -TimeoutSec 60 -UseBasicParsing -UserAgent $UA }
-        else     { Invoke-WebRequest -Uri ('https://arxiv.org/pdf/' + $id) -OutFile $dst -TimeoutSec 60 -UseBasicParsing -UserAgent $UA }
-        $sz = (Get-Item $dst).Length
-        if ($sz -gt 20000) {
-          "OK    $id  $name  $([math]::Round($sz/1KB,1)) KB  via=$px" | Add-Content $logf -Encoding utf8
-          $ok = $true; $n++; break
-        } else { Remove-Item $dst -Force -ErrorAction SilentlyContinue }
-      } catch { }
+if ($ArxivId) {
+    $baseId = $ArxivId -replace 'v[0-9]+$', ''
+    $name = 'arxiv'
+    foreach ($item in $papers) {
+        $parts = $item.Split('|')
+        if ($parts[0] -ceq $baseId) { $name = $parts[1]; break }
     }
-  }
-  if (-not $ok) { "FAIL  $id  $name" | Add-Content $logf -Encoding utf8 }
-  Start-Sleep -Seconds 3
+    # Only accept an index filename for this paper and this exact version.
+    # Extract the short name, never join a CSV-supplied path to the output directory.
+    $index = Join-Path $PSScriptRoot 'sources.csv'
+    if ([IO.File]::Exists($index)) {
+        $safeId = [regex]::Escape($ArxivId.Replace('/', '-'))
+        $pattern = '^files/papers/([A-Za-z0-9][A-Za-z0-9_-]*)__' + $safeId + '\.pdf\z'
+        $names = @(Import-Csv -LiteralPath $index -Encoding UTF8 | ForEach-Object {
+            if ($_.arxiv_id -ceq $baseId -and $_.local_pdf -cmatch $pattern) { $Matches[1] }
+        } | Select-Object -Unique)
+        if ($names.Count -eq 1) { $name = $names[0] }
+    }
+    $papers = @("$ArxivId|$name")
 }
-"=== done: $n / $($papers.Count) ===" | Add-Content $logf -Encoding utf8
+
+$pdfInfo = Get-Command -Name pdfinfo -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+function Get-CheckedPdfHash([string]$Path) {
+    $stream = [IO.File]::OpenRead($Path)
+    try {
+        $header = [byte[]]::new(8)
+        if ($stream.Read($header, 0, $header.Length) -ne 8 -or
+            [Text.Encoding]::ASCII.GetString($header) -notmatch '^%PDF-[12]\.[0-9]$') {
+            throw 'Missing PDF header.'
+        }
+        $tailLength = [int][Math]::Min(4096, $stream.Length)
+        $stream.Seek(-$tailLength, [IO.SeekOrigin]::End) | Out-Null
+        $reader = [IO.BinaryReader]::new($stream)
+        $tailText = [Text.Encoding]::ASCII.GetString($reader.ReadBytes($tailLength))
+        if ($tailText -notmatch 'startxref\s+([0-9]+)\s+%%EOF\s*\z' -or
+            [long]$Matches[1] -ge $stream.Length) {
+            throw 'Missing or invalid final PDF cross-reference offset or EOF marker.'
+        }
+        $stream.Position = [long]$Matches[1]
+        $target = [Text.Encoding]::ASCII.GetString($reader.ReadBytes(80))
+        if ($target -cnotmatch '^(xref\b|[0-9]+\s+[0-9]+\s+obj\b)') {
+            throw 'PDF offset does not point to a cross-reference table or stream object.'
+        }
+        if ($pdfInfo) {
+            & $pdfInfo.Source $Path | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw 'pdfinfo could not read the PDF.' }
+        }
+        $stream.Position = 0
+        $hasher = [Security.Cryptography.SHA256]::Create()
+        try {
+            $digest = [BitConverter]::ToString($hasher.ComputeHash($stream)).Replace('-', '').ToLowerInvariant()
+        } finally {
+            $hasher.Dispose()
+        }
+        if ($ExpectedSha256 -and $digest -ine $ExpectedSha256) {
+            throw 'PDF SHA-256 does not match the specified digest.'
+        }
+        return $digest
+    } finally {
+        $stream.Dispose()
+    }
+}
+
+$succeeded = 0
+$requested = $false
+foreach ($item in $papers) {
+    $id, $name = $item.Split('|')
+    $dst = Join-Path $OutDir ($name + '__' + $id.Replace('/', '-') + '.pdf')
+    $url = 'https://arxiv.org/pdf/' + $id
+    $stage = Join-Path $OutDir ([guid]::NewGuid().ToString('N') + '.part')
+    try {
+        if ([IO.File]::Exists($dst)) {
+            $digest = Get-CheckedPdfHash $dst
+            $result = 'CACHED'
+        } else {
+            if ($requested) { Start-Sleep -Seconds 3 }
+            $requested = $true
+            Invoke-WebRequest -Uri $url -OutFile $stage -TimeoutSec 60 -UseBasicParsing
+            $digest = Get-CheckedPdfHash $stage
+            # Move within one directory. A concurrent winner cannot be overwritten.
+            [IO.File]::Move($stage, $dst)
+            $result = 'SAVED'
+        }
+        "$result $url $([IO.Path]::GetFileName($dst)) sha256=$digest" | Add-Content -LiteralPath $logf -Encoding utf8
+        $succeeded++
+    } catch {
+        $message = "FAIL $url $($_.Exception.Message)"
+        $message | Add-Content -LiteralPath $logf -Encoding utf8
+        Write-Warning $message
+    } finally {
+        [IO.File]::Delete($stage)
+    }
+}
+"=== done: $succeeded / $($papers.Count) ===" | Add-Content -LiteralPath $logf -Encoding utf8
+if ($succeeded -ne $papers.Count) { exit 1 }
+exit 0

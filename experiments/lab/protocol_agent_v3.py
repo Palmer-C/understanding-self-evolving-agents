@@ -22,7 +22,7 @@ from typing import Optional
 from .action_protocol_v3 import parse_action, ActionFormatError
 from .backends import ScriptedBackend
 from .budget import Budget, BudgetExceeded, Stopwatch, Usage, check_within
-from .sandbox import Sandbox, SandboxViolation
+from .sandbox import Sandbox, SandboxViolation, require_isolated_execution
 from .tasks import Task
 from .trace import EpisodeTrace, new_run_id
 
@@ -82,6 +82,8 @@ class ProtocolAgentV3:
         test_timeout: float = 120.0,
         materialize: bool = True,
     ) -> EpisodeTrace:
+        if getattr(self.backend, "name", None) == "openai-chat":
+            require_isolated_execution()
         budget = budget or Budget()
         owns_sandbox = sandbox is None
         sandbox = sandbox or Sandbox.create_temp(prefix=task.task_id)
@@ -148,7 +150,7 @@ class ProtocolAgentV3:
             )
         trace.usage = usage.as_dict()
         trace.verdict = verdict
-        trace.verdict_source = "task.verify（真实执行验收命令）"
+        trace.verdict_source = res.verdict_source
 
         if trace.persistent_writes:
             raise RuntimeError(

@@ -1,4 +1,6 @@
-"""E05 v2 exploratory runner. Default is offline preflight; --execute calls API.
+"""E05 v2 exploratory runner. Offline preflight is available.
+
+Live execution requires an OS-isolated candidate executor.
 
 New IDs and per-sequence checkpoints prevent mixing with the legacy E05 pilot.
 See experiments/protocols/E05-v2.md for exact endpoints and limitations.
@@ -22,6 +24,7 @@ from experiments.lab.e01_arms import memory_block
 from experiments.lab.static_agent import StaticAgent, SYSTEM_PROMPT
 from experiments.lab.trace import new_run_id
 from experiments.lab.budget import Budget
+from experiments.lab.sandbox import ExecutionUnavailable, require_isolated_execution
 
 
 def atomic_json(path, data):
@@ -45,6 +48,8 @@ def absorb(led, trace, bucket):
 
 
 def run_sequence(arm, k, tasks, backend, seed, out_dir, entries, u=1):
+    if getattr(backend, 'name', None) == 'openai-chat':
+        require_isolated_execution()
     out_dir.mkdir(parents=True, exist_ok=True)
     rb = RevisionBudget(u=u)  # One budget per family x grid x repeat sequence.
     led, verdicts, events, skill = ledger(), {}, [], None
@@ -122,6 +127,11 @@ def main(argv=None):
     ap.add_argument('--grid',default='0,1,2,4')
     ap.add_argument('--temperature',type=float,default=.7)
     args=ap.parse_args(argv)
+    if args.execute:
+        try:
+            require_isolated_execution()
+        except ExecutionUnavailable as exc:
+            ap.error(str(exc))
     tasks=load_all_tasks()
     families=sorted(set(args.families.split(',')) if args.families else {t.family for t in tasks})
     grid=tuple(int(k) for k in args.grid.split(','))

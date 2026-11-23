@@ -1,9 +1,9 @@
 """实验成本核算：把已完成的运行账目聚合成人读表。
 
-用途：附录 F（实验成本核算）的所有实测数字由本脚本产出，不手工抄写。
+用途：按固定运行标识复算 E01、E02 和 E03 的历史资源账。账目对应的实验范围见附录 F。
 
 用法：
-    python experiments/lab/cost_report.py                 # 打印全部已完成运行
+    python experiments/lab/cost_report.py                 # 打印下列三份历史运行汇总
     python experiments/lab/cost_report.py --json          # 落盘 analysis/cost-ledger-reproduction.json
 
 口径说明（写进附录 F）：
@@ -26,8 +26,8 @@ from experiments.lab.archive_inputs import required_summaries
 
 # 已完成的运行：run_id -> (实验名, 结果文件名, 是否已判决/是否为试跑)
 RUNS = [
-    ("E01", "E01-20260923T152230Z-90acda", "正式试验运行（四格）"),
-    ("E02", "E02-20260924T153511Z-421eac", "正式运行（验证层级六臂）"),
+    ("E01", "E01-20260923T152230Z-90acda", "历史四格试跑（相同回合配额）"),
+    ("E02", "E02-20260924T153511Z-421eac", "历史反馈方式六臂试跑"),
     ("E03", "E03-20260925T152453Z-254845", "十臂历史汇总；A/base_same判定与成本记录冲突，暂停效应及效率解释"),
 ]
 

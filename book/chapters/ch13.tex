@@ -158,11 +158,11 @@ Gate 规则为事后示例（错误集中 $\ge 2$ 或新颖性 $\ge 0.5$ 才放�
 
 原始判定依次为“通过、失败、失败、通过、通过、通过、通过、通过”。前窗失败率为\calcnum{2/4}，后窗为\calcnum{0/4}。有效绝对差是\calcnum{0.5}，带方向的后窗减前窗为\calcnum{$-0.5$}：这一次变化对应失败减少，不能称为失败突然增多。窗口不足、观测到零变化和反馈缺失应分别标记；新版报告可以同时保留历史算法读数与按有效窗口计算的量，不能覆盖旧输出冒充原来的分析。
 
-八条经验的来源任务、序号与八条训练轨迹一一对应，没有触发旧脚本的任务号补位路径。若别的记录缺少经验文本，该脚本会用任务号补齐；这种输出不应继续命名为经验新颖性。读取器必须先检查输入身份，再解释数组。历史复核结果保存在：
-\begin{quote}\small\ttfamily
-calculations/\allowbreak ch13-trigger-replay-audit-2026-09-30-1815.json
-\end{quote}
-本版只读复算另存于附录\ref{app:repro}列出的分析输出，不执行模型，也不改写原轨迹或原结果表。
+八条经验的来源任务、序号与八条训练轨迹一一对应，没有触发旧脚本的任务号补位路径。若别的记录缺少经验文本，该脚本会用任务号补齐；这种输出不应继续命名为经验新颖性。公开预览与完整档案都收录了这次 E01 运行：由\path{analysis/inputs.json}找到对应的\path{summary.json}，其所在目录下的\path{traces/grid4/train/}保留八条训练轨迹。从仓库根目录运行以下命令，脚本会对齐经验与轨迹，并将复算结果写入\path{analysis/timing-audit-reproduction.json}。
+\begin{verbatim}
+python calculations/reproduce_timing_audit.py
+\end{verbatim}
+完整档案还保留早期复核报告\path{calculations/ch13-trigger-replay-audit-2026-09-30-1815.json}。
 
 \subsection{信号会越过阈值，不等于环境真的变化}
 \label{sec:ch13-signal-noise}

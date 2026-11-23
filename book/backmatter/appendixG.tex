@@ -54,7 +54,7 @@
         用 E01 的实测配对差标准差 \measured{0.2875} 与区间半宽近似 $n\ge(1.96\,s/h)^{2}$，
         估计半宽目标 $h=\calcnum{0.03}$ 时需要的配对题数，并与本书可用的 \measured{16} 道封存题比较。
         若把半宽目标放宽到 \calcnum{0.10}，需要多少道？这两个选择各自让渡了什么？
-        \emph{参考分析查}：附录 \ref{app:stats} 的样本量反推节与 \texttt{agent/BLOCKERS.md} 的判决力缺口条。
+        \emph{参考分析查}：附录\ref{app:stats}式~\eqref{eq:samplesize}给出区间半宽与题数的关系。完整维护档案在\path{agent/BLOCKERS.md}另存历史判决力缺口。
 
   \item \textbf{（第 3 章，判定型）}
         一个方法在训练时用过的题上提升明显，在未见题中族混合的检验集上提升较小。
@@ -83,8 +83,7 @@
         为 E03 拆分 A 设计一轮使用另外两个留出族的新运行，先给出离线清单与比较协议。
         要求：记录与旧 \texttt{sortkey} / \texttt{strindex} 划分的差异、完整成本及可比性；付费或执行候选前须具备对应授权与运行隔离。旧轨迹不得覆盖，已完成的 E03c 不在此题重跑范围。
         \begin{sloppypar}
-        \emph{参考分析查}：\texttt{experiments/protocols/E03.md} 的预注册节与运行器的
-        新运行编号与禁止将新划分混入旧运行的要求。
+        \emph{参考分析查}：\path{experiments/protocols/E03.md}列明原来的两个留出族。按附录\ref{app:repro}的运行标识规则，为新划分另列编号。完整档案中的\path{experiments/lab/run_e03.py}可供核对历史实现。
         \end{sloppypar}
 
   \item \textbf{（第 6 章，判定型）}
@@ -125,8 +124,7 @@
   \item \textbf{（全书，综合型）}
         任选一篇本书参考文献中的论文，先确认所读版本，用本书的六问把它重建一遍：
         每条结论标明"定位于原文第几节 / 表几"；尚未找到写"未定位"，核对相应范围后仍缺失才写"在所核对范围未报告"，不得补全。
-        \emph{参考分析查}：\texttt{research/cards/TEMPLATE.md} 与该文已在
-        \texttt{research/cards/} 下建立的方法卡。
+        \emph{参考分析查}：公开预览可用\path{research/cards/voyager.md}对照六问各栏，再按所选论文逐项定位。完整档案另附空白模板\path{research/cards/TEMPLATE.md}。
 
 \end{enumerate}
 
@@ -291,9 +289,8 @@ P4缺有效技能及质量受控的复用成本曲线；P5缺共同任务流与�
 \section{勘误流程}
 
 \begin{sloppypar}
-全书唯一的真源是 \path{book/chapters/*.tex} 与各分目录
-（\path{book/figures/}、\path{book/backmatter/}、\path{spec/}）下的源文件；
-但勘误不是直接改文件，而是走下面五步，为的是让"改了什么、为什么改、影响多大"留下记录。
+读者可在\href{https://github.com/Palmer-C/understanding-self-evolving-agents/issues}{公开预览仓库的 Issues} 提交勘误。请列出版次或提交号、章节或表号、原文与核对依据。若涉及复算，附上输入文件名、命令、实际输出与预期差异即可。
+维护者在完整档案中按以下五步核对并修订源文件。
 \end{sloppypar}
 
 \begin{enumerate}
@@ -320,7 +317,7 @@ P4缺有效技能及质量受控的复用成本曲线；P5缺共同任务流与�
 \begin{pitfallbox}
 \textbf{反例：把口径变更写进正文却不登记。}
 同一套数据换一种重采样单位，区间会变宽或变窄，而正文的表看上去一模一样。
-这类变更必须写进 \texttt{agent/decision-record.md} 并回头检查同口径下的其它章节；
+维护者应将这类变更记入完整档案的\path{agent/decision-record.md}，并核对沿用同一口径的其他章节；
 否则读者无法知道两次报告为什么不一致。
 \end{pitfallbox}
 

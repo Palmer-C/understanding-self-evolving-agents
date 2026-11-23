@@ -1,0 +1,371 @@
+"""E05 三个臂的实现：技能契约、接口漂移分类器、实物量成本函数（协议：`experiments/protocols/E05.md`）。
+
+本文件只实现**机制与可在本地验证的判据**，不含任何实验结果，也不含任何数字结论。
+三个臂（协议 §2）：
+
+| 臂 | 持久物 | 能否按反馈修订 |
+| --- | --- | --- |
+| `replan` | 无 | — |
+| `static_skill` | 带七字段契约的技能 | 否 |
+| `dynamic_skill` | 同上 | 是，受修订预算 $U$ 限制 |
+
+协议里能被本地验证的部分全部集中在 `--selftest`（§11）：契约缺字段检测、三类漂移的分类、
+成本函数的交点求解（含无交点分支）、检索在空记忆下的行为、修订预算超限行为。
+自检**不调用任何模型**，与任何方法的能力无关。
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+
+from .e01_arms import memory_block, retrieve
+
+ARMS = ("replan", "static_skill", "dynamic_skill")
+
+# 协议 §2.1：七个字段缺任一段，该条目就降级为"自然语言经验"，不是技能。
+SKILL_FIELDS = (
+    "name",
+    "signature",
+    "requires",
+    "applies_when",
+    "does_not_apply_when",
+    "code",
+    "verified_on",
+)
+
+# 协议 §3：预注册的复用次数格点，写死不按结果挑选。
+REUSE_GRID = (0, 1, 2, 4)
+
+# 协议 §5：漂移的三种取值与"解析不出入口"这第四种结局。
+DRIFT_MATCH = "match"
+DRIFT_NAME = "drift:name"
+DRIFT_ARITY = "drift:arity"
+DRIFT_UNKNOWN = "unknown"
+
+ENTRY_RE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)\s*\(([^()]*)\)")
+
+
+# --------------------------------------------------------------------- 技能契约
+
+
+@dataclass
+class Skill:
+    """一条技能条目。字段定义见协议 §2.1。"""
+
+    name: str = ""
+    signature: str = ""
+    requires: str = ""
+    applies_when: str = ""
+    does_not_apply_when: str = ""
+    code: str = ""
+    verified_on: str = ""
+    fail_conditions: str = ""
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Skill":
+        return cls(**{k: d.get(k, "") for k in cls.__dataclass_fields__})  # type: ignore[arg-type]
+
+    def as_dict(self) -> dict:
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
+
+    @property
+    def entry(self) -> str | None:
+        m = ENTRY_RE.search(self.signature)
+        return m.group(1) if m else None
+
+    @property
+    def arity(self) -> int | None:
+        m = ENTRY_RE.search(self.signature)
+        if not m:
+            return None
+        args = [a.strip() for a in m.group(2).split(",") if a.strip()]
+        return len(args)
+
+    def render(self) -> str:
+        """把技能渲染成可注入系统提示的一段文本（与 E01 的 `memory_block` 同口径）。"""
+        head = f"[{self.name}] {self.signature}"
+        return "\n".join(
+            [head, f"  适用：{self.applies_when}", f"  不适用：{self.does_not_apply_when}"]
+            + ([f"  失败条件：{self.fail_conditions}"] if self.fail_conditions else [])
+            + [self.code]
+        )
+
+
+def validate_contract(skill: Skill) -> tuple[bool, list[str]]:
+    """逐字段检查七个必需字段（协议 §2.1）。
+
+    缺任一段即判"不是技能"，并返回缺失字段名；**不猜测、不补全**——补一段空话等于
+    把"有契约"这件事伪装出来。
+    """
+    missing = [f for f in SKILL_FIELDS if not str(getattr(skill, f, "")).strip()]
+    return (not missing), [f"缺字段：{m}" for m in missing]
+
+
+# --------------------------------------------------------------------- 接口漂移
+
+
+def classify_drift(skill: Skill, task_statement: str) -> tuple[str, str]:
+    """静态契约检查：把技能的签名与任务陈述里解析出的入口比对（协议 §5）。
+
+    返回值是 `(结论, 理由)`，结论 ∈ {`match`, `drift:name`, `drift:arity`, `unknown`}。
+    **不调用模型**。`unknown` 必须单独成一类，不能并进 `match`——把解析失败记为匹配会
+    系统性低估失配率。
+    """
+    ok, _ = validate_contract(skill)
+    if not ok:
+        return DRIFT_UNKNOWN, "技能本身契约不完整，无法做契约检查"
+
+    m = ENTRY_RE.search(task_statement)
+    if not m:
+        return DRIFT_UNKNOWN, "任务陈述里没有可解析的函数入口"
+
+    want_name = m.group(1)
+    want_args = [a.strip() for a in m.group(2).split(",") if a.strip()]
+    got_name, got_arity = skill.entry, skill.arity
+    if got_name is None or got_arity is None:
+        return DRIFT_UNKNOWN, "技能签名本身无法解析"
+
+    if got_name != want_name:
+        return DRIFT_NAME, f"技能入口 {got_name} 与任务入口 {want_name} 不一致"
+    if got_arity != len(want_args):
+        return DRIFT_ARITY, f"参数个数 {got_arity} 与任务要求的 {len(want_args)} 不一致"
+    return DRIFT_MATCH, "入口名与参数个数一致"
+
+
+def classify_drift_axes(skill: Skill, task_statement: str) -> dict:
+    """把漂移拆成**彼此独立**的两个轴分别给结论（协议 §5 的 2026-09-28 更正）。
+
+    为什么必须拆开：v1 任务集里同族 8 道题的入口名两两不同。只要沿用
+    `classify_drift` 那种"先比名字、失配即返回"的短路写法，元数轴就永远读不到数，
+    于是"参数序漂移 = 0"会被读成"没发生"，而真实含义是"**没被测到**"。
+
+    本函数两轴互不短路；某轴取 `unknown` 表示这一轴**无法判定**，
+    既不计入一致也不计入失配——把它并进任何一边都是系统性偏差。
+    """
+    axes = {"name": "unknown", "arity": "unknown", "reason": ""}
+    ok_skill, _ = validate_contract(skill)
+    if not ok_skill:
+        axes["reason"] = "技能本身契约不完整，无法做契约检查"
+        return axes
+    m = ENTRY_RE.search(task_statement)
+    if not m:
+        axes["reason"] = "任务陈述里没有可解析的函数入口"
+        return axes
+    got_name, got_arity = skill.entry, skill.arity
+    want_name = m.group(1)
+    want_args = [a.strip() for a in m.group(2).split(",") if a.strip()]
+    if got_name is None:
+        axes["reason"] = "技能签名本身无法解析"
+        return axes
+    axes["name"] = "match" if got_name == want_name else "drift"
+    if got_arity is None:
+        axes["reason"] = "技能元数无法解析"
+        return axes
+    axes["arity"] = "match" if got_arity == len(want_args) else "drift"
+    return axes
+
+
+def count_drift_axes(pairs: list) -> dict:
+    """把 `(skill, statement)` 序列汇总成两轴的计数表。
+
+    返回值形如 `{"name": {"match": n, "drift": n, "unknown": n}, "arity": {...}, "n": n}`，
+    `n` 是总复用次数（分母）。两轴的分母相同、彼此独立，所以两行的 `drift` 数不必相等。
+    """
+    out = {
+        "name": {"match": 0, "drift": 0, "unknown": 0},
+        "arity": {"match": 0, "drift": 0, "unknown": 0},
+        "n": 0,
+    }
+    for skill, statement in pairs:
+        a = classify_drift_axes(skill, statement)
+        out["name"][a["name"]] += 1
+        out["arity"][a["arity"]] += 1
+        out["n"] += 1
+    return out
+
+
+# --------------------------------------------------------------------- 成本函数
+
+
+@dataclass
+class CostLedger:
+    """实物量账本（协议 §6）：只记调用数与 token，不记钱——后端不返回价格。"""
+
+    build_calls: int = 0
+    build_prompt_tokens: int = 0
+    build_completion_tokens: int = 0
+    reuse_calls: int = 0
+    reuse_prompt_tokens: int = 0
+    reuse_completion_tokens: int = 0
+    retrieve_calls: int = 0
+    check_calls: int = 0
+    over_budget: int = 0
+
+    def as_dict(self) -> dict:
+        return {k: getattr(self, k) for k in self.__dataclass_fields__}
+
+
+def skill_cost(ledger: CostLedger, k: int) -> int:
+    """$C_{\\text{skill}}(k) = C_{\\text{build}} + k\\,(C_{\\text{retrieve}} + C_{\\text{check}} + C_{\\text{adapt}})$。
+
+    单位统一取**模型调用数**（协议 §4）。检索与静态检查不走模型，因此它们在这个口径下是 0；
+    若实现里让模型做检查，必须写进账本并改这里。
+    """
+    build = ledger.build_calls
+    per_reuse = ledger.reuse_calls
+    return build + k * per_reuse
+
+
+def replan_cost(ledger: CostLedger, k: int) -> int:
+    """$C_{\\text{replan}}(k) = (k+1)\\,C_{\\text{build}}$：每次都从零规划一遍。"""
+    return (k + 1) * ledger.build_calls
+
+
+def break_even(ledger: CostLedger, grid: tuple[int, ...] = REUSE_GRID) -> int | None:
+    """回本点（协议 §4）：满足 $C_{\\text{skill}}(k) \\le C_{\\text{replan}}(k)$ 的最小**正整数** $k$。
+
+    为什么跳过 $k=0$：$k=0$ 时两臂都只付一次构建，$C_{\\text{skill}}(0) = C_{\\text{replan}}(0) = C_{\\text{build}}$
+    恒成立，把它算作回本等于说"什么都不复用就已经回本"，是一个永真式。
+
+    **格点内无交点时返回 `None`，而不是返回格点上限**——返回上限会让读者误以为
+    "再多复用几次就回本"。
+    """
+    for k in grid:
+        if k < 1:
+            continue
+        if skill_cost(ledger, k) <= replan_cost(ledger, k):
+            return k
+    return None
+
+
+# --------------------------------------------------------------------- 修订预算
+
+
+@dataclass
+class RevisionBudget:
+    """`dynamic_skill` 的修订预算 $U$（协议 §2）。
+
+    超限之后既不静默放行（等于白送更新），也不坍缩成 0 次（等于把 dynamic 变成 static），
+    而是记一笔 `over_budget`——协议 §6 要求这个数进账本。
+    """
+
+    u: int = 1
+    used: int = 0
+    over_budget: int = 0
+
+    def spend(self, n: int = 1) -> bool:
+        if self.used + n > self.u:
+            self.over_budget += n
+            return False
+        self.used += n
+        return True
+
+    def reset(self) -> None:
+        """每个复用机会重新计数（协议 §2：$U$ 是"每次复用机会"的限额）。"""
+        self.used = 0
+
+
+# --------------------------------------------------------------------- 注入
+
+
+def skill_memory_block(skills: list[Skill], statement: str, k: int = 1) -> str:
+    """把技能检索结果注入系统提示；与 E01 / E03 共用 `retrieve` 与 `memory_block`。
+
+    空技能库返回空串（不注入）；注入时用的是**渲染后的整段文本**，检索用的也是同一段，
+    否则"检索到什么"与"注入了什么"会不一致。
+    """
+    if not skills:
+        return ""
+    items = [s.render() for s in skills]
+    picked = retrieve([{"text": t} for t in items], statement, k=k)
+    return memory_block(picked, header="以下是已固化的技能（含契约与代码，可直接使用）：")
+
+
+# --------------------------------------------------------------------- selftest
+
+
+def selftest() -> int:
+    ok = True
+
+    # 1. 契约：七字段齐 → 是技能；缺 does_not_apply_when → 不是技能
+    full = Skill(
+        name="str-slice-safe",
+        signature="without_ends(s) -> str",
+        requires="python>=3.8",
+        applies_when="去掉字符串两端字符",
+        does_not_apply_when="输入不是 str",
+        code="def without_ends(s):\n    return s[1:-1]\n",
+        verified_on="strindex-03",
+        fail_conditions="空串未通过",
+    )
+    good, _ = validate_contract(full)
+    ok &= good
+    partial = Skill.from_dict({**full.as_dict(), "does_not_apply_when": ""})
+    bad, why = validate_contract(partial)
+    ok &= (not bad) and any("does_not_apply_when" in w for w in why)
+
+    # 2. 漂移三类 + unknown
+    same = "实现 without_ends(s)：去掉 s 的第一个和最后一个字符后返回。"
+    c, _ = classify_drift(full, same)
+    ok &= c == DRIFT_MATCH
+
+    other = Skill.from_dict({**full.as_dict(), "signature": "strip_ends(s) -> str"})
+    c, _ = classify_drift(other, same)
+    ok &= c == DRIFT_NAME
+
+    more_args = Skill.from_dict({**full.as_dict(), "signature": "without_ends(s, n) -> str"})
+    c, _ = classify_drift(more_args, same)
+    ok &= c == DRIFT_ARITY
+
+    c, _ = classify_drift(full, "把列表按长度分组，返回字典。")
+    ok &= c == DRIFT_UNKNOWN
+
+    # 2b. 两轴独立计数：名字失配不再吞掉元数轴（协议 §5 更正）
+    ax = classify_drift_axes(other, same)  # 名字变了、元数仍是 1
+    ok &= ax["name"] == "drift" and ax["arity"] == "match"
+    ax = classify_drift_axes(more_args, same)  # 名字没变、元数变成 2
+    ok &= ax["name"] == "match" and ax["arity"] == "drift"
+    ax = classify_drift_axes(full, "把列表按长度分组，返回字典。")
+    ok &= ax["name"] == "unknown" and ax["arity"] == "unknown"
+    tally = count_drift_axes([(other, same), (more_args, same)])
+    ok &= tally["n"] == 2
+    ok &= tally["name"] == {"match": 1, "drift": 1, "unknown": 0}
+    ok &= tally["arity"] == {"match": 1, "drift": 1, "unknown": 0}
+
+    # 契约不完整的技能不能给出 match（否则失配率被低估）
+    c, _ = classify_drift(partial, same)
+    ok &= c == DRIFT_UNKNOWN
+
+    # 3. 成本函数与回本点：三种形状各一个
+    cheap_reuse = CostLedger(build_calls=10, reuse_calls=2)
+    ok &= replan_cost(cheap_reuse, 4) == 50 and skill_cost(cheap_reuse, 4) == 18
+    ok &= break_even(cheap_reuse) == 1  # 10+2k <= 10(k+1) → k=1 起回本
+
+    no_cross = CostLedger(build_calls=1, reuse_calls=2)  # 复用比重新规划还贵 → 格点内无交点
+    ok &= break_even(no_cross) is None
+
+    equal_cost = CostLedger(build_calls=1, reuse_calls=1)  # 两臂恒等 → k=1 即"回本"（协议用 ≤）
+    ok &= break_even(equal_cost) == 1
+
+    # 4. 检索：空技能库不注入；非空时最多取 k 条
+    ok &= skill_memory_block([], same) == ""
+    ok &= len(skill_memory_block([full, other], same, k=1).strip()) > 0
+
+    # 5. 修订预算：三次里只有第一次放行，其余记 over_budget
+    rb = RevisionBudget(u=1)
+    ok &= rb.spend() and not rb.spend()
+    ok &= rb.over_budget == 1 and rb.used == 1
+    rb.reset()
+    ok &= rb.spend() and rb.used == 1 and rb.over_budget == 1
+
+    print(f"contract_ok={good} partial_rejected={not bad} "
+          f"break_even_cheap={break_even(cheap_reuse)} "
+          f"break_even_equal={break_even(equal_cost)} "
+          f"break_even_none={break_even(no_cross)}")
+    print("SELFTEST", "OK" if ok else "FAILED")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(selftest())

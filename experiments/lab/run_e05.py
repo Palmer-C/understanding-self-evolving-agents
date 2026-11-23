@@ -1,8 +1,6 @@
 """E05 运行器：技能固化的回本点与接口漂移（协议：`experiments/protocols/E05.md`）。
 
-用法：
-    python experiments/lab/run_e05.py --trial            # 极小规模验通路（不产生任何结论）
-    python experiments/lab/run_e05.py --repeats 2        # 首轮试验运行（估方差与反推样本量）
+当前版本保留历史协议和分析函数。实跑需要操作系统级隔离执行器。
 
 本文件是**测量工具**：跑三组臂、在每个复用格点上累实物量账、用 `eval.paired_diff` 出区间，
 自己不写任何结论，也不填任何数字（所有数字来自本次运行的原始记录）。
@@ -53,7 +51,7 @@ from experiments.lab.e05_arms import (  # noqa: E402
 )
 from experiments.lab.eval import DEFAULT_MDE, TaskRuns, paired_diff  # noqa: E402
 from experiments.lab.run_e01 import _last_written_code  # noqa: E402
-from experiments.lab.sandbox import Sandbox  # noqa: E402
+from experiments.lab.sandbox import ExecutionUnavailable, Sandbox, require_isolated_execution  # noqa: E402
 from experiments.lab.tasks import load_task_dir  # noqa: E402
 from experiments.lab.taskset_spec import FAMILIES  # noqa: E402
 from experiments.lab.trace import new_run_id  # noqa: E402
@@ -129,6 +127,8 @@ def _absorb(led: dict, usage: dict, bucket: str) -> None:
 
 
 def run_episode_isolated(agent, task, seed, out_dir):
+    if agent.backend.name != "scripted":
+        require_isolated_execution()
     sandbox = Sandbox.create_temp(prefix=task.task_id)
     sandbox.protected = set(task.protected)
     try:
@@ -242,6 +242,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--resume", default="")
     ap.add_argument("--resume-latest", action="store_true")
     args = ap.parse_args(argv)
+    try:
+        require_isolated_execution()
+    except ExecutionUnavailable as exc:
+        ap.error(str(exc))
 
     grid = tuple(int(x) for x in args.grid.split(",") if x.strip())
     if args.trial:

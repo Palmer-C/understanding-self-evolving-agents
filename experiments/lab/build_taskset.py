@@ -10,9 +10,9 @@
    任一条不满足就整体失败，不产出半成品任务集。
 
 用法：
-    python experiments/lab/build_taskset.py                 # 构建 + 校验 + 用实验台实跑
+    python experiments/lab/build_taskset.py                 # 构建并校验仓库自带的可信规格
     python experiments/lab/build_taskset.py --out <目录>     # 指定输出根
-    python experiments/lab/build_taskset.py --no-lab-run    # 只做构建与规格校验
+    python experiments/lab/build_taskset.py --lab-run       # 需要操作系统级隔离执行器
 """
 
 from __future__ import annotations
@@ -20,16 +20,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import shutil
 import sys
-import tempfile
 import types
 from pathlib import Path
 
 if __package__ in (None, ""):  # 直接以脚本方式运行时补上仓库根
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from experiments.lab.sandbox import Sandbox  # noqa: E402
+from experiments.lab.sandbox import ExecutionUnavailable, Sandbox, require_isolated_execution  # noqa: E402
 from experiments.lab.tasks import load_task_dir  # noqa: E402
 from experiments.lab.taskset_spec import FAMILIES, SPLIT_BY_INDEX  # noqa: E402
 
@@ -151,6 +149,7 @@ def build_variant(family: str, idx: int, spec: dict, out_root: Path) -> dict:
 
 def lab_run(task_dir: Path) -> bool:
     """用实验台把任务真跑一遍：初始代码必须失败。返回 True 表示符合预期。"""
+    require_isolated_execution()
     task = load_task_dir(task_dir)
     sandbox = Sandbox.create_temp(prefix=task.task_id)
     try:
@@ -164,8 +163,15 @@ def lab_run(task_dir: Path) -> bool:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="构建任务集 v1")
     ap.add_argument("--out", default="experiments/tasks/v1")
-    ap.add_argument("--no-lab-run", action="store_true", help="跳过用实验台实跑校验")
+    modes = ap.add_mutually_exclusive_group()
+    modes.add_argument("--lab-run", action="store_true", help="实跑初始代码，需要操作系统级隔离执行器")
+    modes.add_argument("--no-lab-run", action="store_true", help="只构建并校验可信规格（默认）")
     args = ap.parse_args(argv)
+    if args.lab_run:
+        try:
+            require_isolated_execution()
+        except ExecutionUnavailable as exc:
+            ap.error(str(exc))
 
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
@@ -196,7 +202,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"WARNING: 规格里已没有、但仍留在输出目录的条目：{stale}")
         print("         它们不在 index.csv 中，加载器不会读到；需要清理时人工删除。")
 
-    if not args.no_lab_run:
+    if args.lab_run:
         bad = [r["task_id"] for r in rows if not lab_run(out_root / r["family"] / r["task_id"])]
         if bad:
             print(f"FAIL: 以下任务的初始代码竟然通过了验收：{bad}")
@@ -214,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"tasks   = {len(rows)}")
     print(f"families= {len(FAMILIES)}")
     print(f"splits  = {by_split}")
-    print(f"lab_run = {'skipped' if args.no_lab_run else 'all initial code fails (expected)'}")
+    print(f"lab_run = {'all initial code fails (expected)' if args.lab_run else 'skipped'}")
     print(f"index   = {index_path}")
     print("BUILD OK")
     return 0

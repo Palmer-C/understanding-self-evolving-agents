@@ -25,7 +25,7 @@ E01/E02的训练轨迹位于\path{traces/<arm>/train/<task_id>-e<episode>/trace.
 E03的评价轨迹位于\path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.json}，来源轨迹位于\path{traces/source/<split>/<task_id>-e<episode>/trace.json}（每回合一条轨迹）。另有
 \texttt{summary.json}（聚合结果与判决）。
 路径中的\texttt{arm}、\texttt{split}与\texttt{task\_id}分别表示实验臂、拆分与题号，\texttt{episode}和\texttt{repeat}分别表示训练回合序号与评价重复序号。
-\texttt{experiments/results/}保留部分汇总及渲染副本，不能当作完整输入目录。本版以\nolinkurl{analysis/inputs.json}列出唯一输入路径和SHA；冲突处理见第~\ref{ch05}章，文件放在runs目录本身不证明它就是可裁定的正确事实。
+\texttt{experiments/results/}保留部分汇总及渲染副本，不能当作完整输入目录。从本版的\nolinkurl{analysis/inputs.json}查所用汇总的路径和哈希。公开预览的E03汇总副本替换了两处回溯中的临时目录，原件与副本分别登记哈希；核对数值可读副本，复核原始记忆的字符长度须读原件。拆分A的计数冲突见第~\ref{ch05}章。
 \end{sloppypar}
 
 \clearpage
@@ -87,8 +87,7 @@ E03的评价轨迹位于\path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.jso
 
 \texttt{usage} 里的 \texttt{usd} 恒为 \texttt{null} 且 \texttt{unpriced} 为真：
 后端不返回价格，本书的成本账只报实物量（调用数、token 数、墙钟时间），
-折美元要等 \texttt{calculations/pricing.yaml} 拿到有出处的定价表
-（已登记 \texttt{agent/BLOCKERS.md}）。
+折算美元还需能对应调用日期、模型和计价单位的价格记录。
 
 旧后端在响应缺少用量字段时会将对应token默认记为零；没有保留原始响应时，不能据一个零字段认定真实用量已知为零。该静态轨迹也没有逐项保存外部任务题面、供应商完整响应或不可变模型修订身份。复核时应连接任务文件与配置，并把无法恢复的服务和用量信息保留为未知。
 
@@ -97,13 +96,19 @@ E03的评价轨迹位于\path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.jso
 \begin{sloppypar}
 复现首先分清目标：重算已有记录、使用脚本后端检查装置、还是重新发送付费模型请求。前两类不需要重新生成真实模型轨迹，后一类要检查数据范围、后端身份、额度和授权。先核对目标协议与实际文件，保留原运行；新版入口使用独立目录。不要在原始记录所在目录尝试“清理后重跑”，也不要把任务集重新生成当成读取旧记录的必要步骤。
 
-后端检查应在真实执行之前进行。\texttt{check\_backend.py}在模型名与密钥齐全且未指定\texttt{--no-probe}时尝试一次最小模型请求，该请求也应进入调用与费用范围。指定\texttt{--no-probe}只检查所需配置字段，服务是否可用还需另外验证。运行之后再检查后端，无法追溯证明先前每个请求都处于相同条件。已知可用的服务状态也不构成未来运行一定成功的保证。
+\texttt{check\_backend.py}默认检查本地配置。只有显式指定\texttt{--probe}才会尝试一次真实请求，这次请求也应计入调用与费用。事后探测只能说明探测时的服务状态，核查历史运行须回到当时记录的模型与请求。
 
 记录Git提交号有助于定位实现，但未提交改动、任务内容与协议也需单独保存。两个提交产生不同结果不自动排除复现失败；反过来，相同提交也不能保证远程模型、依赖或数据完全相同。应逐项解释差异，不用提交号单独判定可复现性。
 \end{sloppypar}
 
 \section{先离线复核，再决定是否重新运行}
 \label{sec:appd-offline}
+
+公开源码预览的离线入口列在\path{analysis/README.md}。下文以“完整档案”标出仅随维护仓库保存的命令；其余命令可在本次修订的公开预览中运行。复算E05案例和统计例题可以直接读取包内材料。若要查看E11或E12的默认预检报告，先在一份新解压的预览副本根目录运行：
+\begin{verbatim}
+python -m experiments.lab.build_taskset --no-lab-run
+\end{verbatim}
+这一步在\path{experiments/tasks/v1/}写入题库；已有同名文件可能被覆盖。本版默认只构建题库，显式使用\texttt{--no-lab-run}得到相同结果。只查历史汇总时无需生成题库。
 
 \subsection{第一层：检查文件是否属于所述运行}
 
@@ -140,13 +145,13 @@ python calculations/reproduce_rl_arithmetic.py
 \end{verbatim}
 两者另存本版分析文件。平台入口中的接口演示使用显式合成夹具，没有执行候选或请求模型；数学入口只导入旧脚本的纯计算函数，不覆盖旧的有日期报告。
 
-第4章的反馈审计还可离线重算：
+完整档案保留了第4章反馈审计所需的逐回合轨迹与复算脚本：
 \begin{verbatim}
 python calculations/reproduce_feedback_audit.py
 \end{verbatim}
 它核对E02轨迹与汇总、正文配对差和栈案例，并比较错误方法与局部候选的容器状态。输出位于\path{analysis/feedback-audit-reproduction.json}。局部候选执行正确不代表Agent曾经执行该修改；未归档的中间评审原文仍然缺失。
 
-第5章的检索与来源成本可用以下入口复核：
+完整档案中的以下脚本复核第5章的检索与来源成本：
 \begin{verbatim}
 python calculations/reproduce_memory_audit.py
 \end{verbatim}
@@ -171,7 +176,7 @@ analysis/\allowbreak context-audit-reproduction.json
 \begin{verbatim}
 python calculations/reproduce_skill_audit.py
 \end{verbatim}
-它只读随书E05 v2轨迹，输出\path{analysis/skill-audit-reproduction.json}，并复核教学成本数组。复算报告同时保留所检出源码的原始字节SHA、CRLF转为LF后的SHA及历史登记值，并注明匹配方式。此换行比较用于登记的源码与协议，实质文本差异会触发核对错误。旧E05累计账未纳入冻结包，历史分析脚本不属于本版可直接复算入口，依赖它的数值表已撤下。
+它只读随书E05 v2轨迹，输出\path{analysis/skill-audit-reproduction.json}，并复核教学成本数组。报告按原运行配置逐项校验14份纯文本快照的字节，包括当时的源码和协议。任一摘要不符，复算即停止。旧E05累计账未纳入冻结包，历史分析脚本不属于本版可直接复算入口，依赖它的数值表已撤下。
 
 \begin{samepage}
 第9章的来源表格差值、独立候选覆盖率、排程反例与摊销算例可复算：
@@ -181,13 +186,13 @@ python calculations/reproduce_workflow_arithmetic.py
 \end{samepage}
 输出位于\path{analysis/}\allowbreak\path{workflow-arithmetic-reproduction.json}。这些计算不产生E06结果，也不代替来源论文的实际运行。
 
-第10章的SEAL表格与热图差值、成功样本归一化、教学梯度、成本交点和给定区间判据可复算：
+完整档案中，第10章的SEAL表格差值、教学梯度、成本交点及区间判据可用以下脚本复算：
 \begin{verbatim}
 python calculations/reproduce_parameter_arithmetic.py
 \end{verbatim}
 结果位于\path{analysis/}\allowbreak\path{parameter-arithmetic-reproduction.json}。它只做确定性计算，没有训练参数模型，也不产生E08能力证据。
 
-第11章的课程漂移、过滤分母、F1与格式奖励合账及来源表格差值可复算：
+完整档案中，第11章的课程漂移、过滤分母、F1与格式奖励合账及来源表格差值可复算：
 \begin{verbatim}
 python calculations/reproduce_curriculum_arithmetic.py
 \end{verbatim}
@@ -199,19 +204,19 @@ python calculations/reproduce_timing_audit.py
 \end{verbatim}
 结果另存于\path{analysis/}\allowbreak\path{timing-audit-reproduction.json}。它核对固定历史输入和教学模型，不执行E11，也不能估计替代调度策略的闭环成绩。
 
-第14章的噪声比较、精度规划、余弦反例、单文件恢复与临时文件权限反例可复算：
+第14章的噪声比较、精度规划、余弦例题与单文件恢复可从归档数据复核。该命令也核对历史权限观察的来源身份。
 \begin{verbatim}
 python calculations/reproduce_reliability_audit.py
 \end{verbatim}
-输出位于\path{analysis/}\allowbreak\path{reliability-audit-reproduction.json}。旧E12运行器未纳入冻结包，记账故障只从另存的有来源身份的短摘录复现；该入口不执行E12，也不提供操作系统隔离或行为等价证明。
+输出位于\path{analysis/}\allowbreak\path{reliability-audit-reproduction.json}。旧E12的记账观察附有源码节选和校验值，入口按数据读取这些材料。重新评价候选执行权限需要单独的隔离环境。
 
-第15章并列引用的E01范围、任务族差值、读取者成本比例、题级点估计反号和E05令牌差值另有算术入口：
+完整档案另有脚本复算第15章的E01范围、任务族差值、读取者成本比例、题级点估计反号和E05令牌差值：
 \begin{verbatim}
 python calculations/reproduce_case_arithmetic.py
 \end{verbatim}
 结果位于\path{analysis/}\allowbreak\path{case-arithmetic-reproduction.json}。它区分80个封存评价回合与88个计时主回合，不把既有不同运行拼成一次集成实验。
 
-第16章的语料比例、振荡、条件风险、零故障上限与独立选择算例可另行复算：
+完整档案另存了第16章语料比例、振荡、条件风险、零故障上限与独立选择的复算脚本：
 \begin{verbatim}
 python calculations/reproduce_scope_arithmetic.py
 \end{verbatim}
@@ -221,7 +226,7 @@ analysis/\allowbreak scope-arithmetic-reproduction.json
 \end{quote}
 它还以构造输入检查FGT与BWT使用不同参照，不产生本书的长期保持率或实测故障概率。
 
-第10—16章同时包含来源论文报告值、真实运行记录和人为教学例。教学例用于说明比较口径，必须可以计算，也必须保持其人为设定的身份。下列脚本复算成本直线交点、难度代理、混合分布均值、父代权重、效用、折扣后代增长、交互差和长期概率例。
+第10—16章同时包含来源论文报告值、真实运行记录和人为教学例。教学例用于说明比较口径，必须可以计算，也必须保持其人为设定的身份。完整档案的下列脚本复算成本直线交点、难度代理、混合分布均值、父代权重、效用、折扣后代增长、交互差和长期概率例。
 
 \begin{verbatim}
 python calculations/reproduce_teaching_arithmetic.py
@@ -235,7 +240,7 @@ python calculations/reproduce_teaching_arithmetic.py
 
 \subsection{第四层：检查展示文件来自当前源稿}
 
-正文正确而PDF过期，是交付链中另一类可复现性问题。本版构建入口把当前书稿与依赖复制到临时构建目录，生成结果后留下诊断文件。检查时应读取诊断指定的实际日志，而不是仅凭主目录中某个旧日志的时间。编译退出成功也要同时核对交叉引用、缺字和图表资源是否来自当前源文件。过高浮动表格可能被裁掉而没有编译错误；构建审计还检查这类专门警告，不能只查\texttt{Overfull}。
+正文正确而PDF过期，是交付链中另一类可复现性问题。本版构建入口把当前书稿与依赖复制到临时构建目录，生成结果后留下诊断文件。检查时应读取诊断指定的实际日志，而不是仅凭主目录中某个旧日志的时间。编译退出成功也要同时核对交叉引用、缺字和图表资源是否来自当前源文件。过高浮动表格可能被裁掉而没有编译错误；除\texttt{Overfull}以外，还应检查过高浮动体警告。完整档案附有以下构建审计脚本。
 
 \begin{verbatim}
 python calculations/audit_book_build.py
@@ -256,7 +261,7 @@ python calculations/audit_book_build.py
 
 \section{运行E01新版的离线检查}
 
-从仓库根目录启动以下入口，可以复查附录B的控制流与文件边界，不需要模型密钥。当前版本使用标准库构造输入；默认入口只打印就绪报告，显式选择离线演示后才创建新的本地记录目录。它没有付费执行选项，也不能用一个参数把构造结果切换成真实能力实验。
+以下一组命令需要完整档案。从仓库根目录启动，可以复查附录B的控制流与文件边界，不需要模型密钥。当前版本使用标准库构造输入；默认入口只打印就绪报告，显式选择离线演示后才创建新的本地记录目录。它没有付费执行选项，也不能用一个参数把构造结果切换成真实能力实验。
 
 \begin{verbatim}
 python -m unittest experiments.lab.test_e01_v2_contracts
@@ -278,17 +283,17 @@ python calculations/demo_e01_final_journal.py
 
 \begin{sloppypar}
 \begin{samepage}
-旧文件组件的缺口由可靠性复核入口中的权限反例重现：
+两版均收录以下命令，可核对旧文件组件的历史观察及其来源。
 \begin{quote}\ttfamily\small
 calculations/\allowbreak reproduce\_reliability\_audit.py
 \end{quote}
 \end{samepage}
-其中的权限反例只在新建临时目录中使用虚构标记；同一入口的其他部分另外读取明确列出的历史记录。反例通过表示复现了旧实现的边界不足；新版文件工具测试通过表示指定接口拒绝了对应请求。两者都不能替代候选进程的操作系统权限隔离。
+权限观察来自当时保存的临时标记检查报告。入口核对其字节身份；当前文件工具的回归测试另行验证目录访问规则。进程能够读取哪些文件，还取决于运行它的账户和隔离环境。
 \end{sloppypar}
 
 \subsection{公开提炼与近期读取的独立演示}
 
-新增组件可单独检查：
+第一条是完整档案的单元测试，第二条是两版都收录的演示：
 \begin{verbatim}
 python -m unittest experiments.lab.test_e01_v2_public_memory
 python calculations/demo_e01_public_memory.py
@@ -304,7 +309,7 @@ calculations/\allowbreak platform\_demo\_fixtures.py
 
 \subsection{复核来源、回复与准入记录的关联}
 
-以下入口使用独立的脚本材料演示请求、回复片段、审核与发布的连接：
+第二条演示和第四条数学复核可在公开预览运行；第一条单元测试和第三条历史触发审计需要完整档案。
 \begin{verbatim}
 python -m unittest experiments.lab.test_e01_v2_admission_receipts
 python calculations/demo_e01_admission_receipts.py
@@ -320,7 +325,7 @@ python calculations/audit_ch14_cosine_bound.py
 \begin{samepage}
 \subsection{复核一次经验准入在中断后怎样恢复}
 
-前节的内存组件保持原样；新增持久日志将一次提取的派发机会、回复、用量、候选片段、审核和结果快照联系起来。以下命令只运行构造数据，不发送模型请求：
+前节的内存组件保持原样；新增持久日志将一次提取的派发机会、回复、用量、候选片段、审核和结果快照联系起来。以下两条命令需要完整档案，均使用构造数据，不发送模型请求：
 \begin{verbatim}
 python -m unittest experiments.lab.test_e01_v2_admission_journal
 python calculations/demo_e01_admission_journal.py
@@ -335,7 +340,7 @@ python calculations/demo_e01_admission_journal.py
 
 \subsection{序列编排的离线检查}
 
-以下三组检查分别覆盖跨单元身份与预算游标、M0及记忆合并、组件编排：
+完整档案保留了三组检查，分别覆盖跨单元身份与预算游标、M0及记忆合并、组件编排：
 \begin{verbatim}
 python -m unittest experiments.lab.test_e01_v2_orchestration
 python -m unittest experiments.lab.test_e01_v2_m0_memory
@@ -346,7 +351,7 @@ python -m unittest experiments.lab.test_e01_v2_assembly
 \section{历史运行环境与本版构建条件}
 
 \begin{itemize}
-  \item 历史环境日志记载Python\texttt{3.13}（如\path{agent/nightly/2026-09-24.md}）；这不是每条轨迹各自记录的解释器身份。实验运行、论文抽取和书稿审查的依赖不同，应分别记录。
+  \item 历史环境日志记载Python\texttt{3.13}（见完整档案\path{agent/nightly/2026-09-24.md}）；这不是每条轨迹各自记录的解释器身份。实验运行、论文抽取和书稿审查的依赖不同，应分别记录。
   \item 历史验收命令使用标准库\texttt{unittest}。更换测试框架前应核对发现规则、失败处理与退出码，再判断新旧结果是否可合并。
   \item 模型后端经OpenAI兼容接口调用，本书运行入口从环境变量或\texttt{experiments/lab/.env}读取凭据；凭据不作为配置和轨迹的主动记录字段。
   \item \begin{sloppypar}

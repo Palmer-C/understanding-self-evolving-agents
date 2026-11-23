@@ -14,10 +14,12 @@ import http.client
 import json
 import os
 import pathlib
+import re
 import socket
 import ssl
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from typing import Optional
@@ -36,24 +38,21 @@ _RETRYABLE_ERRORS = (
 _RETRYABLE_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
 
 
-def _load_local_env() -> None:
-    """读同目录 .env（gitignored），仅补充未设置的变量；显式环境变量优先。
-
-    这样夜班无论是否继承用户会话的环境变量，都能通过 experiments/lab/.env 拿到后端凭据。
-    """
+def _local_backend_settings() -> dict[str, str]:
+    """仅在构造真实后端时读取本机配置；凭据保留在调用进程的 Python 对象中。"""
     env_path = pathlib.Path(__file__).resolve().parent / ".env"
     if not env_path.exists():
-        return
+        return {}
+    settings = {}
     for raw in env_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, val = line.split("=", 1)
         key, val = key.strip(), val.strip().strip('"').strip("'")
-        os.environ.setdefault(key, val)
-
-
-_load_local_env()
+        if key in {"AGENT_LAB_MODEL", "AGENT_LAB_BASE_URL", "AGENT_LAB_API_KEY"}:
+            settings.setdefault(key, val)
+    return settings
 
 
 @dataclass
@@ -66,6 +65,38 @@ class LLMReply:
 
 class BackendUnavailable(RuntimeError):
     pass
+
+
+def _https_base(value: str) -> str:
+    """返回规范化 HTTPS 地址，默认 443 端口和尾部斜线归一化。"""
+    try:
+        if not value.isascii() or re.search(r"[\x00-\x20\x7f\\?#%]", value):
+            raise ValueError
+        url = urllib.parse.urlsplit(value)
+        host = url.hostname
+        if url.scheme != "https" or not host or url.username is not None or url.password is not None:
+            raise ValueError
+        if ":" in host:
+            authority = f"[{host}]"
+        elif re.fullmatch(r"[a-z0-9.-]+", host):
+            authority = host
+        else:
+            raise ValueError
+        port = url.port
+        if port == 0 or url.netloc.lower() != (authority if port is None else f"{authority}:{port}"):
+            raise ValueError
+        if not re.fullmatch(r"[a-zA-Z0-9._~/-]*", url.path) or {".", ".."} & set(url.path.split("/")):
+            raise ValueError
+        if port is not None and port != 443:
+            authority += f":{port}"
+        return f"https://{authority}{url.path.rstrip('/')}"
+    except ValueError:
+        raise BackendUnavailable("模型地址须为 HTTPS 服务地址，只含主机、可选端口和 API 路径。") from None
+
+
+class _NoModelRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 class ScriptedBackend:
@@ -101,10 +132,25 @@ class OpenAIChatBackend:
         max_retries: int = 4,
         retry_backoff: float = 3.0,
     ) -> None:
-        self.model = model or os.environ.get("AGENT_LAB_MODEL")
-        self.base_url = (base_url or os.environ.get("AGENT_LAB_BASE_URL")
-                         or "https://api.openai.com/v1").rstrip("/")
-        self.api_key = api_key or os.environ.get("AGENT_LAB_API_KEY")
+        local = _local_backend_settings()
+        default_base = "https://api.openai.com/v1"
+        env_base = os.environ.get("AGENT_LAB_BASE_URL")
+        local_base = local.get("AGENT_LAB_BASE_URL")
+        self.model = model or os.environ.get("AGENT_LAB_MODEL") or local.get("AGENT_LAB_MODEL")
+        if api_key is not None:
+            self.api_key = api_key
+            configured_base = base_url or env_base or default_base
+        elif "AGENT_LAB_API_KEY" in os.environ:
+            self.api_key = os.environ["AGENT_LAB_API_KEY"]
+            configured_base = env_base or default_base
+        else:
+            self.api_key = local.get("AGENT_LAB_API_KEY")
+            configured_base = local_base or default_base
+        credential_base = _https_base(configured_base)
+        self.base_url = _https_base(base_url or env_base or local_base or default_base)
+        if urllib.parse.urlsplit(self.base_url).netloc != urllib.parse.urlsplit(credential_base).netloc:
+            raise BackendUnavailable("模型地址与凭据配置的 HTTPS 来源不一致，请在同一配置中指定服务地址和对应密钥。")
+        self._completion_url = self.base_url + "/chat/completions"
         self.timeout = timeout
         # temperature 默认 None = 不写进请求体，用服务端默认值。
         # 需要"多次独立运行"时由调用方显式给值，四臂同值才公平。
@@ -119,6 +165,9 @@ class OpenAIChatBackend:
             raise BackendUnavailable(
                 "缺少 AGENT_LAB_MODEL / AGENT_LAB_API_KEY；真实调用需要显式配置，不作默认假设"
             )
+        if not re.fullmatch(r"[\x21-\x7e]+", self.api_key):
+            raise BackendUnavailable("模型凭据含空白或非可见 ASCII 字符。")
+        self._transport = urllib.request.build_opener(_NoModelRedirects())
 
     def generate(self, messages: list[dict]) -> LLMReply:
         body = {"model": self.model, "messages": messages}
@@ -126,35 +175,34 @@ class OpenAIChatBackend:
             body["temperature"] = self.temperature
         payload = json.dumps(body).encode("utf-8")
         req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
+            self._completion_url,
             data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}",
-            },
+            headers={"Content-Type": "application/json"},
             method="POST",
         )
+        req.add_unredirected_header("Authorization", f"Bearer {self.api_key}")
         last_exc: Optional[BaseException] = None
         for attempt in range(self.max_retries + 1):
             try:
-                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                with self._transport.open(req, timeout=self.timeout) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                 break
             except urllib.error.HTTPError as exc:
                 # 429 / 5xx 值得重试；4xx 是请求本身的问题，重试没有意义
+                exc.close()
                 if exc.code in _RETRYABLE_STATUS and attempt < self.max_retries:
                     last_exc = exc
                     self.retries += 1
                     time.sleep(self.retry_backoff * (attempt + 1))
                     continue
-                raise BackendUnavailable(f"模型接口返回 {exc.code}: {exc.read()[:500]!r}") from exc
+                raise BackendUnavailable(f"模型接口返回 HTTP {exc.code}") from None
             except _RETRYABLE_ERRORS as exc:
                 if attempt < self.max_retries:
                     last_exc = exc
                     self.retries += 1
                     time.sleep(self.retry_backoff * (attempt + 1))
                     continue
-                raise BackendUnavailable(f"模型接口连接失败（已重试 {self.max_retries} 次）：{exc}") from exc
+                raise BackendUnavailable(f"模型接口连接失败（已重试 {attempt} 次）：{type(exc).__name__}") from None
         else:  # pragma: no cover —— 上面两处 raise 已覆盖，留作兜底
             raise BackendUnavailable(f"模型接口调用失败：{last_exc}")
         choice = data["choices"][0]["message"]["content"]

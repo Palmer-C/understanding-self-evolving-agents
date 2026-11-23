@@ -101,6 +101,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", help="写报告到此文件（utf-8）")
     ap.add_argument("--only", help="只扫含此子串的文件名（调试）")
+    ap.add_argument("--strict", action="store_true",
+                    help="对扫描范围内的未定义引用或重复标签返回 1；无输入返回 2。其他发现仍只列入报告。")
     args = ap.parse_args()
 
     files = []
@@ -109,6 +111,8 @@ def main():
     if args.only:
         files = [f for f in files if args.only in os.path.basename(f)]
     files.sort()
+    if args.strict and not files:
+        ap.error("严格检查没有匹配的 TeX 源文件")
 
     labels = {}          # key -> [(file, line, envclass)]
     refs = []            # (file, line, macro, key)
@@ -278,6 +282,8 @@ def main():
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fo:
             fo.write(report + "\n")
+    if args.strict and (undef or dups):
+        return 1
     return 0
 
 

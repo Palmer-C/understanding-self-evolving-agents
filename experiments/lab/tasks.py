@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Sequence
 
-from .sandbox import Sandbox, default_test_command
+from .sandbox import CommandResult, Sandbox, default_test_command
 
 
 @dataclass
@@ -24,14 +24,25 @@ class Task:
     split: str = "unassigned"  # train / select-valid / regression / heldout / sealed
 
     def materialize(self, sandbox: Sandbox) -> None:
-        for rel, content in self.files.items():
-            p = sandbox.root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content, encoding="utf-8")
+        sandbox.initialize_files(self.files, self.protected)
 
     def verify(self, sandbox: Sandbox, timeout: float = 120.0):
         cmd = list(self.test_command) if self.test_command else default_test_command()
         return sandbox.run(cmd, timeout=timeout)
+
+
+@dataclass(kw_only=True)
+class LiteralFixtureTask(Task):
+    """脚本自检的固定答案。只比较指定文件的文本，运行轨迹注明判定来源。"""
+
+    fixture_name: str
+    fixture_text: str
+
+    def verify(self, sandbox: Sandbox, timeout: float = 120.0) -> CommandResult:
+        actual = sandbox.read_file(self.fixture_name, limit=len(self.fixture_text) + 1)
+        matched = actual == self.fixture_text and self.fixture_name in sandbox.list_files()
+        detail = "固定样例文本一致" if matched else "固定样例文本不同"
+        return CommandResult(0 if matched else 1, detail, "", verdict_source="固定样例文本比对（未执行候选代码）")
 
 
 def materialize_task(task: Task, sandbox: Sandbox) -> Sandbox:
@@ -44,17 +55,20 @@ def load_task_dir(path: Path) -> Task:
     import json
 
     path = Path(path)
-    files: dict[str, str] = {}
-    for p in path.rglob("*"):
-        if p.is_file() and p.name not in {"statement.md", "test.json"}:
-            files[str(p.relative_to(path)).replace("\\", "/")] = p.read_text(encoding="utf-8")
+    boundary = Sandbox(path)
+    files = {
+        name: boundary._resolve(name).read_text(encoding="utf-8")
+        for name in boundary.list_files()
+        if Path(name).name not in {"statement.md", "test.json"}
+    }
     meta = {}
-    meta_path = path / "test.json"
+    meta_path = boundary._resolve("test.json")
     if meta_path.is_file():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    statement_path = boundary._resolve("statement.md")
     return Task(
         task_id=path.name,
-        statement=(path / "statement.md").read_text(encoding="utf-8") if (path / "statement.md").is_file() else "",
+        statement=statement_path.read_text(encoding="utf-8") if statement_path.is_file() else "",
         files=files,
         test_command=meta.get("test_command"),
         protected=tuple(meta.get("protected", ())),

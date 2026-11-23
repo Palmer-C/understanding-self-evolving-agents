@@ -1,6 +1,7 @@
 """Independent E11 v2 engineering pilot. Default: offline manifest only.
 
---execute requires a matching saved --approved-manifest and prior user consent.
+--execute requires a matching saved --approved-manifest, prior user consent,
+and an OS-isolated candidate executor.
 The manifest is a consistency check, not proof of consent. No resume/overwrite.
 """
 from __future__ import annotations
@@ -27,7 +28,7 @@ from experiments.lab.e11_resources_v2 import JournalBackend, SequenceLimits, ato
 from experiments.lab.e11_timing_v2 import TimingController
 from experiments.lab.e11_analysis_v2 import ARMS, SequenceRun, analyze
 from experiments.lab.protocol_agent_v3 import ProtocolAgentV3, SYSTEM_PROMPT
-from experiments.lab.sandbox import Sandbox, SandboxViolation
+from experiments.lab.sandbox import ExecutionUnavailable, Sandbox, SandboxViolation, require_isolated_execution
 from experiments.lab.tasks import load_task_dir
 from experiments.lab.trace import new_run_id
 
@@ -42,15 +43,7 @@ class VerificationUnavailable(RuntimeError):
 
 
 class E11Sandbox(Sandbox):
-    """Stricter local file boundary without modifying historical executors.
-
-    Generated Python is still executed locally, not an OS security sandbox.
-    """
-    def _resolve(self, rel):
-        p = (self.root / rel).resolve()
-        if not p.is_relative_to(self.root):
-            raise SandboxViolation('path outside task root')
-        return p
+    """Limit file-tool writes to the manifest's initial mutable source files."""
 
     def write_file(self, rel, content):
         p = self._resolve(rel)
@@ -90,6 +83,8 @@ def memory_prompt(memory):
 def run_sequence(arm, tasks, backend, out_dir, *, split, repeat_id='r0',
                  limits=None, write_limit=4, max_retries=4, retry_backoff=3., seed=20260930):
     validate_tasks(tasks, split)
+    if backend.name != 'scripted':
+        require_isolated_execution()
     controller = TimingController(arm, len(tasks), write_attempt_limit=write_limit)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=False)
@@ -241,6 +236,13 @@ def main(argv=None):
     p.add_argument('--save-preflight', type=Path)
     args = p.parse_args(argv)
     tasks, design = preflight(args.before, args.after)
+    if args.execute:
+        if not args.approved_manifest or json.loads(args.approved_manifest.read_text(encoding='utf-8')) != design:
+            raise ValueError('matching preflight required before paid execution')
+        try:
+            require_isolated_execution()
+        except ExecutionUnavailable as exc:
+            p.error(str(exc))
     if args.save_preflight:
         if args.save_preflight.exists():
             raise ValueError('preflight destination already exists')
@@ -248,8 +250,6 @@ def main(argv=None):
     print(json.dumps(design, ensure_ascii=False, indent=2), flush=True)
     if not args.execute:
         return 0
-    if not args.approved_manifest or json.loads(args.approved_manifest.read_text(encoding='utf-8')) != design:
-        raise ValueError('matching preflight required before paid execution')
     identity = design['backend_identity']
     if not identity['model'] or not identity['base_url']:
         raise ValueError('explicit backend identity must be frozen before execution')

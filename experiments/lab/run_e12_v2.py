@@ -1,5 +1,6 @@
 """E12 v2 engineering pilot. Default offline preflight; execution requires
---execute, matching --approved-manifest, and separate prior user authorization.
+--execute, a matching --approved-manifest, prior user authorization, and an
+OS-isolated candidate executor.
 A matching manifest checks consistency; it is not itself permission to spend.
 """
 from __future__ import annotations
@@ -19,6 +20,7 @@ from experiments.lab.e11_resources_v2 import JournalBackend,SequenceLimits,atomi
 from experiments.lab.run_e11_v2 import E11Sandbox,VerificationUnavailable,LESSON_PROMPT,memory_prompt
 from experiments.lab.protocol_agent_v3 import ProtocolAgentV3,SYSTEM_PROMPT
 from experiments.lab.tasks import load_task_dir
+from experiments.lab.sandbox import ExecutionUnavailable, require_isolated_execution
 from experiments.lab.trace import new_run_id
 from experiments.lab.e12_design_v2 import (Item,MemorySnapshot,construct_arms,measure_change,
     describe_pair,describe_recovery,restore_new_snapshot,rollback_requested,resource_totals)
@@ -89,6 +91,8 @@ def run_pilot(sources,evaluation,backend,out_dir,*,limits=None,max_retries=4,ret
     validate_design(sources,evaluation)
     if backend.name!='scripted' and design_manifest is None:
         raise ValueError('non-scripted run requires a frozen manifest and prior authorization')
+    if backend.name != 'scripted':
+        require_isolated_execution()
     out_dir=Path(out_dir);out_dir.mkdir(parents=True,exist_ok=False)
     started=time.perf_counter()
     limits=limits or SequenceLimits(calls=357,http_attempts=1785,
@@ -244,13 +248,18 @@ def main(argv=None):
     parser.add_argument('--approved-manifest',type=Path)
     parser.add_argument('--save-preflight',type=Path)
     args=parser.parse_args(argv);design=preflight()
+    if args.execute:
+        if not args.approved_manifest or json.loads(args.approved_manifest.read_text(encoding='utf-8')) != design:
+            raise ValueError('matching frozen preflight required before paid execution')
+        try:
+            require_isolated_execution()
+        except ExecutionUnavailable as exc:
+            parser.error(str(exc))
     if args.save_preflight:
         if args.save_preflight.exists():raise ValueError('preflight destination exists')
         atomic_json(args.save_preflight,design)
     print(json.dumps(design,ensure_ascii=False,indent=2),flush=True)
     if not args.execute:return 0
-    if not args.approved_manifest or json.loads(args.approved_manifest.read_text(encoding='utf-8'))!=design:
-        raise ValueError('matching frozen preflight required before paid execution')
     identity=design['backend_identity']
     if not identity['model'] or not identity['base_url']:raise ValueError('explicit backend identity required')
     from experiments.lab.backends import build_backend

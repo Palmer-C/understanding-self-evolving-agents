@@ -245,7 +245,7 @@
 角色 & 输入 & 输出 & 实验台落点 & 坏掉时的症状 \\
 \midrule
 执行器 & $A_k$、任务 $T$ & $\tau_{k,e}$ & \texttt{static\_agent.py} 的 \texttt{run\_episode} & 轨迹不完整，后面全都无从诊断 \\
-反馈器 & 执行结果 & 信号 $f$ & \texttt{task.verify} 真实执行验收命令 & 信号与真实目标不一致，改进方向被带偏 \\
+反馈器 & 执行结果 & 信号 $f$ & 旧版 \texttt{task.verify} 执行验收命令 & 信号与真实目标不一致，改进方向被带偏 \\
 修改器 & $A_k,\tau,f$ & $\widetilde A_{k+1}$ & \texttt{e01\_arms.py} 的写入与适配 & 改对了分数，改错了组件 \\
 选择器 & $\widetilde A_{k+1}$、验证结果 & $A_{k+1}$ & 各实验分别核对；历史E01没有经验质量准入 & 未经检查的候选生效，拒绝理由缺失 \\
 \bottomrule

@@ -1,32 +1,19 @@
 """Read-only E05 archive/skill audit and exact teaching costs; no execution backend."""
 from pathlib import Path
-import hashlib,json
+import argparse,hashlib,json,sys
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
+from calculations.historical_evidence import e05_source_identities, write_reproduction
+
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--output',type=Path,help='Write an additional copy to a new file instead of refreshing the derived report.')
+args=parser.parse_args()
 def read(p):return json.loads(p.read_text('utf-8'))
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def require(condition,message):
     if not condition:raise ValueError(message)
 run=ROOT/'experiments/runs/E05v2-20260929T143245Z-d7a8db';summary=read(run/'summary.json');config=read(run/'config.json')
-source_identity={}
-for name,digest in config['design']['source_sha256'].items():
-    p=ROOT/('experiments/protocols/E05-v2.md' if name=='protocol' else 'experiments/lab/'+name)
-    raw_bytes = p.read_bytes()
-    raw_digest = hashlib.sha256(raw_bytes).hexdigest()
-    lf_digest = hashlib.sha256(raw_bytes.replace(b'\r\n', b'\n')).hexdigest()
-    raw_match = raw_digest == digest
-    if raw_match:
-        match_mode = 'raw'
-    elif lf_digest == digest:
-        match_mode = 'crlf_to_lf'
-    else:
-        match_mode = 'mismatch'
-    source_identity[name] = dict(
-        sha256=raw_digest, recorded_sha256=digest, match=raw_match,
-        lf_sha256=lf_digest, accepted_match=match_mode != 'mismatch',
-        match_mode=match_mode)
-require(all(x['accepted_match'] for x in source_identity.values()),
-        'Retained v2 source differs beyond CRLF/LF from recorded source digest')
+source_identity=e05_source_identities(ROOT,config)
 sequences=[];totals=dict(calls=0,prompt_tokens=0,completion_tokens=0);trace_count=passed=0
 for complete in sorted((run/'sequences').glob('*/complete.json')):
     seq=read(complete);traces=[];local={k:0 for k in totals}
@@ -56,5 +43,5 @@ out=dict(identity='Independent arithmetic and semantic-event reconstruction of f
          v2=dict(source_identity=source_identity,sequences=sequences,totals=totals,episodes=trace_count,passed=passed),
          teaching=dict(k=ks,replan=base,fixed_skill=fixed,maintained_skill=maint,figure_sha256=sha(figure)),
          interpretation=['Reference injected only in static reuse; direct function execution not observed','Dynamic origins fail protocol parsing before writes; no skill admission; successful reuse uses empty reference','No repair episodes observed; no causal reference-benefit estimate or P4 verdict','48 generate calls and zero recorded current-process retries; not independent network-service billing verification'])
-(ROOT/'analysis/skill-audit-reproduction.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n','utf-8')
+write_reproduction(out, ROOT/'analysis/skill-audit-reproduction.json', args.output)
 print('6v2sequences/9traces/48calls,3reusecases and33teachingcostvalues reconciled; legacy table excluded; API calls:0')

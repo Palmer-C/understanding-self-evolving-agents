@@ -1,8 +1,11 @@
 """E01 四格运行器（协议：`experiments/protocols/E01.md`，公共协议：`spec/outline-v0.4.md` §6.3）。
 
 用法：
-    python experiments/lab/run_e01.py --train-episodes 8 --repeats 3
-    python experiments/lab/run_e01.py --trial          # 只跑 2 题 × 1 次，验通路不花钱
+    python experiments/lab/run_e01.py                 # 离线查看四格计划
+    python experiments/lab/run_e01.py --trial         # 离线查看小规模计划
+    python experiments/lab/cost_report.py             # 离线复算已存的成本账
+
+真实模型运行需另加 --execute-real，可能产生费用，并要求可用的隔离执行器。
 
 本文件是**测量工具**：它跑四格、记账、用 `eval.paired_diff` 出判决，
 自己不写任何结论，也不填任何数字（所有数字来自本次运行的原始记录）。
@@ -41,6 +44,7 @@ from experiments.lab.e01_arms import (  # noqa: E402
     retrieve,
 )
 from experiments.lab.eval import TaskRuns, by_family, paired_diff  # noqa: E402
+from experiments.lab.sandbox import ExecutionUnavailable, require_isolated_execution  # noqa: E402
 from experiments.lab.tasks import load_task_dir  # noqa: E402
 from experiments.lab.trace import new_run_id  # noqa: E402
 
@@ -123,6 +127,8 @@ def train_phase(
 
     返回 (格 4 写出的记忆条目, 副账)。其余三格返回空记忆列表。
     """
+    if getattr(backend, "name", None) != "scripted":
+        require_isolated_execution()
     led = _ledger()
     lessons: list[dict] = []
     for i in range(n_episodes):
@@ -178,6 +184,8 @@ def sealed_phase(
     base_seed: int,
 ) -> tuple[list[TaskRuns], dict]:
     """每格在封存集上每题跑 R 次独立运行，主指标 pass@1（单次 episode 验收与否）。"""
+    if getattr(backend, "name", None) != "scripted":
+        require_isolated_execution()
     led = _ledger()
     runs: list[TaskRuns] = []
     for task in sealed_tasks:
@@ -234,14 +242,15 @@ def flips(runs: list[TaskRuns]) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="E01 四格运行器")
+    ap = argparse.ArgumentParser(description="E01 四格运行计划，默认离线")
     ap.add_argument("--train-episodes", type=int, default=8, help="四格在训练集上各花的 episode 数 E")
     ap.add_argument("--repeats", type=int, default=3, help="每道封存题的独立运行次数 R")
     ap.add_argument("--sealed-limit", type=int, default=0, help="封存题数上限，0=全部 16 题")
     ap.add_argument("--temperature", type=float, default=0.7, help="四格同值；None 则用服务端默认")
     ap.add_argument("--base-seed", type=int, default=20260923)
     ap.add_argument("--out", default="", help="运行目录，默认 experiments/runs/E01-<runid>")
-    ap.add_argument("--trial", action="store_true", help="只跑 2 题 × 1 次，用于验证通路")
+    ap.add_argument("--trial", action="store_true", help="每格计划 2 个训练回合、2 道封存题、每题 1 次")
+    ap.add_argument("--execute-real", action="store_true", help="使用隔离执行器和真实模型后端，可能产生费用")
     args = ap.parse_args(argv)
 
     if args.trial:
@@ -249,10 +258,17 @@ def main(argv: list[str] | None = None) -> int:
         args.repeats = 1
         args.train_episodes = 2
 
-    backend = build_backend("openai", temperature=args.temperature)
-    run_id = new_run_id("E01")
-    out_dir = Path(args.out) if args.out else RUNS_ROOT / run_id
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if args.train_episodes < 0 or args.repeats <= 0 or args.sealed_limit < 0:
+        ap.error("训练回合数和封存题上限须为非负整数，重复次数须为正整数。")
+    if not args.execute_real:
+        print(f"E01 离线计划：{len(GRIDS)} 格，每格训练 {args.train_episodes} 个回合，"
+              f"封存题数上限 {args.sealed_limit or '全部'}，每题重复 {args.repeats} 次。")
+        print("核对历史运行成本：python experiments/lab/cost_report.py")
+        return 0
+    try:
+        require_isolated_execution()
+    except ExecutionUnavailable as exc:
+        ap.error(str(exc))
 
     train_tasks = load_tasks("train")
     sealed_tasks = load_tasks("sealed")
@@ -262,6 +278,10 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: 任务集里没有 train / sealed 划分；先跑 experiments/lab/build_taskset.py")
         return 2
 
+    backend = build_backend("openai", temperature=args.temperature)
+    run_id = new_run_id("E01")
+    out_dir = Path(args.out) if args.out else RUNS_ROOT / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
     started = datetime.now(timezone.utc).isoformat()
     t0 = time.time()
     config = {
@@ -284,7 +304,8 @@ def main(argv: list[str] | None = None) -> int:
         "unit": "task",
         "trial": bool(args.trial),
     }
-    print(f"[{run_id}] model={backend.model} E={args.train_episodes} R={args.repeats} "
+    print(f"[{run_id}] 真实模型调用可能产生费用，backend={backend.base_url} model={backend.model} "
+          f"E={args.train_episodes} R={args.repeats} "
           f"sealed={len(sealed_tasks)} train={len(train_tasks)}")
 
     memory_by_grid: dict[str, list[dict]] = {}

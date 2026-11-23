@@ -46,63 +46,105 @@ $log = & $latexmk -xelatex -interaction=nonstopmode -file-line-error -outdir=bui
 $code = $LASTEXITCODE
 Pop-Location
 
-if (-not (Test-Path $outdir)) { New-Item -ItemType Directory -Force -Path $outdir | Out-Null }
-$log | Out-File (Join-Path $outdir 'build.log') -Encoding utf8
-
-$srcPdf = Join-Path $work 'build\main.pdf'
-
-# undef 判据：只看 latexmk 收敛之后的最终 main.log，不再扫 latexmk 的 stdout。
-# 旧判据用 -match 'Undefined (citation|reference)'（大小写不敏感），把 LaTeX 的汇总行
-# "There were undefined references." 也算成一条；首轮 pass 必然出该行（\include 的章节 aux
-# 要等 aux 收敛），于是 undef 虚高且不随收敛归零。同时真实条目
-# "LaTeX Warning: Reference `x' undefined" 反而不匹配该模式——既误报又漏报。
-# 新判据只认带名字的条目行，并显式排除汇总行；来源是最终 pass 的日志，故收敛后即为 0。
-# 修复（2026-09-20 第 6 班）：原先 main.log 缺失时 $undef 记 0，build-status 会出现
-# "假绿"（第 3 班 handoff 已登记该风险）。现在缺失时记 -1，明确表示"无法验证"：
-# 出现 undef=-1 时必须以 exit != 0 为准，不得把 -1 当作 0 通过验收。
-# 修复（2026-09-20 第 6 班）：Join-Path 在本机 PS 5.1 以 -File 子进程方式运行时，
-# 会把 $finalLog 偶发赋成 null（同一份脚本连续跑几次，finalLog 时有时无，
-# 而紧邻的 $srcPdf 用同样的 Join-Path 却是好的）。加一道显式拼接回退，
-# 并把实际使用的工作目录写进 build-diag.txt，便于下一班核对 undef 判据的来源。
-$finalLog = Join-Path $work 'build\main.log'
-if (-not $finalLog) { $finalLog = "$work\build\main.log" }
-$undefCount = -1
-@("tmp=[$tmp]", "work=[$work]", "finalLog=[$finalLog]") | Out-File (Join-Path $outdir 'build-diag.txt') -Encoding utf8
-if ($finalLog -and (Test-Path -LiteralPath $finalLog)) {
-    $undef = @(Get-Content -LiteralPath $finalLog | Where-Object {
-        ($_ -match 'Reference\s+.+\s+undefined' -or $_ -match 'Citation\s+.+\s+undefined') -and
-        $_ -notmatch 'There were undefined'
-    })
-    $undefCount = $undef.Count
-} else {
-    $undef = @()
+function Install-StagedPdf($staged, $destination, $backup) {
+    if ([IO.File]::Exists($destination)) {
+        [IO.File]::Replace($staged, $destination, $backup)
+    } else {
+        [IO.File]::Move($staged, $destination)
+    }
 }
-$errs  = ($log -split "`n") | Where-Object { $_ -match ':\d+:\s' -and $_ -notmatch 'Latexmk' }
 
-$st = @()
-$st += "exit=$code"
-$st += "pdf=$((Test-Path $srcPdf))"
-$st += "undef=$undefCount"
-$st += "errors=$($errs.Count)"
-$st | Out-File (Join-Path $outdir 'build-status.txt') -Encoding utf8
+function Publish-BookPdf($source) {
+    $prefix = Join-Path $outdir ("publish-" + [guid]::NewGuid().ToString('N'))
+    $buildPdf = Join-Path $outdir 'main.pdf'
+    $readerPdf = Join-Path $here 'main.pdf'
+    $buildStage = "$prefix-build.tmp"
+    $readerStage = "$prefix-reader.tmp"
+    $buildBackup = "$prefix-build.bak"
+    $readerBackup = "$prefix-reader.bak"
+    try {
+        [IO.File]::Copy($source, $buildStage)
+        [IO.File]::Copy($source, $readerStage)
+        Install-StagedPdf $buildStage $buildPdf $buildBackup
+        try {
+            Install-StagedPdf $readerStage $readerPdf $readerBackup
+        } catch {
+            # 常见情形是阅读器锁住了 book/main.pdf。还原本次已替换的第一个文件。
+            if ([IO.File]::Exists($buildBackup)) {
+                [IO.File]::Replace($buildBackup, $buildPdf, $buildStage)
+            } else {
+                [IO.File]::Delete($buildPdf)
+            }
+            throw
+        }
+        [IO.File]::Delete($buildBackup)
+        [IO.File]::Delete($readerBackup)
+    } finally {
+        [IO.File]::Delete($buildStage)
+        [IO.File]::Delete($readerStage)
+    }
+}
 
-# 失败产物只留在独立临时目录，不能覆盖上一份通过检查的PDF。
-$publishable = ($code -eq 0 -and (Test-Path $srcPdf) -and $undefCount -eq 0 -and $errs.Count -eq 0)
-if ($publishable) {
-    Copy-Item $srcPdf (Join-Path $outdir 'main.pdf') -Force
-    Copy-Item $srcPdf (Join-Path $here 'main.pdf') -Force
-}
-# 先清掉上一轮的产物报告，避免"本次干净但 errors.txt 仍写着上一次的错"这种误判
-foreach ($old in @('undefined.txt', 'errors.txt')) {
-    $p = Join-Path $outdir $old
-    if (Test-Path $p) { Remove-Item $p -Force }
-}
-if ($undef.Count -gt 0) { $undef | Select-Object -First 40 | Out-File (Join-Path $outdir 'undefined.txt') -Encoding utf8 }
-if ($errs.Count -gt 0)  { $errs  | Select-Object -First 40 | Out-File (Join-Path $outdir 'errors.txt') -Encoding utf8 }
+$ErrorActionPreference = 'Stop'
+[IO.Directory]::CreateDirectory($outdir) | Out-Null
+# 编译目录彼此独立。共享的日志、状态和两份 PDF 每次只允许一个构建进程更新。
+$publishLock = [IO.File]::Open((Join-Path $outdir '.publish.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+try {
+    [IO.File]::Delete((Join-Path $outdir 'build-status.txt'))
+    $log | Out-File (Join-Path $outdir 'build.log') -Encoding utf8
 
-# 把真实验收结果传回调用者；不能因最后一次Out-File成功而返回0。
-if ($publishable) {
-    exit 0
+    $srcPdf = Join-Path $work 'build\main.pdf'
+
+    # undef 判据：只看 latexmk 收敛之后的最终 main.log，不再扫 latexmk 的 stdout。
+    # 旧判据用 -match 'Undefined (citation|reference)'（大小写不敏感），把 LaTeX 的汇总行
+    # "There were undefined references." 也算成一条；首轮 pass 必然出该行（\include 的章节 aux
+    # 要等 aux 收敛），于是 undef 虚高且不随收敛归零。同时真实条目
+    # "LaTeX Warning: Reference `x' undefined" 反而不匹配该模式——既误报又漏报。
+    # 新判据只认带名字的条目行，并显式排除汇总行；来源是最终 pass 的日志，故收敛后即为 0。
+    # 修复（2026-09-20 第 6 班）：原先 main.log 缺失时 $undef 记 0，build-status 会出现
+    # "假绿"（第 3 班 handoff 已登记该风险）。现在缺失时记 -1，明确表示"无法验证"：
+    # 出现 undef=-1 时必须以 exit != 0 为准，不得把 -1 当作 0 通过验收。
+    # 修复（2026-09-20 第 6 班）：Join-Path 在本机 PS 5.1 以 -File 子进程方式运行时，
+    # 会把 $finalLog 偶发赋成 null（同一份脚本连续跑几次，finalLog 时有时无，
+    # 而紧邻的 $srcPdf 用同样的 Join-Path 却是好的）。加一道显式拼接回退，
+    # 并把实际使用的工作目录写进 build-diag.txt，便于下一班核对 undef 判据的来源。
+    $finalLog = Join-Path $work 'build\main.log'
+    if (-not $finalLog) { $finalLog = "$work\build\main.log" }
+    $undefCount = -1
+    @("tmp=[$tmp]", "work=[$work]", "finalLog=[$finalLog]") | Out-File (Join-Path $outdir 'build-diag.txt') -Encoding utf8
+    if ($finalLog -and (Test-Path -LiteralPath $finalLog)) {
+        $undef = @(Get-Content -LiteralPath $finalLog | Where-Object {
+            ($_ -match 'Reference\s+.+\s+undefined' -or $_ -match 'Citation\s+.+\s+undefined') -and
+            $_ -notmatch 'There were undefined'
+        })
+        $undefCount = $undef.Count
+    } else {
+        $undef = @()
+    }
+    $errs  = ($log -split "`n") | Where-Object { $_ -match ':\d+:\s' -and $_ -notmatch 'Latexmk' }
+
+    # 先清掉上一轮的产物报告，避免"本次干净但 errors.txt 仍写着上一次的错"这种误判
+    foreach ($old in @('undefined.txt', 'errors.txt')) {
+        $p = Join-Path $outdir $old
+        if (Test-Path $p) { Remove-Item $p -Force }
+    }
+    if ($undef.Count -gt 0) { $undef | Select-Object -First 40 | Out-File (Join-Path $outdir 'undefined.txt') -Encoding utf8 }
+    if ($errs.Count -gt 0)  { $errs  | Select-Object -First 40 | Out-File (Join-Path $outdir 'errors.txt') -Encoding utf8 }
+
+    $publishable = ($code -eq 0 -and [IO.File]::Exists($srcPdf) -and $undefCount -eq 0 -and $errs.Count -eq 0)
+    if ($publishable) {
+        try {
+            Publish-BookPdf $srcPdf
+        } catch {
+            [Console]::Error.WriteLine("PDF publication failed: $($_.Exception.Message)")
+            $publishable = $false
+            $code = 1
+        }
+    }
+    if (-not $publishable -and $code -eq 0) { $code = 1 }
+    @("exit=$code", "pdf=$publishable", "undef=$undefCount", "errors=$($errs.Count)") |
+        Out-File (Join-Path $outdir 'build-status.txt') -Encoding utf8
+} finally {
+    $publishLock.Dispose()
 }
-if ($code -ne 0) { exit $code }
-exit 1
+exit $code

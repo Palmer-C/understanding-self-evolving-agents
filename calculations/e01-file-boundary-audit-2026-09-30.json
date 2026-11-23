@@ -1,0 +1,21 @@
+{
+  "identity": "controlled local engineering counterexample with fresh dummy markers; no model test",
+  "legacy": {
+    "string_prefix_sibling_read_allowed": true,
+    "protected_test_is_readable": true,
+    "child_can_read_dummy_outside_cwd": true,
+    "child_can_modify_dummy_protected_file": true
+  },
+  "new_file_tool": {
+    "sibling_read": true,
+    "verifier_write": true
+  },
+  "os_process_isolation_fixed": false,
+  "scope": "new tool fixes file manifest/path checks only; generated-code runner isolation remains blocked",
+  "api_calls": 0,
+  "historical_files_modified": false,
+  "source_sha256": {
+    "experiments/lab/sandbox.py": "4f71cfe0020182eeede8f3f71e2a707e07c4674641dd1187c3e4ed0ef974b223",
+    "experiments/lab/e01_v2_file_boundary.py": "cc0253591b0d4ac3efca3aee717ff724939e1407cdd3aa693e94fd1c2ba483ca"
+  }
+}
