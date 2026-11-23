@@ -4,7 +4,9 @@
 
 ## 阅读与复算
 
-从仓库根目录运行。编译书稿需要 Windows 中文字体、XeLaTeX、latexmk 和 biber。成功后可打开 book/main.pdf。
+读者可在[版本发布页](https://github.com/Palmer-C/understanding-self-evolving-agents/releases)查看已发布的整书 PDF。有附件的版本会列出对应源码提交和 PDF 的 SHA-256；页面尚无附件时，可从仓库根目录自行编译。
+
+编译书稿需要 Windows 中文字体、XeLaTeX、latexmk 和 biber。成功后可打开 book/main.pdf。
 
 ~~~powershell
 powershell -ExecutionPolicy Bypass -File .\book\build.ps1

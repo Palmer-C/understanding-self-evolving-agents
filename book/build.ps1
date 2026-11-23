@@ -54,34 +54,69 @@ function Install-StagedPdf($staged, $destination, $backup) {
     }
 }
 
+function Get-PdfSha256($path) {
+    $algorithm = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [IO.File]::OpenRead($path)
+        try {
+            return [BitConverter]::ToString($algorithm.ComputeHash($stream))
+        } finally {
+            $stream.Dispose()
+        }
+    } finally {
+        $algorithm.Dispose()
+    }
+}
+
 function Publish-BookPdf($source) {
     $prefix = Join-Path $outdir ("publish-" + [guid]::NewGuid().ToString('N'))
-    $buildPdf = Join-Path $outdir 'main.pdf'
-    $readerPdf = Join-Path $here 'main.pdf'
-    $buildStage = "$prefix-build.tmp"
-    $readerStage = "$prefix-reader.tmp"
-    $buildBackup = "$prefix-build.bak"
-    $readerBackup = "$prefix-reader.bak"
+    $targets = @(
+        @{Path=(Join-Path $outdir 'main.pdf'); Stage="$prefix-build.tmp"; Backup="$prefix-build.bak"}
+        @{Path=(Join-Path $here 'main.pdf'); Stage="$prefix-reader.tmp"; Backup="$prefix-reader.bak"}
+    )
+    $expected = Get-PdfSha256 $source
+    $installed = 0
     try {
-        [IO.File]::Copy($source, $buildStage)
-        [IO.File]::Copy($source, $readerStage)
-        Install-StagedPdf $buildStage $buildPdf $buildBackup
-        try {
-            Install-StagedPdf $readerStage $readerPdf $readerBackup
-        } catch {
-            # 常见情形是阅读器锁住了 book/main.pdf。还原本次已替换的第一个文件。
-            if ([IO.File]::Exists($buildBackup)) {
-                [IO.File]::Replace($buildBackup, $buildPdf, $buildStage)
-            } else {
-                [IO.File]::Delete($buildPdf)
-            }
-            throw
+        foreach ($target in $targets) {
+            [IO.File]::Copy($source, $target.Stage)
         }
-        [IO.File]::Delete($buildBackup)
-        [IO.File]::Delete($readerBackup)
+        foreach ($target in $targets) {
+            Install-StagedPdf $target.Stage $target.Path $target.Backup
+            $installed++
+        }
+        foreach ($target in $targets) {
+            $actual = Get-PdfSha256 $target.Path
+            if ($actual -cne $expected) {
+                throw "PDF SHA-256 mismatch: $($target.Path)"
+            }
+        }
+    } catch {
+        # 只还原本轮已安装的目标。替换前已有文件时保留原件，首次发布则移除新件。
+        for ($i = $installed - 1; $i -ge 0; $i--) {
+            $target = $targets[$i]
+            try {
+                if ([IO.File]::Exists($target.Backup)) {
+                    if ([IO.File]::Exists($target.Path)) {
+                        [IO.File]::Replace($target.Backup, $target.Path, $target.Stage)
+                    } else {
+                        [IO.File]::Move($target.Backup, $target.Path)
+                    }
+                } else {
+                    [IO.File]::Delete($target.Path)
+                }
+            } catch {
+                # 继续还原另一个目标。无法还原的备份留在原位置供恢复。
+                [Console]::Error.WriteLine("PDF rollback failed for $($target.Path): $($_.Exception.Message)")
+            }
+        }
+        throw
     } finally {
-        [IO.File]::Delete($buildStage)
-        [IO.File]::Delete($readerStage)
+        foreach ($target in $targets) {
+            [IO.File]::Delete($target.Stage)
+        }
+    }
+    foreach ($target in $targets) {
+        [IO.File]::Delete($target.Backup)
     }
 }
 
