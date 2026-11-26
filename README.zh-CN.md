@@ -2,7 +2,7 @@
 
 [English](README.md) · **简体中文**
 
-<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/cover.png" width="280" alt="《深入理解自进化 Agent》封面"></a>
+<a href="docs/images/cover.png"><img src="docs/images/cover.png" width="280" alt="《深入理解自进化 Agent》封面"></a>
 
 作者：shawn。全书围绕一个问题展开：一个 Agent 从经验中改变了什么，又怎样检验这种变化？本公开源码预览包含 16 章、7 个附录、参考文献索引、配图和选定的实验记录。
 

@@ -4,7 +4,7 @@
 
 By shawn
 
-<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/cover.png" width="280" alt="Cover of the Chinese edition"></a>
+<a href="docs/images/cover.png"><img src="docs/images/cover.png" width="280" alt="Cover of the Chinese edition"></a>
 
 What does an agent change as it learns from experience, and how can we test whether that change helps? This public source preview includes the Chinese-language manuscript (16 chapters and 7 appendices), figures, a reference index, and selected experimental records.
 
