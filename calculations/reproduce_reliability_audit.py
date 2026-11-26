@@ -19,6 +19,20 @@ args=parser.parse_args()
 
 def require(ok,message):
     if not ok:raise ValueError(message)
+# Constructed population, with equal type weights and independent repeats within each type.
+success_probabilities = (F(4, 5), F(2, 5))
+all_three = tuple(p**3 for p in success_probabilities)
+selected_weights = tuple(s / sum(all_three) for s in all_three)
+next_pass = sum(w * p for w, p in zip(selected_weights, success_probabilities))
+require(selected_weights == (F(8, 9), F(1, 9)) and next_pass == F(34, 45),
+        'All-pass screening and independent retest calculation changed')
+screened_population = {
+    'initial_equal_type_mean': str(sum(success_probabilities) / 2),
+    'probability_all_three_pass': str(sum(all_three) / 2),
+    'conditional_type_weights': [str(w) for w in selected_weights],
+    'conditional_fourth_pass': str(next_pass),
+}
+
 run_id='E02-20260924T153511Z-421eac';s=load_summary(ROOT,run_id);vv=s['verdicts'];comparisons=[]
 for base in ('arm_base','arm_formal'):
     require(set(vv[base])==set(vv['arm_noise']),'Paired tasks mismatch')
@@ -35,6 +49,10 @@ require(s['feedback_quality']['arm_noise']['n_mismatch']==2,'Feedback perturbati
 # Exact unit-vector dot products at 0,60,120 degrees; no rounded trig.
 uv=F(1,2);vw=F(-1,4)+F(3,4);uw=F(-1,2)
 d_uv,d_vw,d_uw=(1-v for v in (uv,vw,uw))
+step_angle = math.acos(1 - float(d_uv))
+angle_bounds = [1 - math.cos(min(math.pi, steps * step_angle)) for steps in range(4)]
+require(all(math.isclose(actual, expected, abs_tol=1e-14) for actual, expected in
+            zip(angle_bounds, [0, .5, 1.5, 2])), 'Clipped angular bound changed')
 require((d_uv,d_vw,d_uw)==(F(1,2),F(1,2),F(3,2)) and d_uw>d_uv+d_vw,'Geometric counterexample changed')
 require(noise_floor([[True,True]]*2,[[False,False]]*2)==0 and degradation([True]*2,[False]*2)==1,'Legacy dispersion example changed')
 a=MemorySnapshot((Item('1','ABC','source','constructed'),));b=MemorySnapshot((Item('1','XYZ','source','constructed'),))
@@ -46,6 +64,18 @@ with tempfile.TemporaryDirectory(prefix='reliability-snapshot-') as directory:
     except FileExistsError:overwrite_blocked=True
     else:raise ValueError('Snapshot overwrite allowed')
 corrupt,evidence=controlled_corruption();require(evidence['counterexample']['observed']==[2,3],'Range counterexample changed')
+# Three observed verdicts on the same four tasks distinguish restoring the
+# old total from recovering the particular tasks that were lost.
+baseline = {"甲", "乙"}
+after_update = {"乙"}
+lost = baseline - after_update
+recovery_examples = {}
+for name, restored_tasks in (("different_tasks", {"乙", "丙"}), ("original_tasks", {"甲", "乙"})):
+    recovery_examples[name] = {"baseline_passes": len(baseline), "updated_passes": len(after_update),
+                               "restored_passes": len(restored_tasks), "total_tasks": 4,
+                               "previously_lost": len(lost), "regained": len(lost & restored_tasks)}
+require([example["regained"] for example in recovery_examples.values()] == [0, 1],
+        "Recovery denominator example changed")
 pair=describe_pair({'a':True,'b':True},{'a':True,'b':False},{'a':False,'b':False})
 require((pair['D_raw'],pair['D_control'],pair['D_adjusted'])==(1,.5,.5),'Raw/control/adjusted distinction changed')
 keys=('calls','transport_dispatches','known_prompt_tokens','known_completion_tokens')
@@ -67,7 +97,9 @@ paths=['experiments/lab/e12_arms.py','analysis/e12-legacy-bookkeeping-excerpt.js
 out=dict(identity='Read-only historical statistics and local constructed reliability checks; not E12 or production security proof',
  api_calls=0,summary_sha256=hashlib.sha256((ROOT/'experiments/runs'/run_id/'summary.json').read_bytes()).hexdigest(),
  source_sha256={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in paths},noise_comparisons=comparisons,
- geometry=dict(unit_vector_angles=[0,60,120],distances=[str(d_uv),str(d_vw),str(d_uw)],adjacent_sum=str(d_uv+d_vw),
+ four_task_recovery_examples=recovery_examples, all_pass_screening_example=screened_population,
+ geometry=dict(step_limit_degrees=60, angular_bound_at_zero_through_three_steps=[round(x, 14) for x in angle_bounds],
+               unit_vector_angles=[0,60,120],distances=[str(d_uv),str(d_vw),str(d_uw)],adjacent_sum=str(d_uv+d_vw),
                meaning='One-minus-cosine is not a metric; fixed-target additive-increment and bounded reconciliation residual are extra assumptions'),
  legacy_bookkeeping_excerpt_check=legacy,local_file_boundaries=boundary,boundary_observation_source=BOUNDARY_RECORD,equal_length_change=change,
  snapshot_restoration=dict(**restored,overwrite_blocked=overwrite_blocked,behavior_equivalence_established=False),
@@ -77,4 +109,4 @@ out=dict(identity='Read-only historical statistics and local constructed reliabi
          'Historical boundary findings describe the 2026-09-30 implementation; current runtime protections are outside this reproduction',
          'Noise precision_n uses task-level observed SD and 0.03 half-width, not a complete power design'])
 write_reproduction(out, ROOT/'analysis/reliability-audit-reproduction.json', args.output)
-print('Two noise comparisons and490-task precision counts, exact cosine counterexample, snapshot restoration and two hash-bound historical observations checked; API calls:0')
+print('Two noise-specific precision counts, cosine bounds, paired recovery examples, snapshot restoration and historical observations checked; API calls:0')

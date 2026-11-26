@@ -42,9 +42,29 @@ Get-ChildItem -Path $here -Recurse -File | Where-Object {
     Copy-Item -LiteralPath $_.FullName -Destination $dst -Force -ErrorAction Stop
 }
 Push-Location $work
-$log = & $latexmk -xelatex -interaction=nonstopmode -file-line-error -outdir=build main.tex 2>&1 | Out-String
-$code = $LASTEXITCODE
-Pop-Location
+try {
+    # xdvipdfmx 按 TFM 字体名读取 ToUnicode 映射。直接使用当前 TeX Live 自带的映射，
+    # 让求和号、分隔符和黑板粗体字母可以复制，字体和排版参数仍取自原稿。
+    $kpsewhich = Get-Command kpsewhich -CommandType Application -ErrorAction Stop | Select-Object -First 1
+    $mathMaps = [ordered]@{ 'cmex10' = 'omx.cmap'; 'msbm10' = 'umsb.cmap' }
+    foreach ($font in $mathMaps.Keys) {
+        $name = $mathMaps[$font]
+        $map = & $kpsewhich.Source '--path=$TEXMFDIST/tex/latex/mmap' $name
+        if ($LASTEXITCODE -ne 0 -or -not $map -or -not [IO.File]::Exists($map)) {
+            throw "TeX Live mmap resource unavailable: $name (font $font)."
+        }
+        # 若源树已有同名字体资源，报告冲突并保留它。
+        [IO.File]::Copy($map, (Join-Path $work $font), $false)
+    }
+    $log = & $latexmk -xelatex -interaction=nonstopmode -file-line-error -outdir=build main.tex 2>&1 | Out-String
+    $code = $LASTEXITCODE
+} catch {
+    $log = "PDF build preparation failed: $($_.Exception.Message)"
+    [Console]::Error.WriteLine($log)
+    $code = 1
+} finally {
+    Pop-Location
+}
 
 function Install-StagedPdf($staged, $destination, $backup) {
     if ([IO.File]::Exists($destination)) {

@@ -390,7 +390,7 @@ E02 共保留 \measured{528} 个回合轨迹，六臂各有 \measured{8} 个训�
 
 \begin{table}[htbp]
 \centering
-\caption{E02 六臂：封存集回合通过率与相对无记忆基线的收益（运行 \texttt{E02-20260924T153511Z-421eac}）}
+\caption{E02 六臂在封存集上的回合通过率与相对无记忆基线的收益}
 \label{tab:ch04-e02}
 \small
 \begin{tabular}{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}ccc}
@@ -423,7 +423,7 @@ arm\_noise & 受控噪声对照 & \measured{0.6625} & \measured{$-0.1500$} & \me
 \small\setlength{\tabcolsep}{4pt}
 \begin{tabular}{>{\raggedright\arraybackslash}p{4.0cm}cc>{\raggedright\arraybackslash}p{3.0cm}}
 \toprule
-臂间比较 & 点估计 & 95\% 区间 & 是否反转（点估计 $\le 0$） \\
+臂间比较 & 点估计 & 95\% 区间 & 未呈预期正序（差值 $\le 0$） \\
 \midrule
 测试判定 $-$ 执行输出 & \measured{$+0.0125$} & \measured{$[-0.1125,+0.1375]$} & 否 \\
 执行输出 $-$ 评审提示 & \measured{$-0.0125$} & \measured{$[-0.1375,+0.1125]$} & \textbf{是} \\
@@ -433,7 +433,7 @@ arm\_noise & 受控噪声对照 & \measured{0.6625} & \measured{$-0.1500$} & \me
 
 \begin{minipage}{0.92\linewidth}
 \vspace{2mm}
-{\footnotesize 表注：反转条数 \measured{1}。
+{\footnotesize 三个相邻差中有 \measured{1} 个为负。历史规则也计入恰好为零的差值，那种情形是持平。
 另一个历史比较为自评提示减执行输出的收益差：
 点估计 \measured{$-0.0875$}、区间 \measured{$[-0.2625,+0.0875]$}，包含 0。
 这些区间与点估计只描述本次数据，不构成完整层级的支持或反证。}
@@ -653,7 +653,7 @@ E02 的六个臂都在回答同一批给定的 \measured{16} 道题，
         点估计 \measured{$-0.0125$}）。
         请列出三种能产生这种反转的\emph{设计}原因（不是“真实就是这样”），
         并说明各自应当如何被排除。
-  \item\label{ex:ch04-4} E02 已有 \measured{16} 道配对题，区间精度公式给出约 \calcnum{592} 道独立题的规划示例。
+  \item\leavevmode\label{ex:ch04-4}E02 已有 \measured{16} 道配对题，区间精度公式给出约 \calcnum{592} 道独立题的规划示例。
         扩题、增加每题重复次数、改用分层估计，分别处理哪种不确定性？
         为什么后两项不能直接算作增加了独立题数，这个规划数又为什么不是功效保证？
   \item\label{ex:ch04-5} 第 \ref{sec:ch04-framing} 节说方向生成先于层级。
@@ -664,8 +664,7 @@ E02 的六个臂都在回答同一批给定的 \measured{16} 道题，
 \begin{itemize}
 \sloppy
   \item \textbf{“反馈越可靠，收益越高”。}
-        可靠是信号自己的性质，收益是整个闭环的性质。
-        E02 里判定全对（标签不一致率 \measured{0.0000}）而收益为负的臂有四个。
+        E02 中有四臂各自的 \measured{8} 条训练标签都与验收一致。其中两臂的标签直接取自验收结果或退出码，另两臂来自模型评审或自评。到了封存题，四臂的通过率点估计均低于无记忆基线，只有自评臂的差值区间完全低于零（表~\ref{tab:ch04-e02}）。
   \item \textbf{“E02 说明验证层级是错的”。}
         本轮的反馈操作并未覆盖完整概念层级，且样本与确认性设计仍有缺口，本轮不能由该排序推出完整反馈层级的规律。
         区间包含 0 与一次反转都只作为读数，不构成判决。

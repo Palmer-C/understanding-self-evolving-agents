@@ -4,11 +4,15 @@
 
 By shawn
 
+<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/cover.png" width="210" alt="Cover of the Chinese edition"></a>
+
 What does an agent change as it learns from experience, and how can we test whether that change helps? This public source preview includes the Chinese-language manuscript (16 chapters and 7 appendices), figures, a reference index, and selected experimental records.
 
 ## Read the book and check the calculations
 
-When a book PDF is available, its release lists the source commit and the PDF’s SHA-256 checksum. You can also build the book from the repository root. [Releases](https://github.com/Palmer-C/understanding-self-evolving-agents/releases)
+<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/download-pdf.png" width="166" alt="Download the complete Chinese PDF"></a>
+
+[Download the complete Chinese PDF](https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf) · Chinese edition · 417 pages · [Release notes and SHA-256](https://github.com/Palmer-C/understanding-self-evolving-agents/releases/tag/v0.1.0)
 
 The build requires Windows with Chinese fonts, XeLaTeX, latexmk, and biber. After a successful build, open `book/main.pdf`.
 
@@ -27,6 +31,12 @@ python -m experiments.lab.run_e01 --trial
 Running untrusted candidate programs requires an isolated execution environment. This preview leaves that execution disabled.
 
 For E03 split A, the archived summary reports 72/80 baseline successes, while the verdicts in the saved traces total 70/80. Comparisons that depend on this baseline are on hold until the discrepancy is resolved. All ten formal propositions remain open. E03v2 has only been checked offline against its saved artifacts. [Public materials and offline checks](analysis/README.md) · [Propositions](spec/propositions.md) · [Source index](references/sources.csv)
+
+## What survives a task?
+
+![Step, episode and version, with memory, instructions, skills, workflow and parameters persisting across tasks](docs/images/three-timescales.png)
+
+Figure 1.1 follows state across three timescales. A step exchanges messages and tool results. An episode holds temporary working state and can leave an archived trace. The dashed arrow shows one possible update: experience becomes a skill that a later task loads. Whether that skill helps requires a separate comparison.
 
 ## Chapters at a glance
 

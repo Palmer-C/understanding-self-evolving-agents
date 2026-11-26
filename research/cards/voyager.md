@@ -1,7 +1,7 @@
 # VOYAGER（arXiv:2305.16291v2）
 
 ## 来源
-VOYAGER: An Open-Ended Embodied Agent with Large Language Models，Guanzhi Wang 等，arXiv:2305.16291v2（2023-10-19），https://voyager.minedojo.org 。代码提交号：未定位（文中仅给项目站，无 commit）。
+VOYAGER: An Open-Ended Embodied Agent with Large Language Models，Guanzhi Wang 等，arXiv:2305.16291v2（2023-10-19），https://voyager.minedojo.org 。论文未标注历史运行提交。另核作者实现快照 55e45a880755d0c8c66ca7fb5fe7962ac8974f89（2023-07-27），用于定位检索、执行、准入三处代码。
 
 ## 研究问题
 解决开放世界（Minecraft）中 LLM 智能体无法"持续探索、逐步积累并跨任务复用技能"的失败——即缺乏终身学习能力。明确不在实验范围内：不微调模型参数（黑盒 GPT-4，Sec 1 "bypasses … finetuning"）；不做 3D 感知/传感器运动控制（依赖 Mineflayer 高层 API，Sec 3.2）；不与基于屏幕像素输入的 Minecraft 智能体做 apple-to-apple 比较（Sec 3.2）。
@@ -10,15 +10,15 @@ VOYAGER: An Open-Ended Embodied Agent with Large Language Models，Guanzhi Wang 
 - 改什么：L（技能库，可执行代码写入向量库）为主角；θ/P/M 均不改（黑盒 GPT-4，无微调，指令为固定模板）。自动课程承担 G 中"任务提议"角色，但持久写入 version 层的只有 L。修改器 = 搜索空间 𝒮（程序空间 + 技能检索）与优化算法 H（迭代提示机制：GPT-4 生成代码并依反馈重生成）。
 - 根据什么改：环境结果（Minecraft 执行反馈、库存/装备/生物等状态）、执行错误（解释器 trace）、模型自评（self-verification，另一 GPT-4 充当 critic 判定成功并给 critique）。主信号：self-verification 的成功/失败判定 + 环境执行结果。
 - 怎样改：程序生成（code as action）+ 反思（把环境反馈、执行错误、critique 回填 prompt 再生成）。非监督学习、非强化学习。
-- 什么时候改：任务后（self-verification 确认任务完成 → 提交技能入库）；事件触发（连续 4 轮代码生成仍卡住 → 向课程请求新任务）。技能在 episode 成功后写入。
+- 什么时候改：任务后（self-verification 确认任务完成 → 提交技能入库）；事件触发（连续 4 轮代码生成仍卡住 → 向课程请求新任务）。成功触发准入检查，约定排除的整理任务会被跳过。
 - 保留什么：技能库跨 episode、跨任务持久——明确进入 version 层（系统持久组件 L 被修改）。episode 内推理轨迹属 step/episode 层，不持久；仅入库技能进入 version。
 - 怎样检验：外部 held-out——重置到新 Minecraft 世界、清空库存，对未见任务做零样本泛化（Table 2，最大 50 次提示迭代）；同环境（MineDojo）内用 Table 1 科技树掌握度与消融 Fig 9 检验。独立封存测试集：未定位。
 
 ## 机制
 三组件（Sec 2）。
 (1) 自动课程（Sec 2.1）：GPT-4 基于"发现尽可能多的事物"总体目标，按探索进度与智能体状态自底向上提议任务；温度 0.1；可视为 in-context novelty search。
-(2) 技能库（Sec 2.2 / Fig 4）：每个技能 = 可执行 JavaScript 程序（Mineflayer 接口，PDF p6 §3.1）；向量库 key = 程序描述的 embedding（描述由 GPT-3.5 生成，编码模型为 text-embedding-ada-002），value = 程序本身；检索取 top-5 相关技能作 in-context 示例；复杂技能由更简单的程序组合而成。
-(3) 迭代提示机制（Sec 2.3）：每轮执行生成代码得环境反馈与执行错误，回填 GPT-4 重生成；self-verification 由另一 GPT-4 判定成功/失败并给 critique；确认成功后入库并请课程派新任务；卡住 4 轮则换任务。
+(2) 技能库（Sec 2.2 / Fig 4）：每个技能 = 可执行 JavaScript 程序（Mineflayer 接口，PDF p6 §3.1）；向量库 key = 程序描述的 embedding（描述由 GPT-3.5 生成，编码模型为 text-embedding-ada-002），value = 程序本身；生成提示默认取至多五个已索引技能。执行时可调用库中全部程序与控制原语。检索名单、执行环境可见程序与本次真正调用的函数各有不同的证据。
+(3) 迭代提示机制（Sec 2.3）：每轮执行生成代码得环境反馈与执行错误，回填 GPT-4 重生成；self-verification 由另一 GPT-4 判定成功/失败并给 critique；成功后进入准入分支。固定快照的 SkillManager 会跳过向箱子存放多余物品的整理任务。卡住 4 轮则换任务。
 
 ## 实验
 基础模型 gpt-4-0314 + gpt-3.5-turbo-0301，embedding text-embedding-ada-002，除课程外温度 0。环境 MineDojo + Mineflayer。对照 ReAct / Reflexion / AutoGPT。

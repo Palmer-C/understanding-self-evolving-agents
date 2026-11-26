@@ -242,6 +242,33 @@
   note = {v1; Sections 4--6 and Table 1}
 }
 
+@inproceedings{locomo-acl-2024,
+  author = {Maharana, Adyasha and Lee, Dong-Ho and Tulyakov, Sergey and Bansal, Mohit and Barbieri, Francesco and Fang, Yuwei},
+  title = {Evaluating Very Long-Term Conversational Memory of {LLM} Agents},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  year = {2024},
+  month = aug,
+  pages = {13851--13870},
+  publisher = {Association for Computational Linguistics},
+  doi = {10.18653/v1/2024.acl-long.747},
+  url = {https://aclanthology.org/2024.acl-long.747/}
+}
+
+@inproceedings{schubert-cosine-2021,
+  author = {Schubert, Erich},
+  title = {A Triangle Inequality for Cosine Similarity},
+  booktitle = {Similarity Search and Applications},
+  series = {Lecture Notes in Computer Science},
+  volume = {13058},
+  pages = {32--44},
+  publisher = {Springer International Publishing},
+  year = {2021},
+  doi = {10.1007/978-3-030-89657-7_3},
+  url = {https://doi.org/10.1007/978-3-030-89657-7_3},
+  eprint = {2107.04071},
+  archivePrefix = {arXiv}
+}
+
 @misc{ssgm-2603,
   author = {Chingkwun Lam and Jiaxin Li and Lingfei Zhang and Kuo Zhao},
   title  = {Governing Evolving Memory in LLM Agents: Risks, Mechanisms, and the Stability and Safety Governed Memory (SSGM) Framework},
@@ -319,7 +346,7 @@
   eprint = {2601.22628},
   archivePrefix = {arXiv},
   url = {https://arxiv.org/abs/2601.22628v1},
-  note = {v1, 2026-01-30; Tables 1--3, Figure 3, Sections 4--5 and Appendices A.2, C.1; the cited results were also checked against v3 (2026-10-20)}
+  note = {v1, 2026-01-30; Tables 1--3, Figure 3, Sections 4--5 and Appendices A.2, C.1; the cited results were also checked against \href{https://arxiv.org/abs/2601.22628v3}{v3} (2026-10-20)}
 }
 
 @misc{self-challenging-2506,
@@ -372,6 +399,16 @@
   note   = {v1, 2026-03-19; DGM-H；任务 agent 与元 agent 合并在同一可编辑程序}
 }
 
+@misc{hyperagents-transfer-code,
+  author = {{HyperAgents contributors}},
+  title  = {{HyperAgents}: test-evaluation plotting and statistical comparison code},
+  date   = {2026-04-14},
+  year   = {2026},
+  url    = {https://github.com/facebookresearch/HyperAgents/tree/59a68f672dfb92c74aeb7e61535d776fb36e172d/analysis},
+  urldate = {2026-11-26},
+  note   = {Commit 59a68f6, transfer scores in plot\_testevals.py and directional tests in analysis\_utils.py}
+}
+
 @misc{hyperagents-2603-v2,
   author = {Jenny Zhang and Bingchen Zhao and Wannan Yang and Jakob Foerster and Jeff Clune and Minqi Jiang and Sam Devlin and Tatiana Shavrina},
   title = {Hyperagents},
@@ -385,9 +422,10 @@
 @online{scipy-wilcoxon-116,
   author = {{SciPy community}},
   title = {scipy.stats.wilcoxon: SciPy 1.16.0 Manual},
+  date = {2025-06-22},
   url = {https://docs.scipy.org/doc/scipy-1.16.0/reference/generated/scipy.stats.wilcoxon.html},
   urldate = {2026-11-08},
-  note = {版本化API文档，Parameters与Notes}
+  note = {手册版本发布日期见 SciPy 1.16.0 首页，统计方法见 Parameters 与 Notes}
 }
 
 
@@ -464,31 +502,36 @@
 
 @online{docker-run-security-docs,
   author = {{Docker}},
-  title = {Running containers; Docker Engine security},
+  title = {docker container run},
   url = {https://docs.docker.com/reference/cli/docker/container/run/},
   urldate = {2026-09-30},
-  note = {运行配置说明；安全边界另见 https://docs.docker.com/engine/security/}
+  note = {运行配置说明，安全边界见 \href{https://docs.docker.com/engine/security/}{Docker Engine security}}
 }
 @online{python-subprocess-docs,
   author = {{Python Software Foundation}},
-  title = {subprocess --- Subprocess management, Python 3.12 documentation},
-  url = {https://docs.python.org/3.12/library/subprocess.html},
-  urldate = {2026-09-30}
+  title = {subprocess --- Subprocess management, Python 3.12.14 documentation},
+  date = {2026-08-12},
+  url = {https://github.com/python/cpython/blob/v3.12.14/Doc/library/subprocess.rst},
+  urldate = {2026-11-24},
+  note = {日期为 Python 3.12.14 的发布日期}
 }
 
 @online{sqlite-atomic-commit,
   author = {{SQLite}},
   title = {Atomic Commit In SQLite},
+  date = {2026-04-21},
   url = {https://www.sqlite.org/atomiccommit.html},
-  urldate = {2026-09-30}
+  urldate = {2026-09-30},
+  note = {日期为该页所列的最后更新时间}
 }
 
 @online{awesome-rsi,
   author = {{lobehub}},
-  title = {Awesome Recursive Self-Improvement},
-  url = {https://github.com/lobehub/awesome-rsi},
+  title = {Awesome {RSI} (Recursive Self-Improvement)},
+  date = {2026-09-25},
+  url = {https://github.com/lobehub/awesome-rsi/blob/18ff618b1018c0ef3edfece0e459d359868d6644/README.md},
   urldate = {2026-09-30},
-  note = {Scope and Terminology; community-maintained terminology reference, not a consensus standard}
+  note = {日期为所引提交的日期，术语见 Scope \& Terminology}
 }
 
 @misc{brown-few-shot-2005,
@@ -579,9 +622,10 @@
 @online{amac-code-2026,
   author = {{GuilinDev}},
   title = {Adaptive Memory Admission Control for LLM Agents: Reference Implementation},
+  date = {2026-01-22},
   url = {https://github.com/GuilinDev/Adaptive_Memory_Admission_Control_LLM_Agents/tree/40407aec883bf289664653406ac15a4cac1f6158},
   urldate = {2026-10-26},
-  note = {Commit 40407ae; features/novelty.py, data\_loader.py and scorer.py; static code inspection}
+  note = {初始提交 40407ae，见 features/novelty.py、data\_loader.py 与 scorer.py}
 }
 
 @misc{memalpha-erratum-2025,
@@ -664,7 +708,7 @@
   primaryClass = {cs.AI},
   url = {https://arxiv.org/abs/2610.04756v1},
   urldate = {2026-11-02},
-  note = {arXiv v1, 2026-10-03; Sections 3.1--3.3, stopping and output selection}
+  note = {arXiv v1, 2026-10-03; Sections 3.1--3.3, Table 1 and Appendix B, Propositions 1 and 5}
 }
 
 @misc{ruharness-2610,
@@ -817,6 +861,17 @@
   urldate = {2026-11-21},
   note = {arXiv v1, 2026-10-22; Sections 4.2--5, Appendix 6.4 and 6.11}
 }
+@misc{compaction-friendly-2610-v2,
+  author = {Salle, Jeanne and Bhatnagar, Hardik and Bethge, Matthias and Abdelnabi, Sahar and Andriushchenko, Maksym},
+  title = {Benchmarks Are Surprisingly Compaction-Friendly},
+  year = {2026},
+  eprint = {2610.31778},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.LG},
+  url = {https://arxiv.org/abs/2610.31778v2},
+  urldate = {2026-11-24},
+  note = {arXiv v2, 2026-11-20; Appendix 6.13.2, Table 6 (SWE-chat)}
+}
 
 @misc{agentic-teacher-2611,
   author = {Teng, Gongyue and Xie, Yuqing and Zhang, Yixian and Gao, Feng and Yu, Shu'ang and Rao, Jiaji and Wang, Sukai and Ren, Guanghui and Zhang, Ya and Yao, Maoqing and Wang, Yu and Yu, Chao and Chen, Xinlei},
@@ -852,4 +907,116 @@
   url = {https://arxiv.org/abs/2411.16905v1},
   urldate = {2026-11-23},
   note = {arXiv v1, submitted 2024-11-25; position paper, Sections 1--2 and 4, pp. 1--4}
+}
+
+@misc{harness-updating-benefit-2605,
+  author = {Lin, Minhua and Wu, Juncheng and Wang, Zijun and Shi, Zhan and Sang, Yisi and He, Bing and Liu, Zewen and Wei, Tianxin and Wu, Zongyu and Zhang, Zhiwei and Wang, Dakuo and Zhang, Xiang and Dumoulin, Benoit and Xie, Cihang and Zhou, Yuyin and Wang, Suhang and Lu, Hanqing},
+  title = {Harness Updating Is Not Harness Benefit: Disentangling Evolution Capabilities in Self-Evolving LLM Agents},
+  year = {2026},
+  month = nov,
+  eprint = {2605.30621},
+  archivePrefix = {arXiv},
+  url = {https://arxiv.org/abs/2605.30621v2},
+  urldate = {2026-11-24},
+  note = {arXiv v2, 2026-11-04; Sections 4.1 and 4.3, Table 2 and Appendix D.3}
+}
+
+@misc{self-distilled-memory-2611,
+  author = {Jayaram, K. R. and Isahagian, Vatche and Aravindan, Aswath Vaithinathan and Muthusamy, Vinod and Oum, Punleuk and Fang, Gaodan and Ulewicz, Michal and Thomas, Gegi and Duesterwald, Evelyn},
+  title = {How Much Should an Agent Remember? Deployment Lessons from Self-Distilled Memory for LLM Agents},
+  year = {2026},
+  month = nov,
+  eprint = {2611.26361},
+  archivePrefix = {arXiv},
+  url = {https://arxiv.org/abs/2611.26361v1},
+  urldate = {2026-11-24},
+  note = {arXiv v1, 2026-11-19; Measurement Setting, Insight 1, Figure 1, Tables 2 and 3}
+}
+
+@misc{chen-humaneval-2107,
+  author = {Chen, Mark and Tworek, Jerry and Jun, Heewoo and Yuan, Qiming and Pinto, Henrique Ponde de Oliveira and Kaplan, Jared and Edwards, Harri and Burda, Yuri and Joseph, Nicholas and Brockman, Greg and Ray, Alex and Puri, Raul and Krueger, Gretchen and Petrov, Michael and Khlaaf, Heidy and Sastry, Girish and Mishkin, Pamela and Chan, Brooke and Gray, Scott and Ryder, Nick and Pavlov, Mikhail and Power, Alethea and Kaiser, Lukasz and Bavarian, Mohammad and Winter, Clemens and Tillet, Philippe and Such, Felipe Petroski and Cummings, Dave and Plappert, Matthias and Chantzis, Fotios and Barnes, Elizabeth and Herbert-Voss, Ariel and Guss, William Hebgen and Nichol, Alex and Paino, Alex and Tezak, Nikolas and Tang, Jie and Babuschkin, Igor and Balaji, Suchir and Jain, Shantanu and Saunders, William and Hesse, Christopher and Carr, Andrew N. and Leike, Jan and Achiam, Josh and Misra, Vedant and Morikawa, Evan and Radford, Alec and Knight, Matthew and Brundage, Miles and Murati, Mira and Mayer, Katie and Welinder, Peter and McGrew, Bob and Amodei, Dario and McCandlish, Sam and Sutskever, Ilya and Zaremba, Wojciech},
+  title = {Evaluating Large Language Models Trained on Code},
+  year = {2021},
+  eprint = {2107.03374},
+  archivePrefix = {arXiv},
+  url = {https://arxiv.org/abs/2107.03374v2},
+  urldate = {2026-11-25},
+  note = {arXiv v2 (version date 2021-07-14); Section 2.1, Equation 1 and Figure 3; Appendix A}
+}
+
+@misc{zhou-cta-2605,
+  author = {Zhou, Xiaolin and Liu, Jinbo and Li, Li and Rossi, Ryan A. and Hu, Xiyang},
+  title = {Counterfactual Trace Auditing of {LLM} Agent Skills},
+  year = {2026},
+  eprint = {2605.11946},
+  archivePrefix = {arXiv},
+  url = {https://arxiv.org/abs/2605.11946v2},
+  urldate = {2026-11-25},
+  note = {arXiv v2 (version date 2026-05-28); Section 4.3, Table 2 and Section 7; subsequent repository correction cited separately}
+}
+
+@misc{zhou-cta-correction-2026,
+  author = {Zhou, Xiaolin},
+  title = {Corrected Statistics for the Bucket-Signature and Destructive-Share Analyses},
+  year = {2026},
+  url = {https://github.com/WillChow66/CTA/blob/bafb67b3ceb05d5777e5e2e0667064cf223fc57a/analysis_reports/FINAL_NUMBERS.txt},
+  urldate = {2026-11-25},
+  note = {2026-07-28; Sections A and B; correction in the authors’ repository}
+}
+
+@misc{aflow-metagpt-2024,
+  author = {{FoundationAgents}},
+  title = {{AFlow} Implementation in {MetaGPT}},
+  year = {2024},
+  url = {https://github.com/FoundationAgents/MetaGPT/tree/39ae68225b06472b9b1377603e255d20aee5560d/metagpt/ext/aflow},
+  urldate = {2026-11-25},
+  note = {2024-10-24; Contemporaneous source snapshot; parent selection and evaluation accounting}
+}
+
+@misc{heams-campaign-2026,
+  author = {{HEAMS contributors}},
+  title = {{HEAMS} Erasability and Editability Campaign Configuration},
+  year = {2026},
+  url = {https://github.com/milatechtransfer/heams/blob/8bd3cf93b87dcc8676d6cc714e8e80090bc1bc07/python_package/configs/agents/campaigns/erasability_editability.yaml},
+  urldate = {2026-11-25},
+  note = {2026-11-11; Public campaign configuration at 8bd3cf9; memory strategy and deletion instructions}
+}
+
+@misc{voyager-code-55e45a8,
+  author = {{MineDojo}},
+  title = {{Voyager}: An Open-Ended Embodied Agent with Large Language Models},
+  year = {2023},
+  url = {https://github.com/MineDojo/Voyager/tree/55e45a880755d0c8c66ca7fb5fe7962ac8974f89},
+  urldate = {2026-11-25},
+  note = {Reference implementation, 2023-07-27; SkillManager retrieval, action prompt, execution and admission}
+}
+
+@misc{seal-continual-archive-2025,
+  author = {{SEAL contributors}},
+  title = {{Self-Adapting Language Models}: Continual Self-Edit Results and Aggregation Code},
+  year = {2025},
+  url = {https://github.com/Continual-Intelligence/SEAL/tree/6d9c9f9ee392c6cc618e771f399d436d190f6ca4/general-knowledge},
+  urldate = {2026-11-25},
+  note = {Results and aggregation code at commit 6d9c9f9, 2025-08-01}
+}
+
+@inproceedings{dua-2019-drop,
+  author = {Dua, Dheeru and Wang, Yizhong and Dasigi, Pradeep and Stanovsky, Gabriel and Singh, Sameer and Gardner, Matt},
+  title = {{DROP}: A Reading Comprehension Benchmark Requiring Discrete Reasoning Over Paragraphs},
+  booktitle = {Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)},
+  year = {2019},
+  month = jun,
+  pages = {2368--2378},
+  publisher = {Association for Computational Linguistics},
+  doi = {10.18653/v1/N19-1246},
+  url = {https://aclanthology.org/N19-1246/}
+}
+
+@misc{ttcs-code-e29e95c,
+  author = {{XMUDeepLIT}},
+  title = {{TTCS}: Test-Time Curriculum Synthesis for Self-Evolving},
+  year = {2026},
+  url = {https://github.com/XMUDeepLIT/TTCS/tree/e29e95ce95fbd47a74e34c1be1d9ad548d47e0d0},
+  urldate = {2026-11-25},
+  note = {Official implementation at commit e29e95c, 2026-10-23; synthesizer reward and solver filtering}
 }

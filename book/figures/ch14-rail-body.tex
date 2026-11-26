@@ -12,9 +12,9 @@
   \draw[arrow] (raw) -- (candidate);
   \draw[arrow] (memory.east) -- (candidate.south west);
   \draw[<->,>=Stealth,thick] (candidate.south) -- (dev.north);
-  \draw[arrow] (candidate) -- node[above,font=\scriptsize] {提交工件} (judge);
-  \draw[arrow] (judge) -- (result);
   \draw[dashed,thick] (7.5,-1.1) -- (7.5,3.1);
+  \draw[arrow] (candidate) -- node[above=1pt,font=\scriptsize,fill=white,inner sep=1.5pt] {提交工件} (judge);
+  \draw[arrow] (judge) -- (result);
   \node[font=\scriptsize] at (10,3.05) {评价规则不由候选直接改写};
   \draw[arrow] (raw.south) -- node[right,font=\scriptsize] {追溯、重建} (memory.north);
   \node[note,anchor=north west] at (-1.5,-1.6) {图示为设计分工：开发反馈可以可读；最终评价若声明隐藏，须另有实际访问隔离。\\本书旧实验的测试写入限制与查询账不构成完整隐藏测试，也不构成操作系统级沙箱。};

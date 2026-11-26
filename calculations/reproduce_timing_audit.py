@@ -6,12 +6,19 @@ constructed. A single valid historical drift window is distinct from warmup.
 from pathlib import Path
 from fractions import Fraction as F
 from itertools import product
-import hashlib,json,sys
+import argparse,hashlib,json,sys
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from experiments.lab.trigger_signals import load_train_episodes,analyze,drift
 from experiments.lab.e11_arms import signals_for,delta_widening
 from experiments.lab.e11_timing_v2 import TimingController
 from experiments.lab.archive_inputs import load_summary
+
+from calculations.e01_prompt_exposure import INDEX_FILE, prompt_exposure
+from calculations.historical_evidence import write_reproduction
+
+cli = argparse.ArgumentParser(description=__doc__)
+cli.add_argument("--output", type=Path, help="write the report to a new file")
+args = cli.parse_args()
 
 def require(ok,message):
     if not ok:raise ValueError(message)
@@ -26,7 +33,7 @@ require([x['source_verdict'] for x in lessons]==[x['verdict'] for x in episodes]
 require([x['index'] for x in lessons]==list(range(8)),'Source lesson order changed')
 require(all(isinstance(x['text'],str) and x['text'].strip() for x in lessons),'Missing actual lesson text')
 verdicts=[x['verdict'] for x in episodes]
-replay=analyze(run,'grid4',[x['text'] for x in lessons])
+replay=analyze(run,'grid4',lessons)
 historical=ROOT/f'experiments/results/triggers-{run_id}.json'
 require(replay==json.loads(historical.read_text('utf-8'))['signals'][0],'Historical signal replay changed')
 require(drift(verdicts)==[0.]*7+[.5],'Historical warmup scope changed')
@@ -64,12 +71,26 @@ arithmetic={'D_MEM_Table1_cost_ratio':F(1648,319),
  'quality_ratio_A':F(8,10),'quality_ratio_B':F(6,5),
  'JitRL_AppendixR_estimated_training_dollars':F(154*64)}
 require(arithmetic['gate_teaching_strict_rate_upper_bound']==F(17,20),'Gate threshold changed')
-paths=[historical,run/'summary.json',ROOT/'experiments/lab/trigger_signals.py',
+# Eq. (3) of Yin et al. compares item-level outcomes, including rejected proposals.
+stop_weight = F(2, 5)
+flat_factor = 1 + stop_weight * F(1, 100)
+unchanged = flat_factor ** 2
+one_gain_one_loss = (flat_factor - stop_weight) * (flat_factor + stop_weight)
+require((unchanged, one_gain_one_loss) == (F(63001, 62500), F(53001, 62500)),
+        'The two equal-mean stopping examples changed')
+stopping_example = {
+    'minimum_expected_gain': '1/100', 'fixed_betting_fraction': str(stop_weight),
+    'unchanged_pair_factor': str(unchanged), 'swapped_pair_factor': str(one_gain_one_loss),
+    'scope': 'One fixed-weight round of Eq. (3); both means are zero. Not the adaptive Table 1 run.',
+}
+paths=[historical,ROOT/INDEX_FILE,ROOT/'calculations/e01_prompt_exposure.py',run/'summary.json',ROOT/'experiments/lab/trigger_signals.py',
+ ROOT/'analysis/historical-sources'/run_id/'trigger_signals.py.txt',
  ROOT/'experiments/lab/e11_arms.py',ROOT/'experiments/lab/e11_timing_v2.py',
  ROOT/'experiments/lab/e11_resources_v2.py',ROOT/'experiments/lab/run_e11_v2.py',
  ROOT/'calculations/ch13-calculations-2026-09-30.json']+sorted((run/'traces/grid4/train').glob('*/trace.json'))
 out=dict(identity='Historical fixed-input diagnostics and teaching arithmetic; no E11 quality/resource comparison',
  api_calls=0,source_sha256={p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+ prompt_exposure=prompt_exposure(ROOT,run,summary), paired_stopping_example=stopping_example,
  historical_replay=replay,warmup_positions=list(range(1,8)),valid_window_positions=[8],
  valid_signed_failure_difference=str(signed),valid_absolute_failure_difference=str(abs(signed)),
  probabilities={k:dict(exact=str(v),decimal=float(v)) for k,v in probs.items()},
@@ -80,5 +101,8 @@ out=dict(identity='Historical fixed-input diagnostics and teaching arithmetic; n
          'No live requests, no E11/E12 execution, no paper-code replication',
          'Calls and dispatches can be hard bounded; token/wall soft stops may overshoot; unknown usage remains unknown'])
 target=ROOT/'analysis/timing-audit-reproduction.json'
-target.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n','utf-8')
-print('Eight historical training records, three exact probabilities, three schedules, two legacy defects and12 arithmetic quantities checked; API calls:0')
+write_reproduction(out, target, args.output)
+exposure = out['prompt_exposure']
+print('Eight historical training records, three exact probabilities, three schedules, two legacy defects and 12 arithmetic quantities checked; '
+      f"{exposure['sealed_prompts']} sealed prompt index rows counted; "
+      f"{exposure['sealed_originals_checked']}/{exposure['sealed_prompts']} original sealed traces verified; API calls: 0")

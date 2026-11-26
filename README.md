@@ -2,11 +2,15 @@
 
 **简体中文** · [English](README.en.md)
 
+<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/cover.png" width="210" alt="《深入理解自进化 Agent》封面"></a>
+
 作者：shawn。全书围绕一个问题展开：一个 Agent 从经验中改变了什么，又怎样检验这种变化？本公开源码预览包含 16 章、7 个附录、参考文献索引、配图和选定的实验记录。
 
 ## 阅读与复算
 
-读者可在[版本发布页](https://github.com/Palmer-C/understanding-self-evolving-agents/releases)查看已发布的整书 PDF。有附件的版本会列出对应源码提交和 PDF 的 SHA-256；页面尚无附件时，可从仓库根目录自行编译。
+<a href="https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf"><img src="docs/images/download-pdf.png" width="166" alt="下载中文整书 PDF"></a>
+
+[下载中文整书 PDF](https://github.com/Palmer-C/understanding-self-evolving-agents/releases/download/v0.1.0/understanding-self-evolving-agents.pdf) · 中文全书 · 417 页 · [版本说明与 SHA-256](https://github.com/Palmer-C/understanding-self-evolving-agents/releases/tag/v0.1.0)
 
 编译书稿需要 Windows 中文字体、XeLaTeX、latexmk 和 biber。成功后可打开 book/main.pdf。
 
@@ -23,6 +27,12 @@ python -m experiments.lab.run_e01 --trial
 ~~~
 
 本版没有配置运行不受信任候选程序所需的独立执行环境。E03 拆分 A 的两份档案分别给出 72/80 和 70/80，依赖它们的基线比较暂停。十条正式命题仍为 open；E03v2 的离线检查只核验了工件。[公开材料与复算命令](analysis/README.md) · [命题表](spec/propositions.md) · [原文索引](references/sources.csv)
+
+## 一次任务结束后，什么会留下？
+
+![执行步、回合与版本三层时间尺度，以及可跨任务保留的记忆、指令、技能、工作流和参数](docs/images/three-timescales.png)
+
+图 1.1 沿三个时间尺度追踪一次更新。执行步传递消息和工具结果，回合保存临时工作状态，轨迹可以另行归档。虚线画出一种可能：从轨迹中提炼技能，写入新版本，再由后续任务加载。技能究竟有没有帮助，还要用对照来检验。
 
 ## 内容速览
 

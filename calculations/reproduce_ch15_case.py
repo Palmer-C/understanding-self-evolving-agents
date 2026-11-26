@@ -1,7 +1,9 @@
 """Reconstruct archived E05 v2 case index without running a model or changing traces."""
 from pathlib import Path
-import argparse,hashlib,json
+import argparse,hashlib,json,sys
 r=Path(__file__).resolve().parents[1];run=r/'experiments/runs/E05v2-20260929T143245Z-d7a8db'
+sys.path.insert(0,str(r))
+from calculations.historical_evidence import e05_trace_path
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-o','--output',type=Path,help='Write a new case index at this path; existing files are refused. Default updates analysis/ch15-case-index-reproduction.json.')
 args=parser.parse_args()
@@ -11,7 +13,7 @@ rows=[]
 for p in sorted((run/'sequences').glob('*/complete.json')):
  s=read(p);traces=[]
  for e in s['events']:
-  q=p.parent/Path(e['trace']);t=read(q)
+  q=e05_trace_path(p.parent,e['trace']);t=read(q)
   traces.append({'path':q.relative_to(r).as_posix(),'sha256':digest(q),'task':t['task_id'],'calls':t['usage']['calls'],'verdict':t['verdict'],'retrieved':e['retrieved'],'role':e['role']})
  assert sum(t['calls'] for t in traces)==s['ledger']['calls']
  rows.append({'path':p.relative_to(r).as_posix(),'sha256':digest(p),'arm':s['arm'],'k':s['k'],'ledger':s['ledger'],'traces':traces,'has_final_skill':s['final_skill'] is not None})

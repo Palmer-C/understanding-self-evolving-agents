@@ -65,7 +65,7 @@ E01 的格 4 减格 1 在题级重采样下区间宽度为 \measured{0.275}，
 
 \section{区间精度与检验功效}
 
-旧版公式应解释为区间半宽的规划近似：
+假设每道题给出一个配对差。希望均值的双侧区间足够窄，可以从目标半宽反推题数：
 \begin{equation}
  n_{\mathrm{precision}}\approx
  \left\lceil\left(\frac{z_{1-\alpha/2}s}{h}\right)^2\right\rceil.
@@ -74,7 +74,7 @@ E01 的格 4 减格 1 在题级重采样下区间宽度为 \measured{0.275}，
 其中 $h$ 是目标半宽，$s$ 来自试验配对差，$\alpha$ 是双侧区间的错误概率。
 在独立近似正态和方差估计可用的条件下，令 $h=0.03$ 并取 $z=1.96$，
 E01 的历史计算得到 \calcnum{353} 与 \calcnum{836} 道配对题。
-这些数不是“只要跑到就一定判定”的门槛。
+这里的 $0.03$ 限定均值估计的精度。
 
 指定检验功效后，样本量还取决于漏检概率 $\beta$。
 围绕零差异的双侧均值检验可先用
@@ -84,13 +84,9 @@ E01 的历史计算得到 \calcnum{353} 与 \calcnum{836} 道配对题。
  \frac{(z_{1-\alpha/2}+z_{1-\beta})s}{\delta_{\mathrm{detect}}}
  \right)^2\right\rceil
 \end{equation}
-作规划近似；NIST 同时列出了单侧、双侧及未知方差时的调整\cite{nist-sample-size}。
-对族相关、多个比较或序贯设计，应进一步选择匹配的模型和错误控制方式。
+估算所需题数。NIST 在总体标准差已知时给出正态近似，标准差未知时还给出按自由度迭代的 $t$ 近似\cite{nist-sample-size}。这里用先导试验的 $s$ 代入正态公式，把它当作未来配对差波动大小的估计。
 
-本次离线审计采用双侧 $\alpha=0.05$、目标功效 $0.80$、检出差异 $0.03$ 的示例设置。
-使用未舍入的历史标准差，E01 两个比较得到 \calcnum{721} 与 \calcnum{1708} 道的正态近似。
-本版复算输出在\path{analysis/sample-size-reproduction.json}，来源运行ID与假设一同保存；旧的有日期报告保留供追溯。
-本书没有据此自动批准新实验规模，也没有回写历史运行的样本量字段。
+仍取双侧 $\alpha=0.05$。如果真实均值相差 $0.03$，希望有 $80\%$ 的机会检出它，E01 的两个比较分别需要约 \calcnum{721} 和 \calcnum{1708} 道配对题。以格 4 与格 1 为例，从 353 道增加到 721 道，原因在于功效公式还要为漏检留出余量。两个 $0.03$ 虽然数值相同，一个指定区间半宽，另一个指定要检出的真实差异。未舍入的先导标准差与两套计算均保存在 \path{analysis/sample-size-reproduction.json}。若按任务族抽样、同时比较多种策略或分批查看结果，则要按相应设计重新规划。
 
 \section{从试验运行到确认性运行}
 
@@ -133,7 +129,7 @@ E01 的历史计算得到 \calcnum{353} 与 \calcnum{836} 道配对题。
 \begin{itemize}
  \item \texttt{experiments/lab/eval.py}：配对与自助实现；当前入口增加输入检查，保留历史统计量、重采样和端点规则。返回的降级字段不直接决定命题状态。
  \item \texttt{calculations/audit\_sample\_size.py}：离线复算精度与功效示例，不调用模型、不生成能力收益。
- \item \nolinkurl{analysis/inputs.json}：固定E01/E02/E03在\texttt{experiments/runs/}中的汇总身份；本版不依赖缺失的results别名。
+ \item \nolinkurl{analysis/inputs.json}：按运行编号给出实际读取的汇总路径与 SHA-256。公开预览的 E03 条目另列原件的路径和摘要，可据此区分公开副本与维护档案原件。
 \end{itemize}
 \end{sloppypar}
 

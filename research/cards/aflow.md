@@ -1,7 +1,7 @@
 # AFLOW（arXiv:2410.10762v4）
 
 ## 来源
-AFLOW: Automating Agentic Workflow Generation，Jiayi Zhang 等，arXiv:2410.10762v4（2025-04-15，ICLR 2025）。代码参考固定为 github.com/FoundationAgents/AFlow 提交 3f457218fc716093fe53f6df8a5d5e6379d66346（2025-12-25）。该公开参考实现含从 MetaGPT 迁移后的边界，原论文历史运行配置尚缺直接绑定。
+AFLOW: Automating Agentic Workflow Generation，Jiayi Zhang 等，arXiv:2410.10762v4（2025-04-15，ICLR 2025）。代码参考固定为 github.com/FoundationAgents/AFlow 提交 3f457218fc716093fe53f6df8a5d5e6379d66346（2025-12-25）。2024-10-24 的 MetaGPT 快照 39ae68225b06472b9b1377603e255d20aee5560d 先保留首轮。后期迁移版则只会将已经入围的首轮排到名单开头。原结果包中的父子关系可检验入围规则，仍缺实际抽样参数。
 
 ## 研究问题
 解决"agentic workflow（多步 LLM 调用流程）需大量人工设计、难以自动化且泛化差"的失败。明确不在：本文聚焦带数值评估函数的推理任务（Sec 3.2）；不要求人工初始工作流（相较 ADAS/DSPy 需手动 setup，Sec 1）。
@@ -47,4 +47,4 @@ Sec 3.1/3.2/4；Table 1（主结果）、Table 2（跨模型）、Fig 4（Pareto
 
 ## 2026-09-30 16:15班原文冲突登记
 
-本地v4 PDF第7页式(3)说明lambda=0.2、alpha=0.4，第19页附录A.6详细算法第36行却写lambda=0.4、alpha=0.2。前者是均匀混合权重，后者是分数指数系数，不能互换后假装同一设置。当前未核对固定执行代码/原始配置，因此实际运行值未决；正文第9章已明确保留冲突。
+本地v4 PDF第7页式(3)说明lambda=0.2、alpha=0.4，第19页附录A.6详细算法第36行却写lambda=0.4、alpha=0.2。前者是均匀混合权重，后者是分数指数系数，不能互换后假装同一设置。该次登记时尚未核对代码。后来核查的两份公开快照和作者结果包详见本卡“来源”及书稿第9章，历史运行的有效参数仍待配置记录；正文第9章已明确保留冲突。

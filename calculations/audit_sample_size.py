@@ -25,7 +25,7 @@ def calculate(sd, h=.03, alpha=.05, power=.80, true_shift=.03):
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1])
-    ap.add_argument('--output',type=Path)
+    ap.add_argument('--output', type=Path, help='Save a copy to a new file. Existing files are preserved.')
     args=ap.parse_args()
     specs=[('P1','E01-20260923T152230Z-90acda','sd_paired_diff_41','n_required_41'),
            ('P1b','E01-20260923T152230Z-90acda','sd_paired_diff_42','n_required_42'),
@@ -50,8 +50,14 @@ def main():
             'rows':rows}
     text=json.dumps(result,ensure_ascii=False,indent=2)
     if args.output:
-        args.output.parent.mkdir(parents=True,exist_ok=True)
-        args.output.write_text(text+'\n',encoding='utf-8')
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            with args.output.open('x', encoding='utf-8') as stream:
+                stream.write(text + '\n')
+        except FileExistsError:
+            ap.exit(1, f'输出已存在，请另选新文件：{args.output}\n')
+        except OSError as exc:
+            ap.exit(1, f'输出写入失败：{exc}\n')
     print(text)
 
 if __name__=='__main__': main()

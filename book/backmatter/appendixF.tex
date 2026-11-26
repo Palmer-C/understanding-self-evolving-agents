@@ -29,8 +29,7 @@ token 数量需要连同输入、输出的构成与对应单价，才能换算�
 \label{sec:appF-ledger}
 
 \begin{sloppypar}
-下表由 \texttt{python experiments/lab/cost\_report.py} 从
-\texttt{analysis/inputs.json}列明并绑定SHA的\texttt{experiments/runs/<run-id>/summary.json}中读取\texttt{ledger}，可离线复算历史汇总。缺任一必需运行、输入哈希不符或必需账字段缺失时，脚本失败，不输出不完整合计。
+\path{experiments/lab/cost_report.py} 按 \path{analysis/inputs.json} 中的路径与 SHA-256 找到三份汇总，再从各自的 \texttt{ledger} 计算下表。公开预览中，E01、E02 的汇总在各自的运行目录，E03 使用 \path{analysis/public-inputs/} 中的脱敏副本。缺少运行、文件摘要不符或必需账项缺失时，脚本会停止。
 配置记录的同模型别名为 \texttt{deepseek-flash}，E03 的换读取者别名为 \texttt{deepseek-v4-pro}，温度为 \measured{0.7}。E01/E02 每臂训练配额 $E=$\measured{8}，E03 将该配额用于每个拆分的来源采集；评价阶段每题重复运行 $R=$\measured{5} 次。
 \end{sloppypar}
 
@@ -89,7 +88,7 @@ E03 & \calcnum{4.36} & \calcnum{2282} & \calcnum{701} & \calcnum{9.38} \\
 \begin{sloppypar}
 按历史汇总除以各自的回合数，E03 的每 episode 调用次数为 \calcnum{4.36}，低于 E01 的 \calcnum{5.60}，
 每 episode 平均回合计时却是后者的约 \calcnum{2.1} 倍。E03 的换读取者臂耗时更长，模型、输出长度与运行时段均可能影响计时（详见下节）。
-\textbf{调用次数相近不等于耗时相近}——这也是"只报调用数"的成本表会误导的地方。
+\textbf{调用次数相近不等于耗时相近}——这也是“只报调用数”的成本表会误导的地方。
 \end{sloppypar}
 
 \section{换读取者的成本：E03 的换模型臂}
@@ -124,12 +123,9 @@ E03比较同模型（\texttt{deepseek-flash}）与换模型（\texttt{deepseek-v
 \end{table}
 
 \begin{sloppypar}
-换读取者之后，调用次数反而下降（\measured{365} → \measured{276}、\measured{358} → \measured{301}），
-提示 token 在基线上也下降，但\textbf{生成 token 与回合计时和大幅上升}：
-拟合到求解器这一对从 \measured{32774} 生成 token / \measured{374.2} 秒
-变成 \measured{172180} 生成 token / \measured{2084.9} 秒。
-如果只统计调用次数，会得出"换模型更省"的相反结论。
-这也是第 15 章讨论迁移时必须同时给四张账的原因。
+两对比较的调用次数都下降了。基线换读取者后，少用 \calcnum{16963} 个提示 token，多用 \calcnum{33954} 个生成 token。
+若按同一张价目表给两个模型估价，提示和生成分别以正单价计费且不打折，那么生成单价与提示单价之比超过 \calcnum{$16963/33954$} 时，换读取者的 token 费用就更高。
+求解器拟合臂的两类 token 都增加，回合计时和也从 \measured{374.2} 秒增至 \measured{2084.9} 秒。估算实际费用还需要各模型适用的价目与缓存计费规则。
 \end{sloppypar}
 
 \section{为什么本书实验账暂不折算金额}
@@ -140,7 +136,7 @@ E03比较同模型（\texttt{deepseek-flash}）与换模型（\texttt{deepseek-v
   \item 定价随供应商、时段、批量折扣变化，且提示与生成两类 token 定价不同，
         把本书的实物量折算成金额需要一张有出处的定价表（\texttt{calculations/pricing.yaml}，待办）。
   \item 跨论文金额比较需要统一价格假设：各家用的是不同时点的不同价目，
-        把"花了多少钱"放在一起比，会同时混入价目和方法差异。
+        把“花了多少钱”放在一起比，会同时混入价目和方法差异。
 \end{itemize}
 
 \begin{sloppypar}
@@ -176,10 +172,10 @@ token 合计 & \calcnum{4754387} & 上两项之和 \\
 \end{pitfallbox}
 
 \begin{pitfallbox}
-\textbf{反例：把"训练免费"当成"没有演化成本"。}
+\textbf{反例：把“训练免费”当成“没有演化成本”。}
 JitRL 一类方法不执行该阶段的权重训练，但经验采集、检索、反馈与推理仍有成本。无参数更新不能被解释成无计算投入。
 本书的 $C_{\text{evolve}}$（第 13 章）要求把构建、验证、回归三部分都算进去；
-只对比训练算力，会把"不需要训练"的方法系统性地判成更便宜。
+只对比训练算力，会把“不需要训练”的方法系统性地判成更便宜。
 \end{pitfallbox}
 
 \openquestion{本附录前三次历史汇总覆盖 \calcnum{1680} 个 episode，仍缺 E03 渲染用量及部分计时；E05 v2 的小规模试跑另见第~\ref{ch08}章，未混入这里的三次运行合计。按调用数或 token 定义的交点可以在相应完整账目内讨论；美元交点还需要可靠价目与用量。不同成本定义不能合并成一个无条件的回本次数。}
@@ -189,19 +185,13 @@ JitRL 一类方法不执行该阶段的权重训练，但经验采集、检索�
 
 最终汇总的 \texttt{side\_ledger} 全零，不能解释为没有构建费用。
 续跑流程重建了这张账，却没有从中断文件恢复早期的来源采集与经验渲染用量。
-离线逐条读取来源轨迹，恢复 \measured{16} 个回合、\measured{79} 次调用、
+完整维护档案中保留了来源轨迹。逐条加总可得 \measured{16} 个回合、\measured{79} 次调用、
 \measured{29443} 个输入 token、\measured{4243} 个输出 token，回合计时和约 \measured{72.09} 秒。
 
-保留实现对拆分 A 的两种模型形式、拆分 B 的四种模型形式分别处理八份来源；
-按已保存条目重建为 \calcnum{48} 次成功渲染调用。原始渲染 token 用量缺失，
-不能用最终经验长度替代，也不能把续跑段的耗时当整项实验墙钟。
-这里新增的是审计补表，没有修改历史结果或重新调用模型。
+读者可从公开汇总的 \texttt{memory} 核对渲染条数。除去直接截取的原文，拆分 A 留下两种形式，拆分 B 留下四种，每种都有八条。\path{experiments/lab/e03_arms.py} 的 \texttt{render\_with\_model} 每生成一个这样的条目就调用一次模型，故可由已存条目推算 \calcnum{48} 次成功渲染。未留下产物的请求次数和渲染 token 用量仍然未知。
 
 \begin{sloppypar}
-本附录前面的总数保留为历史汇总覆盖范围，不能用于完整生命周期效率排名。
-可恢复的来源账、推算的渲染次数与未知的渲染用量分别登记于
-\path{analysis/memory-audit-reproduction.json}；旧的有日期报告保留供追溯。
-只有补齐或明确约束缺失部分以后，才能作更强的成本比较。
+完整维护档案的 \path{analysis/memory-audit-reproduction.json} 列出来源轨迹摘要、逐项合计和渲染次数的推算依据。公开汇总可核对已留存的条目，逐回合复加来源用量还要取得上述轨迹。这些已知支出及缺项限定了前表可比较的费用范围。
 \end{sloppypar}
 
 \section{唯一请求账怎样避免重复与漏计}

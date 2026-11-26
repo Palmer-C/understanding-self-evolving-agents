@@ -20,10 +20,14 @@
 \usepackage{enumitem}
 \usepackage[hidelinks,bookmarksnumbered]{hyperref}
 \usepackage[backend=biber,style=authoryear,sorting=nyt,maxbibnames=4]{biblatex}
+% Undated web pages retain their access dates in the bibliography.
+\DeclareLabeldate[online]{\field{date}\field{year}\field{eventdate}\field{origdate}\literal{nodate}}
 % Load after biblatex so its URL penalties allow full commit identifiers to wrap.
 \usepackage{xurl}
 \addbibresource{bib/references.bib}
 \setlength{\bibitemsep}{-0.8pt}
+\usepackage{needspace}
+\AtEveryBibitem{\Needspace{3\baselineskip}}
 % Parenthesize author-year citations so they remain distinct from Chinese prose.
 \let\cite\parencite
 

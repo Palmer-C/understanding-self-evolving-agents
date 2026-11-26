@@ -18,13 +18,27 @@
 新运行还应在创建目录时拒绝已有路径；当前E11 v2与E12 v2入口使用\texttt{exist\_ok=False}，而历史工具并非全部如此。运行号生成与拒绝覆盖是两道不同的检查。
 \end{sloppypar}
 
+E01、E02 和 E03 的历史运行保存在 \path{experiments/runs/<run_id>/} 下。进入某次运行的目录后，
+可从 \texttt{config.json} 核对主要入参，从 \texttt{summary.json} 查看聚合结果与判决。
+每个回合的轨迹另存一份，以下路径均相对于该运行目录。
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+回合类型 & 轨迹文件 \\
+\midrule
+E01/E02 训练 & \path{traces/<arm>/train/<task_id>-e<episode>/trace.json} \\
+E01/E02 评价 & \path{traces/<arm>/sealed/<task_id>-r<repeat>/trace.json} \\
+E03 来源 & \path{traces/source/<split>/<task_id>-e<episode>/trace.json} \\
+E03 评价 & \path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.json} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \begin{sloppypar}
-历史E01/E02/E03运行在 \texttt{experiments/runs/<run\_id>/} 下主要保存三类工件：
-\texttt{config.json}（这次运行的主要入参）、
-E01/E02的训练轨迹位于\path{traces/<arm>/train/<task_id>-e<episode>/trace.json}，评价轨迹位于\path{traces/<arm>/sealed/<task_id>-r<repeat>/trace.json}。
-E03的评价轨迹位于\path{traces/<split>/<arm>/<task_id>-r<repeat>/trace.json}，来源轨迹位于\path{traces/source/<split>/<task_id>-e<episode>/trace.json}（每回合一条轨迹）。另有
-\texttt{summary.json}（聚合结果与判决）。
-路径中的\texttt{arm}、\texttt{split}与\texttt{task\_id}分别表示实验臂、拆分与题号，\texttt{episode}和\texttt{repeat}分别表示训练回合序号与评价重复序号。
+路径中的 \texttt{arm}、\texttt{split} 与 \texttt{task\_id} 分别表示实验臂、拆分与题号。
+\texttt{episode} 标记训练或来源采集的回合序号，\texttt{repeat} 标记评价时的重复序号。
 \texttt{experiments/results/}保留部分汇总及渲染副本，不能当作完整输入目录。从本版的\nolinkurl{analysis/inputs.json}查所用汇总的路径和哈希。公开预览的E03汇总副本替换了两处回溯中的临时目录，原件与副本分别登记哈希；核对数值可读副本，复核原始记忆的字符长度须读原件。拆分A的计数冲突见第~\ref{ch05}章。
 \end{sloppypar}
 
@@ -176,21 +190,23 @@ analysis/\allowbreak context-audit-reproduction.json
 \begin{verbatim}
 python calculations/reproduce_skill_audit.py
 \end{verbatim}
-它只读随书E05 v2轨迹，输出\path{analysis/skill-audit-reproduction.json}，并复核教学成本数组。报告按原运行配置逐项校验14份纯文本快照的字节，包括当时的源码和协议。任一摘要不符，复算即停止。旧E05累计账未纳入冻结包，历史分析脚本不属于本版可直接复算入口，依赖它的数值表已撤下。
+这个入口读取 E05 v2 的轨迹，逐一校验原运行配置列出的 14 份源码与协议快照，并核对图~\ref{fig:ch08-kstar}的教学费用。结果写入\path{analysis/skill-audit-reproduction.json}。另一次旧 E05 部分运行的累计账保存在完整维护档案中。读者源码包只提供上述 v2 复算与教学算例；两次运行的调用数须分开解释。
 
 \begin{samepage}
-第9章的来源表格差值、独立候选覆盖率、排程反例与摊销算例可复算：
+第9章的来源表格差值、父工作流选择概率、候选覆盖率、排程与摊销算例均可复算：
 \begin{verbatim}
 python calculations/reproduce_workflow_arithmetic.py
 \end{verbatim}
 \end{samepage}
-输出位于\path{analysis/}\allowbreak\path{workflow-arithmetic-reproduction.json}。这些计算不产生E06结果，也不代替来源论文的实际运行。
+结果写入\path{analysis/}\allowbreak\path{workflow-arithmetic-reproduction.json}。其中两种父候选概率对应不同的分数单位。附录~\ref{sec:appg-checkers}的例题则先按题计算覆盖率，再求平均。
 
-完整档案中，第10章的SEAL表格差值、教学梯度、成本交点及区间判据可用以下脚本复算：
+表~\ref{tab:ch09-aflow}的“档案复算”一行还需要作者发布的 \nolinkurl{results.tar.gz}。从作者项目的结果说明取得该文件后，可加上 \texttt{--aflow-archive} 和本机文件名，并用 \texttt{-o} 另存结果。完整命令见读者源码包的 \path{analysis/README.md}。脚本先核对归档的字节指纹，再读取其中的 CSV。MATH 有一份文件同时出现在验证目录，故该格留空。
+
+第10章的 SEAL 表格差值、教学梯度、成本交点及区间判据可从读者源码包复算：
 \begin{verbatim}
 python calculations/reproduce_parameter_arithmetic.py
 \end{verbatim}
-结果位于\path{analysis/}\allowbreak\path{parameter-arithmetic-reproduction.json}。它只做确定性计算，没有训练参数模型，也不产生E08能力证据。
+结果位于\path{analysis/}\allowbreak\path{parameter-arithmetic-reproduction.json}。若另有作者的九份连续编辑摘要，可加上 \texttt{--seal-results} 和结果目录，再用 \texttt{-o} 另存各已观察位置的均值与标准误。命令及来源见读者包的 \path{analysis/README.md}。两条路径均在本机做算术核查，E08 仍处于设计阶段。
 
 完整档案中，第11章的课程漂移、过滤分母、F1与格式奖励合账及来源表格差值可复算：
 \begin{verbatim}
@@ -198,13 +214,13 @@ python calculations/reproduce_curriculum_arithmetic.py
 \end{verbatim}
 输出位于\path{analysis/}\allowbreak\path{curriculum-arithmetic-reproduction.json}，保持教学设定与论文报告的身份，不产生E07或E09训练结果。
 
-第13章的历史触发信号、暖机占位、精确概率、三策略落点与成本算例可复算：
+第13章的复算入口读取格4的八个训练提示，重算触发信号、有效窗口、三种更新策略的尝试位置及成本算例。封存阶段按题号与重复序号核对两条入选经验，合计八十个提示：
 \begin{verbatim}
 python calculations/reproduce_timing_audit.py
 \end{verbatim}
-结果另存于\path{analysis/}\allowbreak\path{timing-audit-reproduction.json}。它核对固定历史输入和教学模型，不执行E11，也不能估计替代调度策略的闭环成绩。
+默认报告为\path{analysis/}\allowbreak\path{timing-audit-reproduction.json}，加\texttt{--output}可指定一个新文件。读者版从封存提示索引复算出现次数；完整档案还逐条核对索引中的摘要值及原始提示。提示中出现过一条经验，说明模型有机会读到它，是否采纳仍需结合后续动作判断。若要单看三个触发信号，可用同一运行号调用 \path{experiments/lab/trigger_signals.py} 的 \texttt{--run} 参数。它按回合编号读取判定，默认在终端显示结果。表~\ref{tab:ch13-dmem}的问答复算另取作者发布的三份固定输入；下载位置和命令见\path{analysis/README.md}。
 
-第14章的噪声比较、精度规划、余弦例题与单文件恢复可从归档数据复核。该命令也核对历史权限观察的来源身份。
+第14章的噪声比较、精度规划、余弦差的首尾界、四题失题找回算例与单文件恢复可从归档数据复核。该命令也核对历史权限观察的来源身份。
 \begin{verbatim}
 python calculations/reproduce_reliability_audit.py
 \end{verbatim}
@@ -283,10 +299,10 @@ python calculations/demo_e01_final_journal.py
 
 \begin{sloppypar}
 \begin{samepage}
-两版均收录以下命令，可核对旧文件组件的历史观察及其来源。
-\begin{quote}\ttfamily\small
-calculations/\allowbreak reproduce\_reliability\_audit.py
-\end{quote}
+从仓库根目录运行以下命令，可核对旧文件组件的历史观察及其来源。两版均可运行。
+\begin{verbatim}
+python calculations/reproduce_reliability_audit.py
+\end{verbatim}
 \end{samepage}
 权限观察来自当时保存的临时标记检查报告。入口核对其字节身份；当前文件工具的回归测试另行验证目录访问规则。进程能够读取哪些文件，还取决于运行它的账户和隔离环境。
 \end{sloppypar}

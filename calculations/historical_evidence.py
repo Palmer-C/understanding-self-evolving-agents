@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import os
 import tempfile
 
@@ -51,6 +51,14 @@ def e05_source_identities(root, config):
             "archive_path": relative.as_posix(),
         }
     return result
+
+
+def e05_trace_path(sequence_dir, recorded_path):
+    """Resolve both recorded separator styles beneath the sequence directory."""
+    relative = PureWindowsPath(recorded_path)
+    if relative.anchor or not relative.parts or '..' in relative.parts:
+        raise ValueError(f'Expected a relative E05 trace path: {recorded_path}')
+    return sequence_dir.joinpath(*relative.parts)
 
 
 def read_observation(root, relative):

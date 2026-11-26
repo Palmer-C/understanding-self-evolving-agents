@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse,hashlib,json,sys
 
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from calculations.historical_evidence import e05_source_identities, write_reproduction
+from calculations.historical_evidence import e05_source_identities, e05_trace_path, write_reproduction
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output',type=Path,help='Write an additional copy to a new file instead of refreshing the derived report.')
@@ -18,7 +18,7 @@ sequences=[];totals=dict(calls=0,prompt_tokens=0,completion_tokens=0);trace_coun
 for complete in sorted((run/'sequences').glob('*/complete.json')):
     seq=read(complete);traces=[];local={k:0 for k in totals}
     for event in seq['events']:
-        p=complete.parent/event['trace'];t=read(p);trace_count+=1;passed+=t['verdict'] is True
+        p=e05_trace_path(complete.parent,event['trace']);t=read(p);trace_count+=1;passed+=t['verdict'] is True
         for k in totals:totals[k]+=t['usage'][k];local[k]+=t['usage'][k]
         system='\n'.join(s['content'] for s in t['steps'] if s['kind']=='system')
         tools=[s for s in t['steps'] if s['kind']=='tool_result'];writes=[s['detail']['args'] for s in tools if s['detail'].get('tool')=='write_file' and s['content'].startswith('已写入 ')]
@@ -39,7 +39,7 @@ require('sum_inclusive' not in reuse['static_skill']['successful_writes'][0]['co
 teaching=read(ROOT/'calculations/ch08-cost-teaching-2026-09-30.json');ks=list(range(11));base=[5*k for k in ks];fixed=[12+2*k for k in ks];maint=[12+2*k+(12 if k>=6 else 0) for k in ks]
 require((base,fixed,maint)==(teaching['replan'],teaching['static_skill'],teaching['maintained_skill']),'Teaching arrays differ')
 figure=ROOT/'book/figures/generated/ch08-cost-teaching.pdf';require(sha(figure)==teaching['figure_sha256'],'Teaching figure differs from saved identity')
-out=dict(identity='Independent arithmetic and semantic-event reconstruction of frozen archives; not E05 rerun or capability estimate',api_calls=0,legacy=dict(status='Not a reader reproduction input: original legacy run excluded from frozen package; dependent numeric table withdrawn from book; historical derived artifacts retained'),
+out=dict(identity='Independent arithmetic and semantic-event reconstruction of frozen archives; not E05 rerun or capability estimate',api_calls=0,legacy=dict(status='The reader source package omits the legacy partial ledger. The maintenance archive retains it. This replay uses the separate E05v2 run and the constructed cost example.'),
          v2=dict(source_identity=source_identity,sequences=sequences,totals=totals,episodes=trace_count,passed=passed),
          teaching=dict(k=ks,replan=base,fixed_skill=fixed,maintained_skill=maint,figure_sha256=sha(figure)),
          interpretation=['Reference injected only in static reuse; direct function execution not observed','Dynamic origins fail protocol parsing before writes; no skill admission; successful reuse uses empty reference','No repair episodes observed; no causal reference-benefit estimate or P4 verdict','48 generate calls and zero recorded current-process retries; not independent network-service billing verification'])

@@ -1,0 +1,98 @@
+{
+  "identity": "Exact constructed algebra and arithmetic on reported rounded SEAL values; not E08,model training,or source experiment replication",
+  "api_calls": 0,
+  "values": {
+    "SEAL_single_passage_vs_base_generated_pp": {
+      "exact": "73/10",
+      "value": 7.3
+    },
+    "SEAL_single_passage_vs_GPT41_data_pp": {
+      "exact": "7/10",
+      "value": 0.7
+    },
+    "SEAL_CPT200_vs_GPT41_data_pp": {
+      "exact": "-6/5",
+      "value": -1.2
+    },
+    "SEAL_CPT2067_vs_GPT41_data_pp": {
+      "exact": "-14/5",
+      "value": -2.8
+    },
+    "SEAL_heatmap_first_adapted_minus_final": {
+      "exact": "19/100",
+      "value": 0.19
+    },
+    "SEAL_heatmap_initial_minus_final": {
+      "exact": "7/50",
+      "value": 0.14
+    },
+    "SEAL_filtered_edit_evaluations": {
+      "exact": "40",
+      "value": 40.0
+    },
+    "SEAL_filtered_edit_successes": {
+      "exact": "29",
+      "value": 29.0
+    },
+    "SEAL_inner_evaluations_per_reported_round": {
+      "exact": "750",
+      "value": 750.0
+    },
+    "teacher_success_logit_derivative": {
+      "exact": "1/2",
+      "value": 0.5
+    },
+    "teacher_no_baseline_gradient": {
+      "exact": "1/8",
+      "value": 0.125
+    },
+    "teacher_success_only_mean_gradient": {
+      "exact": "1/2",
+      "value": 0.5
+    },
+    "teacher_nonzero_baseline_gradient": {
+      "exact": "3/16",
+      "value": 0.1875
+    },
+    "service_cost_crossing": {
+      "exact": "60",
+      "value": 60.0
+    },
+    "external40": {
+      "exact": "140",
+      "value": 140.0
+    },
+    "parameter40": {
+      "exact": "180",
+      "value": 180.0
+    },
+    "external100": {
+      "exact": "320",
+      "value": 320.0
+    },
+    "parameter100": {
+      "exact": "240",
+      "value": 240.0
+    },
+    "serial100_edit_seconds_low": {
+      "exact": "3000",
+      "value": 3000.0
+    },
+    "serial100_edit_seconds_high": {
+      "exact": "4500",
+      "value": 4500.0
+    }
+  },
+  "supplied_interval_noninferiority_lower_above_minus3": [
+    false,
+    true,
+    true
+  ],
+  "scope": [
+    "Heatmap values read from originalv2Figure6 image;notnewmeasurements",
+    "40edit evaluations share8tasks;not40independenttaskfamilies",
+    "PGnormalization result onlysamebatch/parameterpoint,noKL/base/lengthnorm;nonzero baseline changesfinitebatch estimate",
+    "Timing bound assumesserialexecutionandnooverhead,notactualworkflowtime",
+    "Costlines hypotheticalconstantcharges,commonquality andvalidassetlifetime"
+  ]
+}

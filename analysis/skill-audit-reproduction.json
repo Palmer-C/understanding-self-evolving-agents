@@ -2,7 +2,7 @@
   "identity": "Independent arithmetic and semantic-event reconstruction of frozen archives; not E05 rerun or capability estimate",
   "api_calls": 0,
   "legacy": {
-    "status": "Not a reader reproduction input: original legacy run excluded from frozen package; dependent numeric table withdrawn from book; historical derived artifacts retained"
+    "status": "The reader source package omits the legacy partial ledger. The maintenance archive retains it. This replay uses the separate E05v2 run and the constructed cost example."
   },
   "v2": {
     "source_identity": {
